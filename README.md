@@ -1,4 +1,4 @@
-# Serilog.Settings.Configuration
+# Serilog.Settings.Configuration [![Build status](https://ci.appveyor.com/api/projects/status/r2bgfimd9ocr61px/branch/master?svg=true)](https://ci.appveyor.com/project/serilog/serilog-settings-configuration/branch/master)
 
 A Serilog settings provider that reads from Microsoft.Extensions.Configuration, i.e. .NET Core's `appsettings.json` file.
 
