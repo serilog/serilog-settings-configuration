@@ -14,11 +14,7 @@ Configuration is read from the `Serilog` section.
       { "Name": "File", "Args": { "path": "%TEMP%\\Logs\\serilog-configuration-sample.txt" } }
     ],
     "Enrich": {
-      "With": [
-        "FromLogContext",
-        "WithMachineName",
-        "WithThreadId"
-      ],
+      "With": ["FromLogContext", "WithMachineName", "WithThreadId"],
       "WithProperties": {
         "Application": "Sample"
       }
