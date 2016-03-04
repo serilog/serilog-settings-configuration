@@ -149,24 +149,6 @@
           "lib/net45/Serilog.Enrichers.Environment.dll": {}
         }
       },
-      "Serilog.Enrichers.Process/2.0.0-beta-507": {
-        "type": "package",
-        "dependencies": {
-          "Serilog": "2.0.0-beta-507"
-        },
-        "frameworkAssemblies": [
-          "Microsoft.CSharp",
-          "mscorlib",
-          "System",
-          "System.Core"
-        ],
-        "compile": {
-          "lib/net45/Serilog.Enrichers.Process.dll": {}
-        },
-        "runtime": {
-          "lib/net45/Serilog.Enrichers.Process.dll": {}
-        }
-      },
       "Serilog.Enrichers.Thread/2.0.0-beta-507": {
         "type": "package",
         "dependencies": {
@@ -185,7 +167,7 @@
           "lib/net45/Serilog.Enrichers.Thread.dll": {}
         }
       },
-      "Serilog.Settings.Configuration/1.0.0": {
+      "Serilog.Settings.Configuration/2.0.0-beta": {
         "type": "project",
         "framework": ".NETFramework,Version=v4.5.1",
         "dependencies": {
@@ -400,19 +382,6 @@
           "lib/dotnet5.4/Serilog.Enrichers.Environment.dll": {}
         }
       },
-      "Serilog.Enrichers.Process/2.0.0-beta-507": {
-        "type": "package",
-        "dependencies": {
-          "Serilog": "2.0.0-beta-507",
-          "System.Diagnostics.Process": "4.1.0-beta-23409"
-        },
-        "compile": {
-          "lib/dotnet5.1/Serilog.Enrichers.Process.dll": {}
-        },
-        "runtime": {
-          "lib/dotnet5.1/Serilog.Enrichers.Process.dll": {}
-        }
-      },
       "Serilog.Enrichers.Thread/2.0.0-beta-507": {
         "type": "package",
         "dependencies": {
@@ -425,7 +394,7 @@
           "lib/dotnet5.1/Serilog.Enrichers.Thread.dll": {}
         }
       },
-      "Serilog.Settings.Configuration/1.0.0": {
+      "Serilog.Settings.Configuration/2.0.0-beta": {
         "type": "project",
         "framework": ".NETPlatform,Version=v5.4",
         "dependencies": {
@@ -1082,24 +1051,6 @@
           "lib/net45/Serilog.Enrichers.Environment.dll": {}
         }
       },
-      "Serilog.Enrichers.Process/2.0.0-beta-507": {
-        "type": "package",
-        "dependencies": {
-          "Serilog": "2.0.0-beta-507"
-        },
-        "frameworkAssemblies": [
-          "Microsoft.CSharp",
-          "mscorlib",
-          "System",
-          "System.Core"
-        ],
-        "compile": {
-          "lib/net45/Serilog.Enrichers.Process.dll": {}
-        },
-        "runtime": {
-          "lib/net45/Serilog.Enrichers.Process.dll": {}
-        }
-      },
       "Serilog.Enrichers.Thread/2.0.0-beta-507": {
         "type": "package",
         "dependencies": {
@@ -1118,7 +1069,7 @@
           "lib/net45/Serilog.Enrichers.Thread.dll": {}
         }
       },
-      "Serilog.Settings.Configuration/1.0.0": {
+      "Serilog.Settings.Configuration/2.0.0-beta": {
         "type": "project",
         "framework": ".NETFramework,Version=v4.5.1",
         "dependencies": {
@@ -1311,24 +1262,6 @@
           "lib/net45/Serilog.Enrichers.Environment.dll": {}
         }
       },
-      "Serilog.Enrichers.Process/2.0.0-beta-507": {
-        "type": "package",
-        "dependencies": {
-          "Serilog": "2.0.0-beta-507"
-        },
-        "frameworkAssemblies": [
-          "Microsoft.CSharp",
-          "mscorlib",
-          "System",
-          "System.Core"
-        ],
-        "compile": {
-          "lib/net45/Serilog.Enrichers.Process.dll": {}
-        },
-        "runtime": {
-          "lib/net45/Serilog.Enrichers.Process.dll": {}
-        }
-      },
       "Serilog.Enrichers.Thread/2.0.0-beta-507": {
         "type": "package",
         "dependencies": {
@@ -1347,7 +1280,7 @@
           "lib/net45/Serilog.Enrichers.Thread.dll": {}
         }
       },
-      "Serilog.Settings.Configuration/1.0.0": {
+      "Serilog.Settings.Configuration/2.0.0-beta": {
         "type": "project",
         "framework": ".NETFramework,Version=v4.5.1",
         "dependencies": {
@@ -1721,19 +1654,6 @@
           "lib/dotnet5.4/Serilog.Enrichers.Environment.dll": {}
         }
       },
-      "Serilog.Enrichers.Process/2.0.0-beta-507": {
-        "type": "package",
-        "dependencies": {
-          "Serilog": "2.0.0-beta-507",
-          "System.Diagnostics.Process": "4.1.0-beta-23409"
-        },
-        "compile": {
-          "lib/dotnet5.1/Serilog.Enrichers.Process.dll": {}
-        },
-        "runtime": {
-          "lib/dotnet5.1/Serilog.Enrichers.Process.dll": {}
-        }
-      },
       "Serilog.Enrichers.Thread/2.0.0-beta-507": {
         "type": "package",
         "dependencies": {
@@ -1746,7 +1666,7 @@
           "lib/dotnet5.1/Serilog.Enrichers.Thread.dll": {}
         }
       },
-      "Serilog.Settings.Configuration/1.0.0": {
+      "Serilog.Settings.Configuration/2.0.0-beta": {
         "type": "project",
         "framework": ".NETPlatform,Version=v5.4",
         "dependencies": {
@@ -2641,19 +2561,6 @@
           "lib/dotnet5.4/Serilog.Enrichers.Environment.dll": {}
         }
       },
-      "Serilog.Enrichers.Process/2.0.0-beta-507": {
-        "type": "package",
-        "dependencies": {
-          "Serilog": "2.0.0-beta-507",
-          "System.Diagnostics.Process": "4.1.0-beta-23409"
-        },
-        "compile": {
-          "lib/dotnet5.1/Serilog.Enrichers.Process.dll": {}
-        },
-        "runtime": {
-          "lib/dotnet5.1/Serilog.Enrichers.Process.dll": {}
-        }
-      },
       "Serilog.Enrichers.Thread/2.0.0-beta-507": {
         "type": "package",
         "dependencies": {
@@ -2666,7 +2573,7 @@
           "lib/dotnet5.1/Serilog.Enrichers.Thread.dll": {}
         }
       },
-      "Serilog.Settings.Configuration/1.0.0": {
+      "Serilog.Settings.Configuration/2.0.0-beta": {
         "type": "project",
         "framework": ".NETPlatform,Version=v5.4",
         "dependencies": {
@@ -3235,7 +3142,7 @@
     }
   },
   "libraries": {
-    "Serilog.Settings.Configuration/1.0.0": {
+    "Serilog.Settings.Configuration/2.0.0-beta": {
       "type": "project",
       "path": "../../src/Serilog.Settings.Configuration/project.json"
     },
@@ -3609,19 +3516,6 @@
         "Serilog.Enrichers.Environment.2.0.0-beta-507.nupkg",
         "Serilog.Enrichers.Environment.2.0.0-beta-507.nupkg.sha512",
         "Serilog.Enrichers.Environment.nuspec"
-      ]
-    },
-    "Serilog.Enrichers.Process/2.0.0-beta-507": {
-      "type": "package",
-      "sha512": "GkTzBWzzTXiuUfR/Ywz0+BBe6C9+mgVDuXcsoqdv83+VFB52F/Ebdi8KwU5e4NIgpLtGRnHl16mSPtSAsjhk0A==",
-      "files": [
-        "lib/dotnet5.1/Serilog.Enrichers.Process.dll",
-        "lib/dotnet5.1/Serilog.Enrichers.Process.xml",
-        "lib/net45/Serilog.Enrichers.Process.dll",
-        "lib/net45/Serilog.Enrichers.Process.xml",
-        "Serilog.Enrichers.Process.2.0.0-beta-507.nupkg",
-        "Serilog.Enrichers.Process.2.0.0-beta-507.nupkg.sha512",
-        "Serilog.Enrichers.Process.nuspec"
       ]
     },
     "Serilog.Enrichers.Thread/2.0.0-beta-507": {
@@ -5384,7 +5278,6 @@
       "Serilog.Sinks.Literate >= 2.0.0-beta-21",
       "Serilog.Sinks.File >= 2.0.0-beta-507",
       "Serilog.Enrichers.Environment >= 2.0.0-beta-507",
-      "Serilog.Enrichers.Process >= 2.0.0-beta-507",
       "Serilog.Enrichers.Thread >= 2.0.0-beta-507"
     ],
     "DNX,Version=v4.5.1": [],

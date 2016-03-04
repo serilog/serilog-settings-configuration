@@ -16,7 +16,6 @@
     "Serilog.Sinks.Literate": "2.0.0-beta-21",
     "Serilog.Sinks.File":  "2.0.0-beta-507",
     "Serilog.Enrichers.Environment": "2.0.0-beta-507",
-    "Serilog.Enrichers.Process": "2.0.0-beta-507",
     "Serilog.Enrichers.Thread": "2.0.0-beta-507"
   },
 

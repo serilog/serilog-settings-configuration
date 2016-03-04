@@ -28,7 +28,23 @@ namespace Serilog.Settings.Configuration
             var configurationAssemblies = LoadConfigurationAssemblies();
 
             ApplyMinimumLevel(loggerConfiguration);
+            ApplyEnrichment(loggerConfiguration, configurationAssemblies);
+            ApplySinks(loggerConfiguration, configurationAssemblies);
+        }
 
+        void ApplySinks(LoggerConfiguration loggerConfiguration, Assembly[] configurationAssemblies)
+        {
+            var writeToDirective = _configuration.GetSection("WriteTo");
+            if (writeToDirective != null)
+            {
+                var methodCalls = GetMethodCalls(writeToDirective);
+                CallConfigurationMethods(methodCalls, FindSinkConfigurationMethods(configurationAssemblies),
+                    loggerConfiguration.WriteTo);
+            }
+        }
+
+        void ApplyEnrichment(LoggerConfiguration loggerConfiguration, Assembly[] configurationAssemblies)
+        {
             var enrichDirective = _configuration.GetSection("Enrich");
             if (enrichDirective != null)
             {
@@ -45,15 +61,9 @@ namespace Serilog.Settings.Configuration
                 if (withDirective != null)
                 {
                     var methodCalls = GetMethodCalls(withDirective);
-                    CallConfigurationMethods(methodCalls, FindEventEnricherConfigurationMethods(configurationAssemblies), loggerConfiguration.Enrich);
+                    CallConfigurationMethods(methodCalls, FindEventEnricherConfigurationMethods(configurationAssemblies),
+                        loggerConfiguration.Enrich);
                 }
-            }
-
-            var writeToDirective = _configuration.GetSection("WriteTo");
-            if (writeToDirective != null)
-            {
-                var methodCalls = GetMethodCalls(writeToDirective);
-                CallConfigurationMethods(methodCalls, FindSinkConfigurationMethods(configurationAssemblies), loggerConfiguration.WriteTo);
             }
         }
 
