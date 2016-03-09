@@ -48,21 +48,17 @@ namespace Serilog.Settings.Configuration
             var enrichDirective = _configuration.GetSection("Enrich");
             if (enrichDirective != null)
             {
-                var withPropertiesDirective = enrichDirective.GetSection("WithProperties");
-                if (withPropertiesDirective != null)
-                {
-                    foreach (var enrichProperyDirective in withPropertiesDirective.GetChildren())
-                    {
-                        loggerConfiguration.Enrich.WithProperty(enrichProperyDirective.Key, enrichProperyDirective.Value);
-                    }
-                }
+                var methodCalls = GetMethodCalls(enrichDirective);
+                CallConfigurationMethods(methodCalls, FindEventEnricherConfigurationMethods(configurationAssemblies),
+                    loggerConfiguration.Enrich);
+            }
 
-                var withDirective = enrichDirective.GetSection("With");
-                if (withDirective != null)
+            var propertiesDirective = _configuration.GetSection("Properties");
+            if (propertiesDirective != null)
+            {
+                foreach (var enrichProperyDirective in propertiesDirective.GetChildren())
                 {
-                    var methodCalls = GetMethodCalls(withDirective);
-                    CallConfigurationMethods(methodCalls, FindEventEnricherConfigurationMethods(configurationAssemblies),
-                        loggerConfiguration.Enrich);
+                    loggerConfiguration.Enrich.WithProperty(enrichProperyDirective.Key, enrichProperyDirective.Value);
                 }
             }
         }

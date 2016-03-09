@@ -13,11 +13,9 @@ Configuration is read from the `Serilog` section.
       { "Name": "LiterateConsole" },
       { "Name": "File", "Args": { "path": "%TEMP%\\Logs\\serilog-configuration-sample.txt" } }
     ],
-    "Enrich": {
-      "With": ["FromLogContext", "WithMachineName", "WithThreadId"],
-      "WithProperties": {
-        "Application": "Sample"
-      }
+    "Enrich": ["FromLogContext", "WithMachineName", "WithThreadId"],
+    "Properties": {
+		"Application": "Sample"
     }
   }
 }
@@ -45,7 +43,7 @@ public class Program
 }
 ```
 
-The `WriteTo` and `Enrich.With` sections support the same syntax, for example the following is valid if no arguments are needed by the sinks:
+The `WriteTo` and `Enrich` sections support the same syntax, for example the following is valid if no arguments are needed by the sinks:
 
 ```json
 "WriteTo": ["LiterateConsole", "DiagnosticTrace"]
