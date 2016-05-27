@@ -1,29 +1,33 @@
 {
-  "version": "2.0.0-beta-*",
+  "version": "2.0.0-rc-*",
   "description": "Microsoft.Extensions.Configuration (appsettings.json) support for Serilog.",
   "authors": [ "Serilog Contributors" ],
-  "tags": [ "serilog", "json" ],
-  "projectUrl": "http://serilog.net",
-  "licenseUrl": "http://www.apache.org/licenses/LICENSE-2.0",
-  "iconUrl": "http://serilog.net/images/serilog-configuration-nuget.png",
-  "compilationOptions": {
-    "keyFile": "../../assets/Serilog.snk"
-  },
-  "frameworks": {
-    "net451": { },
-    "dotnet5.4": {
-      "dependencies": {
-        "Microsoft.CSharp": "4.0.1-beta-23516",
-        "System.Collections": "4.0.11-beta-23516",
-        "System.Linq": "4.0.1-beta-23516",
-        "System.Runtime": "4.0.21-beta-23516",
-        "System.Threading": "4.0.11-beta-23516"
-      }
-    }
+  "packOptions": {
+    "tags": [ "serilog", "json" ],
+    "projectUrl": "http://serilog.net",
+    "licenseUrl": "http://www.apache.org/licenses/LICENSE-2.0",
+    "iconUrl": "http://serilog.net/images/serilog-configuration-nuget.png"
   },
   "dependencies": {
-    "Microsoft.Extensions.Configuration": "1.0.0-rc1-final",
-    "Microsoft.Extensions.PlatformAbstractions": "1.0.0-rc1-final",
-    "Serilog": "2.0.0-beta-507"
+    "Newtonsoft.Json": "8.0.4-beta1",
+    "Microsoft.Extensions.Configuration": "1.0.0-rc2-final",
+    "Microsoft.Extensions.DependencyModel": "1.0.0-rc2-final",
+    "Serilog": "2.0.0-rc-576"
+  },
+  "buildOptions": {
+    "keyFile": "../../assets/Serilog.snk",
+    "xmlDoc": true,
+    "warningsAsErrors": true
+  },
+  "frameworks": {
+    "net4.5.1": {
+      "frameworkAssemblies": {
+        "System.Runtime": ""
+      }
+    },
+    "netstandard1.5": {
+      "dependencies": {
+      }
+    }
   }
 }

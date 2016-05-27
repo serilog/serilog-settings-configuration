@@ -1,6 +1,6 @@
 # Serilog.Settings.Configuration [![Build status](https://ci.appveyor.com/api/projects/status/r2bgfimd9ocr61px/branch/master?svg=true)](https://ci.appveyor.com/project/serilog/serilog-settings-configuration/branch/master)
 
-A Serilog settings provider that reads from Microsoft.Extensions.Configuration, i.e. .NET Core's `appsettings.json` file.
+A Serilog settings provider that reads from _Microsoft.Extensions.Configuration_, .NET Core's `appsettings.json` file.
 
 Configuration is read from the `Serilog` section.
 
@@ -51,4 +51,16 @@ The `WriteTo` and `Enrich` sections support the same syntax, for example the fol
 
 Or alternatively, the long-form (`"Name":` ...) sytax from the first example can be used when arguments need to be supplied.
 
-(This package implements a convention using `ILibraryManager` to find any package with `Serilog` anywhere in the name and pulls configuration methods from it, so the `Using` example above is redundant.)
+(This package implements a convention using `DependencyContext` to find any package with `Serilog` anywhere in the name and pulls configuration methods from it, so the `Using` example above is redundant.)
+
+### .NET 4.x
+
+To use this package in .NET 4.x applications, add `preserveCompilationContext` to `buildOptions` in _project.json_.
+
+```json
+"net4.6": {
+   "buildOptions": {
+     "preserveCompilationContext": true
+   }
+},
+```

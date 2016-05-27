@@ -14,7 +14,7 @@
 
 using System;
 using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.PlatformAbstractions;
+using Microsoft.Extensions.DependencyModel;
 using Serilog.Configuration;
 using Serilog.Settings.Configuration;
 
@@ -32,16 +32,16 @@ namespace Serilog
         /// </summary>
         /// <param name="settingConfiguration">Logger setting configuration.</param>
         /// <param name="configuration">A configuration object with a Serilog section.</param>
-        /// <param name="libraryManager">The library manager from which sink/enricher packages can be located. If not supplied, the platform
+        /// <param name="dependencyContext">The dependency context from which sink/enricher packages can be located. If not supplied, the platform
         /// default will be used.</param>
         /// <returns>An object allowing configuration to continue.</returns>
         public static LoggerConfiguration Configuration(
             this LoggerSettingsConfiguration settingConfiguration,
             IConfiguration configuration,
-            ILibraryManager libraryManager = null)
+            DependencyContext dependencyContext = null)
         {
             if (configuration == null) throw new ArgumentNullException(nameof(configuration));
-            return settingConfiguration.ConfigurationSection(configuration.GetSection(DefaultSectionName), libraryManager);
+            return settingConfiguration.ConfigurationSection(configuration.GetSection(DefaultSectionName), dependencyContext);
         }
 
         /// <summary>
@@ -49,17 +49,26 @@ namespace Serilog
         /// </summary>
         /// <param name="settingConfiguration">Logger setting configuration.</param>
         /// <param name="configuration">The Serilog configuration section</param>
-        /// <param name="libraryManager">The library manager from which sink/enricher packages can be located. If not supplied, the platform
+        /// <param name="dependencyContext">The dependency context from which sink/enricher packages can be located. If not supplied, the platform
         /// default will be used.</param>
         /// <returns>An object allowing configuration to continue.</returns>
         public static LoggerConfiguration ConfigurationSection(
             this LoggerSettingsConfiguration settingConfiguration,
             IConfigurationSection configuration,
-            ILibraryManager libraryManager = null)
+            DependencyContext dependencyContext = null)
         {
             if (settingConfiguration == null) throw new ArgumentNullException(nameof(settingConfiguration));
             if (configuration == null) throw new ArgumentNullException(nameof(configuration));
-            return settingConfiguration.Settings(new ConfigurationReader(configuration, libraryManager ?? PlatformServices.Default.LibraryManager));
+
+            var context = dependencyContext;
+            if (context == null)
+            {
+                context = DependencyContext.Default;
+                if (context == null)
+                    throw new InvalidOperationException("Add `\"preserveCompilationContext\": true` to `\"buildOptions\"` for support on .NET 4.x.");
+            }
+
+            return settingConfiguration.Settings(new ConfigurationReader(configuration, context));
         }
     }
 }
