@@ -4,23 +4,23 @@ using System.Linq;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.PlatformAbstractions;
+using Microsoft.Extensions.DependencyModel;
 using Serilog.Configuration;
 using Serilog.Events;
 
 namespace Serilog.Settings.Configuration
 {
-    public class ConfigurationReader : ILoggerSettings
+    class ConfigurationReader : ILoggerSettings
     {
         readonly IConfigurationSection _configuration;
-        readonly ILibraryManager _libraryManager;
+        readonly DependencyContext _dependencyContext;
 
-        public ConfigurationReader(IConfigurationSection configuration, ILibraryManager libraryManager)
+        public ConfigurationReader(IConfigurationSection configuration, DependencyContext dependencyContext)
         {
             if (configuration == null) throw new ArgumentNullException(nameof(configuration));
-            if (libraryManager == null) throw new ArgumentNullException(nameof(libraryManager));
+            if (dependencyContext == null) throw new ArgumentNullException(nameof(dependencyContext));
             _configuration = configuration;
-            _libraryManager = libraryManager;
+            _dependencyContext = dependencyContext;
         }
 
         public void Configure(LoggerConfiguration loggerConfiguration)
@@ -109,7 +109,7 @@ namespace Serilog.Settings.Configuration
 
         Assembly[] LoadConfigurationAssemblies()
         {
-            var assemblies = new Dictionary<AssemblyName, Assembly>();
+            var assemblies = new Dictionary<string, Assembly>();
 
             var usingSection = _configuration.GetSection("Using");
             if (usingSection != null)
@@ -121,27 +121,29 @@ namespace Serilog.Settings.Configuration
                             "A zero-length or whitespace assembly name was supplied to a Serilog.Using configuration statement.");
 
                     var assembly = Assembly.Load(new AssemblyName(simpleName));
-                    assemblies.Add(assembly.GetName(), assembly);
+                    assemblies.Add(assembly.FullName, assembly);
                 }
             }
 
-            foreach (var library in _libraryManager.GetLibraries())
+            foreach (var library in _dependencyContext.RuntimeLibraries)
             {
                 if (library.Name != null && library.Name.ToLowerInvariant().Contains("serilog"))
                 {
-                    foreach (var assemblyName in library.Assemblies)
+                    var assumedName = new AssemblyName(library.Name);
+                    var assumed = Assembly.Load(assumedName);
+                    if (assumed != null && !assemblies.ContainsKey(assumed.FullName))
+                        assemblies.Add(assumed.FullName, assumed);
+
+                    foreach (var assemblyRef in library.Assemblies)
                     {
-                        if (!assemblies.ContainsKey(assemblyName))
-                        {
-                            var assembly = Assembly.Load(assemblyName);
-                            assemblies.Add(assemblyName, assembly);
-                        }
+                        var assembly = Assembly.Load(assemblyRef.Name);
+                        if (assembly != null && !assemblies.ContainsKey(assembly.FullName))
+                            assemblies.Add(assembly.FullName, assembly);
                     }
                 }
             }
 
-            var configurationAssemblies = assemblies.Values.ToArray();
-            return configurationAssemblies;
+            return assemblies.Values.ToArray();
         }
 
         static void CallConfigurationMethods(Dictionary<string, Dictionary<string, string>> methods, IList<MethodInfo> configurationMethods, object receiver)
