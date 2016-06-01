@@ -97,7 +97,7 @@ namespace Serilog.Settings.Configuration
         void ApplyMinimumLevel(LoggerConfiguration loggerConfiguration)
         {
             var minimumLevelDirective = _configuration.GetSection("MinimumLevel");
-            if (minimumLevelDirective != null)
+            if (minimumLevelDirective?.Value != null)
             {
                 LogEventLevel minimumLevel;
                 if (!Enum.TryParse(minimumLevelDirective.Value, out minimumLevel))
