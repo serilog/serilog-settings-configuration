@@ -5,7 +5,11 @@ using System.Reflection;
 using System.Runtime.CompilerServices;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyModel;
+using Microsoft.Extensions.Primitives;
+
 using Serilog.Configuration;
+using Serilog.Core;
+using Serilog.Debugging;
 using Serilog.Events;
 
 namespace Serilog.Settings.Configuration
@@ -103,7 +107,23 @@ namespace Serilog.Settings.Configuration
                 if (!Enum.TryParse(minimumLevelDirective.Value, out minimumLevel))
                     throw new InvalidOperationException($"The value {minimumLevelDirective.Value} is not a valid Serilog level.");
 
-                loggerConfiguration.MinimumLevel.Is(minimumLevel);
+                var levelSwitch = new LoggingLevelSwitch(minimumLevel);
+                
+                ChangeToken.OnChange(
+                    () => minimumLevelDirective.GetReloadToken(),
+                    () =>
+                    {
+                        if (Enum.TryParse(minimumLevelDirective.Value, out minimumLevel))
+                        {
+                            levelSwitch.MinimumLevel = minimumLevel;
+                        }
+                        else
+                        {
+                            SelfLog.WriteLine($"The value {minimumLevelDirective.Value} is not a valid Serilog level.");
+                        }
+                    });
+
+                loggerConfiguration.MinimumLevel.ControlledBy(levelSwitch);
             }
         }
 
