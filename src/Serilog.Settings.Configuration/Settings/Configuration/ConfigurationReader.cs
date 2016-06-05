@@ -108,22 +108,17 @@ namespace Serilog.Settings.Configuration
                     throw new InvalidOperationException($"The value {minimumLevelDirective.Value} is not a valid Serilog level.");
 
                 var levelSwitch = new LoggingLevelSwitch(minimumLevel);
-                
+                loggerConfiguration.MinimumLevel.ControlledBy(levelSwitch);
+
                 ChangeToken.OnChange(
                     () => minimumLevelDirective.GetReloadToken(),
                     () =>
                     {
                         if (Enum.TryParse(minimumLevelDirective.Value, out minimumLevel))
-                        {
                             levelSwitch.MinimumLevel = minimumLevel;
-                        }
                         else
-                        {
                             SelfLog.WriteLine($"The value {minimumLevelDirective.Value} is not a valid Serilog level.");
-                        }
                     });
-
-                loggerConfiguration.MinimumLevel.ControlledBy(levelSwitch);
             }
         }
 
