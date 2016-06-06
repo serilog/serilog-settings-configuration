@@ -1,4 +1,6 @@
-﻿using Microsoft.Extensions.Configuration;
+﻿using System;
+
+using Microsoft.Extensions.Configuration;
 using Serilog;
 using System.IO;
 
@@ -10,14 +12,18 @@ namespace Sample
         {
             var configuration = new ConfigurationBuilder()
                 .SetBasePath(Directory.GetCurrentDirectory())
-                .AddJsonFile("appsettings.json")
+                .AddJsonFile(path: "appsettings.json", optional: false, reloadOnChange: true)
                 .Build();
 
             var logger = new LoggerConfiguration()
                 .ReadFrom.Configuration(configuration)
                 .CreateLogger();
 
-            logger.Information("Hello, world!");
+            do
+            {
+                logger.Information("Hello, world!");
+            }
+            while (Console.ReadKey().KeyChar != 'q');
         }
     }
 }
