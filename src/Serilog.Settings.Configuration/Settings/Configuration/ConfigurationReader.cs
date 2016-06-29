@@ -100,25 +100,39 @@ namespace Serilog.Settings.Configuration
 
         void ApplyMinimumLevel(LoggerConfiguration loggerConfiguration)
         {
-            var minimumLevelDirective = _configuration.GetSection("MinimumLevel");
-            if (minimumLevelDirective?.Value != null)
-            {
-                LogEventLevel minimumLevel;
-                if (!Enum.TryParse(minimumLevelDirective.Value, out minimumLevel))
-                    throw new InvalidOperationException($"The value {minimumLevelDirective.Value} is not a valid Serilog level.");
-
-                var levelSwitch = new LoggingLevelSwitch(minimumLevel);
-                loggerConfiguration.MinimumLevel.ControlledBy(levelSwitch);
-
-                ChangeToken.OnChange(
-                    () => minimumLevelDirective.GetReloadToken(),
-                    () =>
+            var applyMinimumLevelAction =
+                new Action<IConfigurationSection, Action<LoggerMinimumLevelConfiguration, LoggingLevelSwitch>>(
+                    (directive, applyConfigAction) =>
                     {
-                        if (Enum.TryParse(minimumLevelDirective.Value, out minimumLevel))
-                            levelSwitch.MinimumLevel = minimumLevel;
-                        else
-                            SelfLog.WriteLine($"The value {minimumLevelDirective.Value} is not a valid Serilog level.");
+                        LogEventLevel minimumLevel;
+                        if (!Enum.TryParse(directive.Value, out minimumLevel))
+                            throw new InvalidOperationException($"The value {directive.Value} is not a valid Serilog level.");
+
+                        var levelSwitch = new LoggingLevelSwitch(minimumLevel);
+                        applyConfigAction(loggerConfiguration.MinimumLevel, levelSwitch);
+
+                        ChangeToken.OnChange(
+                            directive.GetReloadToken,
+                            () =>
+                            {
+                                if (Enum.TryParse(directive.Value, out minimumLevel))
+                                    levelSwitch.MinimumLevel = minimumLevel;
+                                else
+                                    SelfLog.WriteLine($"The value {directive.Value} is not a valid Serilog level.");
+                            });
                     });
+
+            var minimumLevelDirective = _configuration.GetSection("MinimumLevel");
+
+            var defaultMinLevelDirective = minimumLevelDirective.Value != null ? minimumLevelDirective : minimumLevelDirective.GetSection("Default");
+            if (defaultMinLevelDirective.Value != null)
+            {
+                applyMinimumLevelAction(defaultMinLevelDirective, (configuration, levelSwitch) => configuration.ControlledBy(levelSwitch));
+            }
+
+            foreach (var overrideDirective in minimumLevelDirective.GetSection("Override").GetChildren())
+            {
+                applyMinimumLevelAction(overrideDirective, (configuration, levelSwitch) => configuration.Override(overrideDirective.Key, levelSwitch));
             }
         }
 
