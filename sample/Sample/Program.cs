@@ -4,6 +4,8 @@ using Microsoft.Extensions.Configuration;
 using Serilog;
 using System.IO;
 
+using Serilog.Core;
+
 namespace Sample
 {
     public class Program
@@ -21,7 +23,11 @@ namespace Sample
 
             do
             {
-                logger.Information("Hello, world!");
+                logger.ForContext<Program>().Information("Hello, world!");
+                logger.ForContext(Constants.SourceContextPropertyName, "Microsoft").Warning("Hello, world!");
+                logger.ForContext(Constants.SourceContextPropertyName, "MyApp.Something.Tricky").Verbose("Hello, world!");
+
+                Console.WriteLine();
             }
             while (Console.ReadKey().KeyChar != 'q');
         }
