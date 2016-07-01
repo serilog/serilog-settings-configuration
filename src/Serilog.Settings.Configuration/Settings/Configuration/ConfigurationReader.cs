@@ -80,8 +80,8 @@ namespace Serilog.Settings.Configuration
                 else
                 {
                     var name = child.GetSection("Name");
-                    if (name == null)
-                        throw new InvalidOperationException("The configuration value in Serilog.WriteTo has no Name element.");
+                    if (name.Value == null)
+                        throw new InvalidOperationException($"The configuration value in {name.Path} has no Name element.");
 
                     var callArgs = new Dictionary<string, string>();
                     var args = child.GetSection("Args");
