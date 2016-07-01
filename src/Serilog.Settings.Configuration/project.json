@@ -12,7 +12,7 @@
     "Newtonsoft.Json": "8.0.4-beta1",
     "Microsoft.Extensions.Configuration.Abstractions": "1.0.0-rc2-final",
     "Microsoft.Extensions.DependencyModel": "1.0.0-rc2-final",
-    "Serilog": "2.0.0-rc-576"
+    "Serilog": "2.0.0-rc-*"
   },
   "buildOptions": {
     "keyFile": "../../assets/Serilog.snk",
