@@ -9,10 +9,10 @@
     "iconUrl": "http://serilog.net/images/serilog-configuration-nuget.png"
   },
   "dependencies": {
-    "Newtonsoft.Json": "8.0.4-beta1",
-    "Microsoft.Extensions.Configuration.Abstractions": "1.0.0-rc2-final",
-    "Microsoft.Extensions.DependencyModel": "1.0.0-rc2-final",
-    "Serilog": "2.0.0-rc-576"
+    "Newtonsoft.Json": "9.0.1",
+    "Microsoft.Extensions.Configuration.Abstractions": "1.0.0",
+    "Microsoft.Extensions.DependencyModel": "1.0.0",
+    "Serilog": "2.0.0"
   },
   "buildOptions": {
     "keyFile": "../../assets/Serilog.snk",
@@ -23,9 +23,6 @@
     "net4.5.1": {
       "dependencies": { "System.Runtime": "4.0.10" }
     },
-    "netstandard1.5": {
-      "dependencies": {
-      }
-    }
+    "netstandard1.6": {}
   }
 }
