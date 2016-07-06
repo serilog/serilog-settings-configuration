@@ -2349,13 +2349,12 @@
           "lib/netstandard1.3/_._": {}
         }
       },
-      "Serilog.Settings.Configuration/2.0.0-rc": {
+      "Serilog.Settings.Configuration/2.1.0": {
         "type": "project",
         "framework": ".NETStandard,Version=v1.6",
         "dependencies": {
           "Microsoft.Extensions.Configuration.Abstractions": "1.0.0",
           "Microsoft.Extensions.DependencyModel": "1.0.0",
-          "Newtonsoft.Json": "9.0.1",
           "Serilog": "2.0.0"
         },
         "compile": {
@@ -2673,13 +2672,12 @@
           "lib/net45/_._": {}
         }
       },
-      "Serilog.Settings.Configuration/2.0.0-rc": {
+      "Serilog.Settings.Configuration/2.1.0": {
         "type": "project",
         "framework": ".NETFramework,Version=v4.5.1",
         "dependencies": {
           "Microsoft.Extensions.Configuration.Abstractions": "1.0.0",
           "Microsoft.Extensions.DependencyModel": "1.0.0",
-          "Newtonsoft.Json": "9.0.1",
           "Serilog": "2.0.0",
           "System.Runtime": "4.0.10"
         },
@@ -7561,7 +7559,7 @@
         "ref/xamarinwatchos10/_._"
       ]
     },
-    "Serilog.Settings.Configuration/2.0.0-rc": {
+    "Serilog.Settings.Configuration/2.1.0": {
       "type": "project",
       "path": "../../src/Serilog.Settings.Configuration/project.json",
       "msbuildProject": "../../src/Serilog.Settings.Configuration/Serilog.Settings.Configuration.xproj"
