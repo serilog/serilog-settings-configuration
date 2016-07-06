@@ -9,7 +9,6 @@
     "iconUrl": "http://serilog.net/images/serilog-configuration-nuget.png"
   },
   "dependencies": {
-    "Newtonsoft.Json": "9.0.1",
     "Microsoft.Extensions.Configuration.Abstractions": "1.0.0",
     "Microsoft.Extensions.DependencyModel": "1.0.0",
     "Serilog": "2.0.0"

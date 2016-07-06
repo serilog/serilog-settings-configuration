@@ -179,10 +179,7 @@ namespace Serilog.Settings.Configuration
         {
             foreach (var method in methods)
             {
-                var methodInfo = configurationMethods
-                    .Where(m => m.Name == method.Key && m.GetParameters().Skip(1).All(p => p.HasDefaultValue || method.Value.Any(s => s.Key == p.Name)))
-                    .OrderByDescending(m => m.GetParameters().Length)
-                    .FirstOrDefault();
+                var methodInfo = SelectConfigurationMethod(configurationMethods, method.Key, method.Value);
 
                 if (methodInfo != null)
                 {
@@ -195,6 +192,15 @@ namespace Serilog.Settings.Configuration
                     methodInfo.Invoke(null, call.ToArray());
                 }
             }
+        }
+
+        internal static MethodInfo SelectConfigurationMethod(IEnumerable<MethodInfo> candidateMethods, string name, Dictionary<string, string> suppliedArgumentValues)
+        {
+            return candidateMethods
+                .Where(m => m.Name == name &&
+                            m.GetParameters().Skip(1).All(p => p.HasDefaultValue || suppliedArgumentValues.Any(s => s.Key == p.Name)))
+                .OrderByDescending(m => m.GetParameters().Count(p => suppliedArgumentValues.Any(s => s.Key == p.Name)))
+                .FirstOrDefault();
         }
 
         static readonly Dictionary<Type, Func<string, object>> ExtendedTypeConversions = new Dictionary<Type, Func<string, object>>
