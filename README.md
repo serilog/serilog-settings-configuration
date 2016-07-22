@@ -64,3 +64,19 @@ To use this package in .NET 4.x applications, add `preserveCompilationContext` t
    }
 },
 ```
+
+### Level overrides
+
+The `MinimumLevel` configuration property can be set to a single value as in the sample above, or, levels can be overridden per logging source.
+
+This is useful in ASP.NET Core applications, which will often specify minimum level as:
+
+```json
+    "MinimumLevel": {
+        "Default": "Information",
+        "Override": {
+            "Microsoft": "Warning",
+            "System": "Warning"
+        }
+    }
+```
