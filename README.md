@@ -85,7 +85,7 @@ This is useful in ASP.NET Core applications, which will often specify minimum le
 
 If your application enables the environment variable configuration source (`AddEnvironmentVariables()`) you can add or override Serilog configuration through the environment.
 
-For example, to set the minimum log level using the `Windows` command prompt:
+For example, to set the minimum log level using the _Windows_ command prompt:
 
 ```
 set Serilog:MinimumLevel=Debug
