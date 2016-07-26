@@ -80,8 +80,8 @@ namespace Serilog.Settings.Configuration
                 else
                 {
                     var name = child.GetSection("Name");
-                    if (name == null)
-                        throw new InvalidOperationException("The configuration value in Serilog.WriteTo has no Name element.");
+                    if (name.Value == null)
+                        throw new InvalidOperationException($"The configuration value in {name.Path} has no Name element.");
 
                     var callArgs = new Dictionary<string, string>();
                     var args = child.GetSection("Args");
@@ -100,25 +100,39 @@ namespace Serilog.Settings.Configuration
 
         void ApplyMinimumLevel(LoggerConfiguration loggerConfiguration)
         {
-            var minimumLevelDirective = _configuration.GetSection("MinimumLevel");
-            if (minimumLevelDirective?.Value != null)
-            {
-                LogEventLevel minimumLevel;
-                if (!Enum.TryParse(minimumLevelDirective.Value, out minimumLevel))
-                    throw new InvalidOperationException($"The value {minimumLevelDirective.Value} is not a valid Serilog level.");
-
-                var levelSwitch = new LoggingLevelSwitch(minimumLevel);
-                loggerConfiguration.MinimumLevel.ControlledBy(levelSwitch);
-
-                ChangeToken.OnChange(
-                    () => minimumLevelDirective.GetReloadToken(),
-                    () =>
+            var applyMinimumLevelAction =
+                new Action<IConfigurationSection, Action<LoggerMinimumLevelConfiguration, LoggingLevelSwitch>>(
+                    (directive, applyConfigAction) =>
                     {
-                        if (Enum.TryParse(minimumLevelDirective.Value, out minimumLevel))
-                            levelSwitch.MinimumLevel = minimumLevel;
-                        else
-                            SelfLog.WriteLine($"The value {minimumLevelDirective.Value} is not a valid Serilog level.");
+                        LogEventLevel minimumLevel;
+                        if (!Enum.TryParse(directive.Value, out minimumLevel))
+                            throw new InvalidOperationException($"The value {directive.Value} is not a valid Serilog level.");
+
+                        var levelSwitch = new LoggingLevelSwitch(minimumLevel);
+                        applyConfigAction(loggerConfiguration.MinimumLevel, levelSwitch);
+
+                        ChangeToken.OnChange(
+                            directive.GetReloadToken,
+                            () =>
+                            {
+                                if (Enum.TryParse(directive.Value, out minimumLevel))
+                                    levelSwitch.MinimumLevel = minimumLevel;
+                                else
+                                    SelfLog.WriteLine($"The value {directive.Value} is not a valid Serilog level.");
+                            });
                     });
+
+            var minimumLevelDirective = _configuration.GetSection("MinimumLevel");
+
+            var defaultMinLevelDirective = minimumLevelDirective.Value != null ? minimumLevelDirective : minimumLevelDirective.GetSection("Default");
+            if (defaultMinLevelDirective.Value != null)
+            {
+                applyMinimumLevelAction(defaultMinLevelDirective, (configuration, levelSwitch) => configuration.ControlledBy(levelSwitch));
+            }
+
+            foreach (var overrideDirective in minimumLevelDirective.GetSection("Override").GetChildren())
+            {
+                applyMinimumLevelAction(overrideDirective, (configuration, levelSwitch) => configuration.Override(overrideDirective.Key, levelSwitch));
             }
         }
 
@@ -165,10 +179,7 @@ namespace Serilog.Settings.Configuration
         {
             foreach (var method in methods)
             {
-                var methodInfo = configurationMethods
-                    .Where(m => m.Name == method.Key && m.GetParameters().Skip(1).All(p => p.HasDefaultValue || method.Value.Any(s => s.Key == p.Name)))
-                    .OrderByDescending(m => m.GetParameters().Length)
-                    .FirstOrDefault();
+                var methodInfo = SelectConfigurationMethod(configurationMethods, method.Key, method.Value);
 
                 if (methodInfo != null)
                 {
@@ -181,6 +192,15 @@ namespace Serilog.Settings.Configuration
                     methodInfo.Invoke(null, call.ToArray());
                 }
             }
+        }
+
+        internal static MethodInfo SelectConfigurationMethod(IEnumerable<MethodInfo> candidateMethods, string name, Dictionary<string, string> suppliedArgumentValues)
+        {
+            return candidateMethods
+                .Where(m => m.Name == name &&
+                            m.GetParameters().Skip(1).All(p => p.HasDefaultValue || suppliedArgumentValues.Any(s => s.Key == p.Name)))
+                .OrderByDescending(m => m.GetParameters().Count(p => suppliedArgumentValues.Any(s => s.Key == p.Name)))
+                .FirstOrDefault();
         }
 
         static readonly Dictionary<Type, Func<string, object>> ExtendedTypeConversions = new Dictionary<Type, Func<string, object>>

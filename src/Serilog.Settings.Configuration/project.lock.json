@@ -3037,7 +3037,6 @@
     "": [
       "Microsoft.Extensions.Configuration.Abstractions >= 1.0.0",
       "Microsoft.Extensions.DependencyModel >= 1.0.0",
-      "Newtonsoft.Json >= 9.0.1",
       "Serilog >= 2.0.0"
     ],
     ".NETFramework,Version=v4.5.1": [

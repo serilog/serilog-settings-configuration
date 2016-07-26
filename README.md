@@ -21,7 +21,7 @@ Configuration is read from the `Serilog` section.
 }
 ```
 
-This example relies on the _Serilog.Sinks.Literate_, _Serilog.Sinks.File_, _Serilog.Enrichers.Environment_ and _Serilog.Sinks.Thread_ packages also being installed.
+This example relies on the _Serilog.Sinks.Literate_, _Serilog.Sinks.File_, _Serilog.Enrichers.Environment_ and _Serilog.Enrichers.Thread_ packages also being installed.
 
 After installing this package, use `ReadFrom.Configuration()` and pass an `IConfiguration` object.
 
@@ -63,4 +63,31 @@ To use this package in .NET 4.x applications, add `preserveCompilationContext` t
      "preserveCompilationContext": true
    }
 },
+```
+
+### Level overrides
+
+The `MinimumLevel` configuration property can be set to a single value as in the sample above, or, levels can be overridden per logging source.
+
+This is useful in ASP.NET Core applications, which will often specify minimum level as:
+
+```json
+    "MinimumLevel": {
+        "Default": "Information",
+        "Override": {
+            "Microsoft": "Warning",
+            "System": "Warning"
+        }
+    }
+```
+
+### Environment variables
+
+If your application enables the environment variable configuration source (`AddEnvironmentVariables()`) you can add or override Serilog configuration through the environment.
+
+For example, to set the minimum log level using the _Windows_ command prompt:
+
+```
+set Serilog:MinimumLevel=Debug
+dotnet run
 ```

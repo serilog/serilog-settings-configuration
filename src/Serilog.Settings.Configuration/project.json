@@ -1,5 +1,5 @@
 {
-  "version": "2.0.0-*",
+  "version": "2.1.0-*",
   "description": "Microsoft.Extensions.Configuration (appsettings.json) support for Serilog.",
   "authors": [ "Serilog Contributors" ],
   "packOptions": {
@@ -9,7 +9,6 @@
     "iconUrl": "http://serilog.net/images/serilog-configuration-nuget.png"
   },
   "dependencies": {
-    "Newtonsoft.Json": "9.0.1",
     "Microsoft.Extensions.Configuration.Abstractions": "1.0.0",
     "Microsoft.Extensions.DependencyModel": "1.0.0",
     "Serilog": "2.0.0"
