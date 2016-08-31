@@ -20,7 +20,8 @@
   },
   "frameworks": {
     "net4.5.1": {
-      "dependencies": { "System.Runtime": "4.0.10" }
+      "dependencies": { "System.Runtime": "4.0.10" },
+      "buildOptions": { "define": [ "APPDOMAIN" ] }
     },
     "netstandard1.6": {}
   }
