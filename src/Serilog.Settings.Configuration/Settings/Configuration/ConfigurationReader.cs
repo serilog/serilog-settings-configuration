@@ -22,7 +22,7 @@ namespace Serilog.Settings.Configuration
         public ConfigurationReader(IConfigurationSection configuration, DependencyContext dependencyContext)
         {
             if (configuration == null) throw new ArgumentNullException(nameof(configuration));
-            if (dependencyContext == null) throw new ArgumentNullException(nameof(dependencyContext));
+
             _configuration = configuration;
             _dependencyContext = dependencyContext;
         }
@@ -154,25 +154,37 @@ namespace Serilog.Settings.Configuration
                 }
             }
 
-            foreach (var library in _dependencyContext.RuntimeLibraries)
+            foreach (var assemblyName in GetSerilogConfigurationAssemblies())
             {
-                if (library.Name != null && library.Name.ToLowerInvariant().Contains("serilog"))
-                {
-                    var assumedName = new AssemblyName(library.Name);
-                    var assumed = Assembly.Load(assumedName);
-                    if (assumed != null && !assemblies.ContainsKey(assumed.FullName))
-                        assemblies.Add(assumed.FullName, assumed);
-
-                    foreach (var assemblyRef in library.Assemblies)
-                    {
-                        var assembly = Assembly.Load(assemblyRef.Name);
-                        if (assembly != null && !assemblies.ContainsKey(assembly.FullName))
-                            assemblies.Add(assembly.FullName, assembly);
-                    }
-                }
+                var assumedName = new AssemblyName(assemblyName);
+                var assumed = Assembly.Load(assumedName);
+                if (assumed != null && !assemblies.ContainsKey(assumed.FullName))
+                    assemblies.Add(assumed.FullName, assumed);
             }
 
             return assemblies.Values.ToArray();
+        }
+
+        string[] GetSerilogConfigurationAssemblies()
+        {
+            var query = Enumerable.Empty<string>();
+            var filter = new Func<string, bool>(name => name != null && name.ToLowerInvariant().Contains("serilog"));
+
+            if (_dependencyContext != null)
+            {
+                query = from lib in _dependencyContext.RuntimeLibraries where filter(lib.Name) select lib.Name;
+            }
+            else
+            {
+#if APPDOMAIN
+                query = from outputAssemblyPath in System.IO.Directory.GetFiles(AppDomain.CurrentDomain.BaseDirectory, "*.dll")
+                        let assemblyFileName = System.IO.Path.GetFileNameWithoutExtension(outputAssemblyPath)
+                        where filter(assemblyFileName)
+                        select AssemblyName.GetAssemblyName(outputAssemblyPath).FullName;
+#endif
+            }
+
+            return query.ToArray();
         }
 
         static void CallConfigurationMethods(Dictionary<string, Dictionary<string, string>> methods, IList<MethodInfo> configurationMethods, object receiver)
