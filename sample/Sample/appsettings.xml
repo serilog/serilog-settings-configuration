@@ -1,0 +1,31 @@
+<settings>
+  <serilog>
+    <using name="Literate">Serilog.Sinks.Literate</using>
+    <minimumLevel default="Debug">
+      <override>
+        <Microsoft>Warning</Microsoft>
+        <MyApp.Something.Tricky>Verbose</MyApp.Something.Tricky>
+      </override>
+    </minimumLevel>
+    <writeTo name="LiterateConsole">
+      <name>LiterateConsole</name>
+      <args outputTemplate="[{Timestamp:HH:mm:ss} {SourceContext} [{Level}] {Message}{NewLine}{Exception}" />
+    </writeTo>
+    <writeTo name="File1">
+      <name>File</name>
+      <args path="%TEMP%\\Logs\\serilog-configuration-sample-1.txt"
+            outputTemplate="{Timestamp:o} [{Level:u3}] ({Application}/{MachineName}/{ThreadId}) {Message}{NewLine}{Exception}" />
+    </writeTo>
+    <writeTo name="File2">
+      <name>File</name>
+      <args path="%TEMP%\\Logs\\serilog-configuration-sample-2.txt"
+            outputTemplate="{Timestamp:o} [{Level:u3}] ({Application}/{MachineName}/{ThreadId}) {Message}{NewLine}{Exception}" />
+    </writeTo>
+    <enrich name="0">FromLogContext</enrich>
+    <enrich name="1">WithMachineName</enrich>
+    <enrich name="2">WithThreadId</enrich>
+    <properties>
+      <Application>Sample</Application>
+    </properties>
+  </serilog>
+</settings>

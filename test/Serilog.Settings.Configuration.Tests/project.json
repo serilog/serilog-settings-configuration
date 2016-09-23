@@ -2,14 +2,13 @@
   "testRunner": "xunit",
   "dependencies": {
     "Serilog.Settings.Configuration": { "target": "project" },
-    "xunit": "2.1.0",
-    "dotnet-test-xunit": "1.0.0-rc2-build10025"
+    "xunit": "2.2.0-*",
+    "dotnet-test-xunit": "2.2.0-*"
   },
   "buildOptions": {
     "keyFile": "../../assets/Serilog.snk"
   },
   "frameworks": {
-    "net4.5.2": {},
     "netcoreapp1.0": {
       "dependencies": {
         "Microsoft.NETCore.App": {
@@ -21,6 +20,7 @@
         "dnxcore50",
         "portable-net45+win8"
       ]
-    }
+    },
+    "net4.5.2": {}
   }
 }
