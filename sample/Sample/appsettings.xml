@@ -7,19 +7,21 @@
         <MyApp.Something.Tricky>Verbose</MyApp.Something.Tricky>
       </override>
     </minimumLevel>
-    <writeTo name="LiterateConsole">
-      <name>LiterateConsole</name>
-      <args outputTemplate="[{Timestamp:HH:mm:ss} {SourceContext} [{Level}] {Message}{NewLine}{Exception}" />
-    </writeTo>
-    <writeTo name="File1">
-      <name>File</name>
-      <args path="%TEMP%\\Logs\\serilog-configuration-sample-1.txt"
-            outputTemplate="{Timestamp:o} [{Level:u3}] ({Application}/{MachineName}/{ThreadId}) {Message}{NewLine}{Exception}" />
-    </writeTo>
-    <writeTo name="File2">
-      <name>File</name>
-      <args path="%TEMP%\\Logs\\serilog-configuration-sample-2.txt"
-            outputTemplate="{Timestamp:o} [{Level:u3}] ({Application}/{MachineName}/{ThreadId}) {Message}{NewLine}{Exception}" />
+    <writeTo>
+      <literateConsole>
+        <name>LiterateConsole</name>
+        <args outputTemplate="[{Timestamp:HH:mm:ss} {SourceContext} [{Level}] {Message}{NewLine}{Exception}" />        
+      </literateConsole>
+      <file1>
+        <name>File</name>
+        <args path="%TEMP%\\Logs\\serilog-configuration-sample-1.txt"
+              outputTemplate="{Timestamp:o} [{Level:u3}] ({Application}/{MachineName}/{ThreadId}) {Message}{NewLine}{Exception}" />  
+      </file1>
+      <file2>
+        <name>File</name>
+        <args path="%TEMP%\\Logs\\serilog-configuration-sample-2.txt"
+              outputTemplate="{Timestamp:o} [{Level:u3}] ({Application}/{MachineName}/{ThreadId}) {Message}{NewLine}{Exception}" />  
+      </file2>
     </writeTo>
     <enrich name="0">FromLogContext</enrich>
     <enrich name="1">WithMachineName</enrich>
