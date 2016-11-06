@@ -7,14 +7,14 @@
     "Microsoft.Extensions.Configuration.Json": "1.0.0",
     "Serilog.Settings.Configuration": {"target": "project"},
     "Serilog.Sinks.Literate": "2.0.0",
-    "Serilog.Sinks.File":  "2.1.0",
+    "Serilog.Sinks.RollingFile":  "3.0.0",
     "Serilog.Enrichers.Environment": "2.0.0",
     "Serilog.Enrichers.Thread":  "2.0.0"
   },
   "frameworks": {
     "net4.6": {
       "buildOptions": {
-        "preserveCompilationContext": true
+        "preserveCompilationContext": false
       }
     },
     "netcoreapp1.0": {

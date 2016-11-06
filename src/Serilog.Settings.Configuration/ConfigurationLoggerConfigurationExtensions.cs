@@ -60,15 +60,7 @@ namespace Serilog
             if (settingConfiguration == null) throw new ArgumentNullException(nameof(settingConfiguration));
             if (configuration == null) throw new ArgumentNullException(nameof(configuration));
 
-            var context = dependencyContext;
-            if (context == null)
-            {
-                context = DependencyContext.Default;
-                if (context == null)
-                    throw new InvalidOperationException("Add `\"preserveCompilationContext\": true` to `\"buildOptions\"` for support on .NET 4.x.");
-            }
-
-            return settingConfiguration.Settings(new ConfigurationReader(configuration, context));
+            return settingConfiguration.Settings(new ConfigurationReader(configuration, dependencyContext ?? DependencyContext.Default));
         }
     }
 }
