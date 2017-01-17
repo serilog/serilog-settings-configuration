@@ -11,6 +11,7 @@ using Serilog.Configuration;
 using Serilog.Core;
 using Serilog.Debugging;
 using Serilog.Events;
+using System.Linq.Expressions;
 
 namespace Serilog.Settings.Configuration
 {
@@ -33,7 +34,18 @@ namespace Serilog.Settings.Configuration
 
             ApplyMinimumLevel(loggerConfiguration);
             ApplyEnrichment(loggerConfiguration, configurationAssemblies);
+            ApplyFilters(loggerConfiguration, configurationAssemblies);
             ApplySinks(loggerConfiguration, configurationAssemblies);
+        }
+
+        void ApplyFilters(LoggerConfiguration loggerConfiguration, Assembly[] configurationAssemblies)
+        {
+            var filterDirective = _configuration.GetSection("Filter");
+            if (filterDirective != null)
+            {
+                var methodCalls = GetMethodCalls(filterDirective);
+                CallConfigurationMethods(methodCalls, FindFilterConfigurationMethods(configurationAssemblies), loggerConfiguration.Filter);
+            }
         }
 
         void ApplySinks(LoggerConfiguration loggerConfiguration, Assembly[] configurationAssemblies)
@@ -273,21 +285,20 @@ namespace Serilog.Settings.Configuration
             return FindConfigurationMethods(configurationAssemblies, typeof(LoggerSinkConfiguration));
         }
 
-        // Unlike the other configuration methods, FromLogContext is an instance method rather than an extension.
-        internal static LoggerConfiguration FromLogContext(LoggerEnrichmentConfiguration loggerEnrichmentConfiguration)
+        internal static IList<MethodInfo> FindFilterConfigurationMethods(IEnumerable<Assembly> configurationAssemblies)
         {
-            return loggerEnrichmentConfiguration.FromLogContext();
-        }
+            var found = FindConfigurationMethods(configurationAssemblies, typeof(LoggerFilterConfiguration));
+            if (configurationAssemblies.Contains(typeof(LoggerFilterConfiguration).GetTypeInfo().Assembly))
+                found.Add(GetSurrogateConfigurationMethod<LoggerFilterConfiguration, ILogEventFilter>((c, f) => With(c, f)));
 
-        static readonly MethodInfo SurrogateFromLogContextConfigurationMethod = typeof(ConfigurationReader)
-            .GetTypeInfo()
-            .DeclaredMethods.Single(m => m.Name == "FromLogContext");
+            return found;
+        }
 
         internal static IList<MethodInfo> FindEventEnricherConfigurationMethods(IEnumerable<Assembly> configurationAssemblies)
         {
             var found = FindConfigurationMethods(configurationAssemblies, typeof(LoggerEnrichmentConfiguration));
             if (configurationAssemblies.Contains(typeof(LoggerEnrichmentConfiguration).GetTypeInfo().Assembly))
-                found.Add(SurrogateFromLogContextConfigurationMethod);
+                found.Add(GetSurrogateConfigurationMethod<LoggerEnrichmentConfiguration, object>((c, _) => FromLogContext(c)));
 
             return found;
         }
@@ -302,6 +313,23 @@ namespace Serilog.Settings.Configuration
                 .Where(m => m.IsStatic && m.IsPublic && m.IsDefined(typeof(ExtensionAttribute), false))
                 .Where(m => m.GetParameters()[0].ParameterType == configType)
                 .ToList();
+        }
+
+        // don't support (yet?) arrays in the parameter list (ILogEventEnricher[])
+        internal static LoggerConfiguration With(LoggerFilterConfiguration loggerFilterConfiguration, ILogEventFilter filter)
+        {
+            return loggerFilterConfiguration.With(filter);
+        }
+
+        // Unlike the other configuration methods, FromLogContext is an instance method rather than an extension.
+        internal static LoggerConfiguration FromLogContext(LoggerEnrichmentConfiguration loggerEnrichmentConfiguration)
+        {
+            return loggerEnrichmentConfiguration.FromLogContext();
+        }
+
+        internal static MethodInfo GetSurrogateConfigurationMethod<TConfiguration, TArg>(Expression<Action<TConfiguration, TArg>> method)
+        {
+            return (method.Body as MethodCallExpression)?.Method;
         }
     }
 }

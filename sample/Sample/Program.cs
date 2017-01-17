@@ -5,6 +5,7 @@ using Serilog;
 using System.IO;
 
 using Serilog.Core;
+using Serilog.Events;
 
 namespace Sample
 {
@@ -30,6 +31,14 @@ namespace Sample
                 Console.WriteLine();
             }
             while (Console.ReadKey().KeyChar != 'q');
+        }
+    }
+
+    public class CustomFilter : ILogEventFilter
+    {
+        public bool IsEnabled(LogEvent logEvent)
+        {
+            return true;
         }
     }
 }
