@@ -168,8 +168,7 @@ namespace Serilog.Settings.Configuration
 
             foreach (var assemblyName in GetSerilogConfigurationAssemblies())
             {
-                var assumedName = new AssemblyName(assemblyName);
-                var assumed = Assembly.Load(assumedName);
+                var assumed = Assembly.Load(assemblyName);
                 if (assumed != null && !assemblies.ContainsKey(assumed.FullName))
                     assemblies.Add(assumed.FullName, assumed);
             }
@@ -177,14 +176,17 @@ namespace Serilog.Settings.Configuration
             return assemblies.Values.ToArray();
         }
 
-        string[] GetSerilogConfigurationAssemblies()
+        AssemblyName[] GetSerilogConfigurationAssemblies()
         {
-            var query = Enumerable.Empty<string>();
+            var query = Enumerable.Empty<AssemblyName>();
             var filter = new Func<string, bool>(name => name != null && name.ToLowerInvariant().Contains("serilog"));
 
             if (_dependencyContext != null)
             {
-                query = from lib in _dependencyContext.RuntimeLibraries where filter(lib.Name) select lib.Name;
+                query = from library in _dependencyContext.RuntimeLibraries
+                        from assemblyName in library.GetDefaultAssemblyNames(_dependencyContext)
+                        where filter(assemblyName.Name)
+                        select assemblyName;
             }
             else
             {
@@ -192,7 +194,7 @@ namespace Serilog.Settings.Configuration
                 query = from outputAssemblyPath in System.IO.Directory.GetFiles(AppDomain.CurrentDomain.BaseDirectory, "*.dll")
                         let assemblyFileName = System.IO.Path.GetFileNameWithoutExtension(outputAssemblyPath)
                         where filter(assemblyFileName)
-                        select AssemblyName.GetAssemblyName(outputAssemblyPath).FullName;
+                        select AssemblyName.GetAssemblyName(outputAssemblyPath);
 #endif
             }
 
