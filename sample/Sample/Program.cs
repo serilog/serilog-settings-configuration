@@ -16,6 +16,7 @@ namespace Sample
             var configuration = new ConfigurationBuilder()
                 .SetBasePath(Directory.GetCurrentDirectory())
                 .AddJsonFile(path: "appsettings.json", optional: false, reloadOnChange: true)
+                .AddEnvironmentVariables()
                 .Build();
 
             var logger = new LoggerConfiguration()

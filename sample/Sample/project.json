@@ -5,9 +5,15 @@
 
   "dependencies": {
     "Microsoft.Extensions.Configuration.Json": "1.0.0",
+    "Microsoft.Extensions.Configuration.Ini": "1.0.0",
+    "Microsoft.Extensions.Configuration.Xml": "1.0.0",
+    "Microsoft.Extensions.Configuration.EnvironmentVariables": "1.0.0",
+
     "Serilog.Settings.Configuration": {"target": "project"},
+    
     "Serilog.Sinks.Literate": "2.0.0",
     "Serilog.Sinks.RollingFile":  "3.0.0",
+    
     "Serilog.Enrichers.Environment": "2.0.0",
     "Serilog.Enrichers.Thread": "2.0.0",
     "Serilog.Filters.Expressions": "1.0.0-*"

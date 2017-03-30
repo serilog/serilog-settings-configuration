@@ -20,6 +20,7 @@ Configuration is read from the `Serilog` section.
   }
 }
 ```
+(more advanced configurations including `xml` and `ini` you can find [here](sample/Sample))
 
 This example relies on the _Serilog.Sinks.Literate_, _Serilog.Sinks.File_, _Serilog.Enrichers.Environment_ and _Serilog.Enrichers.Thread_ packages also being installed.
 

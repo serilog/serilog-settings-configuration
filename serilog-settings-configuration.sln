@@ -1,16 +1,17 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 14
-VisualStudioVersion = 14.0.24720.0
+VisualStudioVersion = 14.0.25420.1
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{4E41FD57-5FAB-4E3C-B16E-463DE98338BC}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{62D0B904-1D11-4962-A4A8-DE28672AA28B}"
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "assets", "assets", "{62D0B904-1D11-4962-A4A8-DE28672AA28B}"
 	ProjectSection(SolutionItems) = preProject
 		appveyor.yml = appveyor.yml
 		Build.ps1 = Build.ps1
 		global.json = global.json
 		LICENSE = LICENSE
+		NuGet.config = NuGet.config
 		README.md = README.md
 	EndProjectSection
 EndProject

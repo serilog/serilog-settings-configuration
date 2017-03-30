@@ -1,0 +1,10 @@
+{
+  "profiles": {
+    "Sample": {
+      "commandName": "Project",
+      "environmentVariables": {
+        "Serilog__WriteTo__File1__Args__path": "%TEMP%\\Logs\\serilog-configuration-sample-42.txt"
+      }
+    }
+  }
+}
