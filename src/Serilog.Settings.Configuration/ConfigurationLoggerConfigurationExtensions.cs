@@ -17,6 +17,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyModel;
 using Serilog.Configuration;
 using Serilog.Settings.Configuration;
+using System.Reflection;
 
 namespace Serilog
 {
@@ -59,8 +60,11 @@ namespace Serilog
         {
             if (settingConfiguration == null) throw new ArgumentNullException(nameof(settingConfiguration));
             if (configuration == null) throw new ArgumentNullException(nameof(configuration));
-
-            return settingConfiguration.Settings(new ConfigurationReader(configuration, dependencyContext ?? DependencyContext.Default));
+            
+            return settingConfiguration.Settings(
+                new ConfigurationReader(
+                    configuration,
+                    dependencyContext ?? (Assembly.GetEntryAssembly() != null ? DependencyContext.Default : null)));
         }
     }
 }
