@@ -33,7 +33,7 @@ namespace Serilog.Settings.Configuration
                 return new Action<LoggerConfiguration>(_configReader.Configure);
             }
 
-            throw new Exception($"Handling {configurationType} is not implemented.");
+            throw new ArgumentException($"Handling {configurationType} is not implemented.");
         }
     }
 }
