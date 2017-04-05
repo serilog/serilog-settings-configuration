@@ -1,28 +1,28 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 14
-VisualStudioVersion = 14.0.24720.0
+# Visual Studio 15
+VisualStudioVersion = 15.0.26228.10
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{4E41FD57-5FAB-4E3C-B16E-463DE98338BC}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{62D0B904-1D11-4962-A4A8-DE28672AA28B}"
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "assets", "assets", "{62D0B904-1D11-4962-A4A8-DE28672AA28B}"
 	ProjectSection(SolutionItems) = preProject
 		appveyor.yml = appveyor.yml
 		Build.ps1 = Build.ps1
-		global.json = global.json
+		CHANGES.md = CHANGES.md
 		LICENSE = LICENSE
 		README.md = README.md
 	EndProjectSection
 EndProject
-Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "Serilog.Settings.Configuration", "src\Serilog.Settings.Configuration\Serilog.Settings.Configuration.xproj", "{21FF98ED-E68C-4A67-B241-C8D6122FAD7D}"
-EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "test", "test", "{D551DCB0-7771-4D01-BEBD-F7B57D1CF0E3}"
-EndProject
-Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "Serilog.Settings.Configuration.Tests", "test\Serilog.Settings.Configuration.Tests\Serilog.Settings.Configuration.Tests.xproj", "{F793C6E8-C40A-4018-8884-C97E2BE38A54}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "sample", "sample", "{D24872B9-57F3-42A7-BC8D-F9DA222FCE1B}"
 EndProject
-Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "Sample", "sample\Sample\Sample.xproj", "{A00E5E32-54F9-401A-BBA1-2F6FCB6366CD}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Serilog.Settings.Configuration", "src\Serilog.Settings.Configuration\Serilog.Settings.Configuration.csproj", "{21FF98ED-E68C-4A67-B241-C8D6122FAD7D}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Serilog.Settings.Configuration.Tests", "test\Serilog.Settings.Configuration.Tests\Serilog.Settings.Configuration.Tests.csproj", "{F793C6E8-C40A-4018-8884-C97E2BE38A54}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Sample", "sample\Sample\Sample.csproj", "{A00E5E32-54F9-401A-BBA1-2F6FCB6366CD}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
