@@ -1,7 +1,5 @@
 ﻿using System.Collections.Generic;
-using Serilog.Settings.Configuration;
 using Serilog.Formatting;
-using Serilog.Formatting.Json;
 using Xunit;
 using System.Reflection;
 using System.Linq;
@@ -11,20 +9,13 @@ namespace Serilog.Settings.Configuration.Tests
     public class ConfigurationReaderTests
     {
         [Fact]
-        public void StringValuesConvertToDefaultInstancesIfTargetIsInterface()
-        {
-            var result = ConfigurationReader.ConvertToType("Serilog.Formatting.Json.JsonFormatter, Serilog", typeof(ITextFormatter));
-            Assert.IsType<JsonFormatter>(result);
-        }
-
-        [Fact]
         public void CallableMethodsAreSelected()
         {
             var options = typeof(DummyLoggerConfigurationExtensions).GetTypeInfo().DeclaredMethods.ToList();
             Assert.Equal(2, options.Count(mi => mi.Name == "DummyRollingFile"));
-            var suppliedArguments = new Dictionary<string, string>
+            var suppliedArguments = new Dictionary<string, IConfigurationArgumentValue>
             {
-                {"pathFormat", "C:\\" }
+                {"pathFormat", new StringArgumentValue(() => "C:\\") }
             };
 
             var selected = ConfigurationReader.SelectConfigurationMethod(options, "DummyRollingFile", suppliedArguments);
@@ -36,10 +27,10 @@ namespace Serilog.Settings.Configuration.Tests
         {
             var options = typeof(DummyLoggerConfigurationExtensions).GetTypeInfo().DeclaredMethods.ToList();
             Assert.Equal(2, options.Count(mi => mi.Name == "DummyRollingFile"));
-            var suppliedArguments = new Dictionary<string, string>()
+            var suppliedArguments = new Dictionary<string, IConfigurationArgumentValue>()
             {
-                { "pathFormat", "C:\\" },
-                { "formatter", "SomeFormatter, SomeAssembly" }
+                { "pathFormat", new StringArgumentValue(() => "C:\\") },
+                { "formatter", new StringArgumentValue(() => "SomeFormatter, SomeAssembly") }
             };
 
             var selected = ConfigurationReader.SelectConfigurationMethod(options, "DummyRollingFile", suppliedArguments);
