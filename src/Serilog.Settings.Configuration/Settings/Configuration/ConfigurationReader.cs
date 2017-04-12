@@ -123,46 +123,51 @@ namespace Serilog.Settings.Configuration
             }
         }
 
-        Dictionary<string, Dictionary<string, IConfigurationArgumentValue>> GetMethodCalls(IConfigurationSection directive)
+        internal ILookup<string, Dictionary<string, IConfigurationArgumentValue>> GetMethodCalls(IConfigurationSection directive)
         {
-            var result = new Dictionary<string, Dictionary<string, IConfigurationArgumentValue>>();
-            foreach (var child in directive.GetChildren())
+            var children = directive.GetChildren();
+
+            var result =
+                (from child in children
+                 where child.Value != null // Plain string
+                 select new { Name = child.Value, Args = new Dictionary<string, IConfigurationArgumentValue>() })
+                     .Concat(
+                (from child in children
+                 where child.Value == null
+                 let name = GetSectionName(child)
+                 let callArgs = (from argument in child.GetSection("Args").GetChildren()
+                                 select new {
+                                     Name = argument.Key,
+                                     Value = GetArgumentValue(argument) }).ToDictionary(p => p.Name, p => p.Value)
+                 select new { Name = name, Args = callArgs }))
+                     .ToLookup(p => p.Name, p => p.Args);
+
+            return result;
+
+            IConfigurationArgumentValue GetArgumentValue(IConfigurationSection argumentSection)
             {
-                if (child.Value != null)
+                IConfigurationArgumentValue argumentValue;
+                if (argumentSection.Value != null)
                 {
-                    // Plain string
-                    result.Add(child.Value, new Dictionary<string, IConfigurationArgumentValue>());
+                    argumentValue = new StringArgumentValue(() => argumentSection.Value, argumentSection.GetReloadToken);
                 }
                 else
                 {
-                    var name = child.GetSection("Name");
-                    if (name.Value == null)
-                        throw new InvalidOperationException($"The configuration value in {name.Path} has no Name element.");
-
-                    var callArgs = new Dictionary<string, IConfigurationArgumentValue>();
-                    var args = child.GetSection("Args");
-                    if (args != null)
-                    {
-                        foreach (var argument in args.GetChildren())
-                        {
-                            IConfigurationArgumentValue argumentValue;
-                            if (argument.Value != null)
-                            {
-                                argumentValue = new StringArgumentValue(() => argument.Value, argument.GetReloadToken);
-                            }
-                            else
-                            {
-                                argumentValue = new ConfigurationSectionArgumentValue(new ConfigurationReader(argument, _configurationAssemblies, _dependencyContext));
-                            }
-
-                            callArgs.Add(argument.Key, argumentValue);
-                        }
-                    }
-                    result.Add(name.Value, callArgs);
+                    argumentValue = new ConfigurationSectionArgumentValue(new ConfigurationReader(argumentSection, _configurationAssemblies, _dependencyContext));
                 }
+
+                return argumentValue;
             }
-            return result;
-        }        
+
+            string GetSectionName(IConfigurationSection s)
+            {
+                var name = s.GetSection("Name");
+                if (name.Value == null)
+                    throw new InvalidOperationException($"The configuration value in {name.Path} has no 'Name' element.");
+
+                return name.Value;
+            }
+        }
 
         Assembly[] LoadConfigurationAssemblies()
         {
@@ -178,7 +183,8 @@ namespace Serilog.Settings.Configuration
                             "A zero-length or whitespace assembly name was supplied to a Serilog.Using configuration statement.");
 
                     var assembly = Assembly.Load(new AssemblyName(simpleName));
-                    assemblies.Add(assembly.FullName, assembly);
+                    if (!assemblies.ContainsKey(assembly.FullName))
+                        assemblies.Add(assembly.FullName, assembly);
                 }
             }
 
@@ -217,9 +223,9 @@ namespace Serilog.Settings.Configuration
             return query.ToArray();
         }
 
-        static void CallConfigurationMethods(Dictionary<string, Dictionary<string, IConfigurationArgumentValue>> methods, IList<MethodInfo> configurationMethods, object receiver)
+        static void CallConfigurationMethods(ILookup<string, Dictionary<string, IConfigurationArgumentValue>> methods, IList<MethodInfo> configurationMethods, object receiver)
         {
-            foreach (var method in methods)
+            foreach (var method in methods.SelectMany(g => g.Select(x => new { g.Key, Value = x })))
             {
                 var methodInfo = SelectConfigurationMethod(configurationMethods, method.Key, method.Value);
 
