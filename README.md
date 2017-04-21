@@ -49,7 +49,7 @@ The `WriteTo` and `Enrich` sections support the same syntax, for example the fol
 "WriteTo": ["LiterateConsole", "DiagnosticTrace"]
 ```
 
-Or alternatively, the long-form (`"Name":` ...) sytax from the first example can be used when arguments need to be supplied.
+Or alternatively, the long-form (`"Name":` ...) syntax from the first example can be used when arguments need to be supplied.
 
 (This package implements a convention using `DependencyContext` to find any package with `Serilog` anywhere in the name and pulls configuration methods from it, so the `Using` example above is redundant.)
 
