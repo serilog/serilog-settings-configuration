@@ -56,7 +56,7 @@ namespace Serilog.Settings.Configuration
 
             if (toTypeInfo.IsInterface && !string.IsNullOrWhiteSpace(argumentValue))
             {
-                var type = Type.GetType(argumentValue.Trim(), throwOnError: false);
+                var type = Type.GetType(argumentValue.Trim());
                 if (type != null)
                 {
                     var ctor = type.GetTypeInfo().DeclaredConstructors.FirstOrDefault(ci =>
