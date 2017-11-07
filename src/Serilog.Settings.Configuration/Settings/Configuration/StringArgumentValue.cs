@@ -54,7 +54,7 @@ namespace Serilog.Settings.Configuration
             if (convertor != null)
                 return convertor(argumentValue);
 
-            if (toTypeInfo.IsInterface && !string.IsNullOrWhiteSpace(argumentValue))
+            if ((toTypeInfo.IsInterface || toTypeInfo.IsAbstract) && !string.IsNullOrWhiteSpace(argumentValue))
             {
                 var type = Type.GetType(argumentValue.Trim());
                 if (type != null)
