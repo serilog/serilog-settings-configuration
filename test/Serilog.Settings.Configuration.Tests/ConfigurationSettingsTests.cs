@@ -66,27 +66,30 @@ namespace Serilog.Settings.Configuration.Tests
             Assert.Equal(0, DummyRollingFileAuditSink.Emitted.Count);
         }
 
-        //[Fact]
-        //public void AuditSinksAreConfigured()
-        //{
-        //    var settings = new Dictionary<string, string>
-        //    {
-        //        ["using:TestDummies"] = typeof(DummyLoggerConfigurationExtensions).GetTypeInfo().Assembly.FullName,
-        //        ["audit-to:DummyRollingFile.pathFormat"] = "C:\\"
-        //    };
+        [Fact]
+        public void AuditSinksAreConfigured()
+        {
+            var json = @"{
+                ""Serilog"": {            
+                    ""Using"": [""TestDummies""],
+                    ""AuditTo"": [{
+                        ""Name"": ""DummyRollingFile"",
+                        ""Args"": {""pathFormat"" : ""C:\\""}
+                    }]        
+                }
+            }";
 
-        //    var log = new LoggerConfiguration()
-        //        .ReadFrom.KeyValuePairs(settings)
-        //        .CreateLogger();
+            var log = ConfigFromJson(json)
+                .CreateLogger();
+            
+            DummyRollingFileSink.Emitted.Clear();
+            DummyRollingFileAuditSink.Emitted.Clear();
 
-        //    DummyRollingFileSink.Emitted.Clear();
-        //    DummyRollingFileAuditSink.Emitted.Clear();
+            log.Write(Some.InformationEvent());
 
-        //    log.Write(Some.InformationEvent());
-
-        //    Assert.Equal(0, DummyRollingFileSink.Emitted.Count);
-        //    Assert.Equal(1, DummyRollingFileAuditSink.Emitted.Count);
-        //}
+            Assert.Equal(0, DummyRollingFileSink.Emitted.Count);
+            Assert.Equal(1, DummyRollingFileAuditSink.Emitted.Count);
+        }
 
         [Fact]
         public void TestMinimumLevelOverrides()
