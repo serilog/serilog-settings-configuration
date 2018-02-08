@@ -19,6 +19,7 @@
     
     <!-- Don't reference the full NETStandard.Library -->
     <DisableImplicitFrameworkReferences>true</DisableImplicitFrameworkReferences>
+    <RootNamespace>Serilog</RootNamespace>
   </PropertyGroup>
 
   <ItemGroup>
