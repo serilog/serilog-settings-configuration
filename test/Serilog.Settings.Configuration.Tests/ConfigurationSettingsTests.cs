@@ -40,6 +40,37 @@ namespace Serilog.Settings.Configuration.Tests
             Assert.Equal("Test", evt.Properties["App"].LiteralValue());
         }
 
+        [Theory]
+        [InlineData("extended syntax",
+            @"{
+                ""Serilog"": {            
+                    ""Using"": [""TestDummies""],
+                    ""WriteTo"": [
+                        { ""Name"": ""DummyConsole""},
+                        { ""Name"": ""DummyWithLevelSwitch""},
+                    ]        
+                }
+            }")]
+        [InlineData("simplified syntax",
+            @"{
+                ""Serilog"": {            
+                    ""Using"": [""TestDummies""],
+                    ""WriteTo"": [""DummyConsole"", ""DummyWithLevelSwitch"" ]        
+                }
+            }")]
+        public void ParameterlessSinksAreConfigured(string syntax, string json)
+        {
+            var log = ConfigFromJson(json)
+                .CreateLogger();
+
+            DummyConsoleSink.Emitted.Clear();
+            DummyWithLevelSwitchSink.Emitted.Clear();
+
+            log.Write(Some.InformationEvent());
+
+            Assert.Equal(1, DummyConsoleSink.Emitted.Count);
+            Assert.Equal(1, DummyWithLevelSwitchSink.Emitted.Count);
+        }
 
         [Fact]
         public void SinksAreConfigured()
