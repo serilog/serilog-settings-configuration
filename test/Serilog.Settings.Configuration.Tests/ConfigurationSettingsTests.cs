@@ -4,6 +4,7 @@ using Serilog.Events;
 using Serilog.Settings.Configuration.Tests.Support;
 using TestDummies;
 using TestDummies.Console;
+using TestDummies.Console.Themes;
 using Xunit;
 
 namespace Serilog.Settings.Configuration.Tests
@@ -176,25 +177,25 @@ namespace Serilog.Settings.Configuration.Tests
             Assert.IsType<CustomConsoleTheme>(DummyConsoleSink.Theme);
         }
 
-        //[Fact]
-        //public void SinksAreConfiguredWithStaticMember()
-        //{
-        //    var json = @"{
-        //        ""Serilog"": {            
-        //            ""Using"": [""TestDummies""],
-        //            ""WriteTo"": [{
-        //                ""Name"": ""DummyConsole"",
-        //                ""Args"": {""theme"" : ""TestDummies.Console.Themes.ConsoleThemes::Theme1, TestDummies""}
-        //            }]        
-        //        }
-        //    }";
+        [Fact]
+        public void SinksAreConfiguredWithStaticMember()
+        {
+            var json = @"{
+                ""Serilog"": {            
+                    ""Using"": [""TestDummies""],
+                    ""WriteTo"": [{
+                        ""Name"": ""DummyConsole"",
+                        ""Args"": {""theme"" : ""TestDummies.Console.Themes.ConsoleThemes::Theme1, TestDummies""}
+                    }]        
+                }
+            }";
 
-        //    DummyConsoleSink.Theme = null;
+            DummyConsoleSink.Theme = null;
 
-        //    ConfigFromJson(json)
-        //        .CreateLogger();
+            ConfigFromJson(json)
+                .CreateLogger();
 
-        //    Assert.Equal(ConsoleThemes.Theme1, DummyConsoleSink.Theme);
-        //}
+            Assert.Equal(ConsoleThemes.Theme1, DummyConsoleSink.Theme);
+        }
     }
 }
