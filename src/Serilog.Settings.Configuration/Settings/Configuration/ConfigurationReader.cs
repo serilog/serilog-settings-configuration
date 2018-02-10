@@ -41,6 +41,7 @@ namespace Serilog.Settings.Configuration
             ApplyEnrichment(loggerConfiguration);
             ApplyFilters(loggerConfiguration);
             ApplySinks(loggerConfiguration);
+            ApplyAuditSinks(loggerConfiguration);
         }        
 
         void ApplyMinimumLevel(LoggerConfiguration loggerConfiguration)
@@ -95,6 +96,16 @@ namespace Serilog.Settings.Configuration
             {
                 var methodCalls = GetMethodCalls(writeToDirective);
                 CallConfigurationMethods(methodCalls, FindSinkConfigurationMethods(_configurationAssemblies), loggerConfiguration.WriteTo);
+            }
+        }
+
+        void ApplyAuditSinks(LoggerConfiguration loggerConfiguration)
+        {
+            var auditToDirective = _configuration.GetSection("AuditTo");
+            if (auditToDirective != null)
+            {
+                var methodCalls = GetMethodCalls(auditToDirective);
+                CallConfigurationMethods(methodCalls, FindAuditSinkConfigurationMethods(_configurationAssemblies), loggerConfiguration.AuditTo);
             }
         }
 
@@ -256,6 +267,13 @@ namespace Serilog.Settings.Configuration
             var found = FindConfigurationMethods(configurationAssemblies, typeof(LoggerSinkConfiguration));
             if (configurationAssemblies.Contains(typeof(LoggerSinkConfiguration).GetTypeInfo().Assembly))
                 found.Add(GetSurrogateConfigurationMethod<LoggerSinkConfiguration, Action<LoggerConfiguration>, LoggingLevelSwitch>((c, a, s) => Logger(c, a, s)));
+
+            return found;
+        }
+
+        internal static IList<MethodInfo> FindAuditSinkConfigurationMethods(IEnumerable<Assembly> configurationAssemblies)
+        {
+            var found = FindConfigurationMethods(configurationAssemblies, typeof(LoggerAuditSinkConfiguration));
 
             return found;
         }
