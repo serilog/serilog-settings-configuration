@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <Description>Microsoft.Extensions.Configuration (appsettings.json) support for Serilog.</Description>
-    <VersionPrefix>2.4.1</VersionPrefix>
+    <VersionPrefix>2.5.1</VersionPrefix>
     <Authors>Serilog Contributors</Authors>
     <TargetFrameworks>net451;netstandard1.6</TargetFrameworks>
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
@@ -20,7 +20,6 @@
     <!-- Don't reference the full NETStandard.Library -->
     <DisableImplicitFrameworkReferences>true</DisableImplicitFrameworkReferences>
     <RootNamespace>Serilog</RootNamespace>
-    <Version>2.5.0</Version>
   </PropertyGroup>
 
   <ItemGroup>
