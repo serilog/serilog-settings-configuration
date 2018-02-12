@@ -1,9 +1,11 @@
-﻿using Serilog.Configuration;
+﻿using System.Collections.Generic;
+using Serilog.Configuration;
+using Serilog.Core;
 
 namespace Serilog.Settings.Configuration
 {
     interface IConfigurationReader : ILoggerSettings
     {
-        void ApplySinks(LoggerSinkConfiguration loggerSinkConfiguration);
+        void ApplySinks(LoggerSinkConfiguration loggerSinkConfiguration, IReadOnlyDictionary<string, LoggingLevelSwitch> declaredLevelSwitches);
     }
 }

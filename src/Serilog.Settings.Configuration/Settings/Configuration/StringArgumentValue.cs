@@ -30,9 +30,14 @@ namespace Serilog.Settings.Configuration
                 { typeof(TimeSpan), s => TimeSpan.Parse(s) }
             };
 
-        public object ConvertTo(Type toType)
+        public object ConvertTo(Type toType, IReadOnlyDictionary<string, LoggingLevelSwitch> declaredLevelSwitches)
         {
             var argumentValue = Environment.ExpandEnvironmentVariables(_valueProducer());
+
+            if (toType == typeof(LoggingLevelSwitch))
+            {
+                return declaredLevelSwitches.LookUpSwitchByName(argumentValue);
+            }
 
             var toTypeInfo = toType.GetTypeInfo();
             if (toTypeInfo.IsGenericType && toType.GetGenericTypeDefinition() == typeof(Nullable<>))
