@@ -22,7 +22,7 @@ namespace Serilog.Settings.Configuration
 
         readonly IConfigurationSection _configuration;
         readonly DependencyContext _dependencyContext;
-        readonly Assembly[] _configurationAssemblies;
+        readonly IReadOnlyCollection<Assembly> _configurationAssemblies;
 
         public ConfigurationReader(IConfigurationSection configuration, DependencyContext dependencyContext)
         {
@@ -31,7 +31,7 @@ namespace Serilog.Settings.Configuration
             _configurationAssemblies = LoadConfigurationAssemblies();
         }
 
-        ConfigurationReader(IConfigurationSection configuration, Assembly[] configurationAssemblies, DependencyContext dependencyContext)
+        ConfigurationReader(IConfigurationSection configuration, IReadOnlyCollection<Assembly> configurationAssemblies, DependencyContext dependencyContext)
         {
             _configuration = configuration ?? throw new ArgumentNullException(nameof(configuration));
             _dependencyContext = dependencyContext;
@@ -48,7 +48,7 @@ namespace Serilog.Settings.Configuration
             ApplyAuditSinks(loggerConfiguration, declaredLevelSwitches);
         }
 
-        private IReadOnlyDictionary<string, LoggingLevelSwitch> ProcessLevelSwitchDeclarations()
+        IReadOnlyDictionary<string, LoggingLevelSwitch> ProcessLevelSwitchDeclarations()
         {
             var levelSwitchesDirective = _configuration.GetSection("LevelSwitches");
             var namedSwitches = new Dictionary<string, LoggingLevelSwitch>();
@@ -198,7 +198,7 @@ namespace Serilog.Settings.Configuration
 
         internal ILookup<string, Dictionary<string, IConfigurationArgumentValue>> GetMethodCalls(IConfigurationSection directive)
         {
-            var children = directive.GetChildren();
+            var children = directive.GetChildren().ToList();
 
             var result =
                 (from child in children
@@ -242,7 +242,7 @@ namespace Serilog.Settings.Configuration
             }
         }
 
-        Assembly[] LoadConfigurationAssemblies()
+        IReadOnlyCollection<Assembly> LoadConfigurationAssemblies()
         {
             var assemblies = new Dictionary<string, Assembly>();
 
@@ -268,11 +268,12 @@ namespace Serilog.Settings.Configuration
                     assemblies.Add(assumed.FullName, assumed);
             }
 
-            return assemblies.Values.ToArray();
+            return assemblies.Values.ToList().AsReadOnly();
         }
 
         AssemblyName[] GetSerilogConfigurationAssemblies()
         {
+            // ReSharper disable once RedundantAssignment
             var query = Enumerable.Empty<AssemblyName>();
             var filter = new Func<string, bool>(name => name != null && name.ToLowerInvariant().Contains("serilog"));
 
@@ -324,7 +325,7 @@ namespace Serilog.Settings.Configuration
                 .FirstOrDefault();
         }
 
-        internal static IList<MethodInfo> FindSinkConfigurationMethods(IEnumerable<Assembly> configurationAssemblies)
+        internal static IList<MethodInfo> FindSinkConfigurationMethods(IReadOnlyCollection<Assembly> configurationAssemblies)
         {
             var found = FindConfigurationMethods(configurationAssemblies, typeof(LoggerSinkConfiguration));
             if (configurationAssemblies.Contains(typeof(LoggerSinkConfiguration).GetTypeInfo().Assembly))
@@ -333,14 +334,14 @@ namespace Serilog.Settings.Configuration
             return found;
         }
 
-        internal static IList<MethodInfo> FindAuditSinkConfigurationMethods(IEnumerable<Assembly> configurationAssemblies)
+        internal static IList<MethodInfo> FindAuditSinkConfigurationMethods(IReadOnlyCollection<Assembly> configurationAssemblies)
         {
             var found = FindConfigurationMethods(configurationAssemblies, typeof(LoggerAuditSinkConfiguration));
 
             return found;
         }
 
-        internal static IList<MethodInfo> FindFilterConfigurationMethods(IEnumerable<Assembly> configurationAssemblies)
+        internal static IList<MethodInfo> FindFilterConfigurationMethods(IReadOnlyCollection<Assembly> configurationAssemblies)
         {
             var found = FindConfigurationMethods(configurationAssemblies, typeof(LoggerFilterConfiguration));
             if (configurationAssemblies.Contains(typeof(LoggerFilterConfiguration).GetTypeInfo().Assembly))
@@ -349,7 +350,7 @@ namespace Serilog.Settings.Configuration
             return found;
         }
 
-        internal static IList<MethodInfo> FindEventEnricherConfigurationMethods(IEnumerable<Assembly> configurationAssemblies)
+        internal static IList<MethodInfo> FindEventEnricherConfigurationMethods(IReadOnlyCollection<Assembly> configurationAssemblies)
         {
             var found = FindConfigurationMethods(configurationAssemblies, typeof(LoggerEnrichmentConfiguration));
             if (configurationAssemblies.Contains(typeof(LoggerEnrichmentConfiguration).GetTypeInfo().Assembly))
@@ -358,7 +359,7 @@ namespace Serilog.Settings.Configuration
             return found;
         }
 
-        internal static IList<MethodInfo> FindConfigurationMethods(IEnumerable<Assembly> configurationAssemblies, Type configType)
+        internal static IList<MethodInfo> FindConfigurationMethods(IReadOnlyCollection<Assembly> configurationAssemblies, Type configType)
         {
             return configurationAssemblies
                 .SelectMany(a => a.ExportedTypes

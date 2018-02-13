@@ -16,7 +16,7 @@ namespace Serilog.Settings.Configuration
         readonly Func<string> _valueProducer;
         readonly Func<IChangeToken> _changeTokenProducer;
 
-        private static readonly Regex StaticMemberAccessorRegex = new Regex("^(?<shortTypeName>[^:]+)::(?<memberName>[A-Za-z][A-Za-z0-9]*)(?<typeNameExtraQualifiers>[^:]*)$");
+        static readonly Regex StaticMemberAccessorRegex = new Regex("^(?<shortTypeName>[^:]+)::(?<memberName>[A-Za-z][A-Za-z0-9]*)(?<typeNameExtraQualifiers>[^:]*)$");
 
         public StringArgumentValue(Func<string> valueProducer, Func<IChangeToken> changeTokenProducer = null)
         {

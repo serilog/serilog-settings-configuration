@@ -71,7 +71,7 @@ namespace Serilog.Settings.Configuration.Tests
 
             Assert.Equal(1, result["LiterateConsole"].Count());
 
-            var args = result["LiterateConsole"].Single().Cast<KeyValuePair<string, IConfigurationArgumentValue>>().ToArray();
+            var args = result["LiterateConsole"].Single().ToArray();
 
             Assert.Equal(1, args.Length);
             Assert.Equal("outputTemplate", args[0].Key);

@@ -12,7 +12,7 @@ namespace Serilog.Settings.Configuration.Tests
 {
     public class ConfigurationSettingsTests
     {
-        private static LoggerConfiguration ConfigFromJson(string jsonString)
+        static LoggerConfiguration ConfigFromJson(string jsonString)
         {
             var config = new ConfigurationBuilder().AddJsonString(jsonString).Build();
             return new LoggerConfiguration()
