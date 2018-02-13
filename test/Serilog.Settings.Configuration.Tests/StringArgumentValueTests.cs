@@ -1,4 +1,7 @@
 ﻿using System;
+using System.Collections.Generic;
+using Serilog.Core;
+using Serilog.Events;
 using Serilog.Formatting;
 using Serilog.Formatting.Json;
 
@@ -15,7 +18,7 @@ namespace Serilog.Settings.Configuration.Tests
         {
             var stringArgumentValue = new StringArgumentValue(() => "Serilog.Formatting.Json.JsonFormatter, Serilog");
 
-            var result = stringArgumentValue.ConvertTo(typeof(ITextFormatter));
+            var result = stringArgumentValue.ConvertTo(typeof(ITextFormatter), new Dictionary<string, LoggingLevelSwitch>());
 
             Assert.IsType<JsonFormatter>(result);
         }
@@ -25,7 +28,7 @@ namespace Serilog.Settings.Configuration.Tests
         {
             var stringArgumentValue = new StringArgumentValue(() => "Serilog.Settings.Configuration.Tests.Support.ConcreteClass, Serilog.Settings.Configuration.Tests");
 
-            var result = stringArgumentValue.ConvertTo(typeof(AbstractClass));
+            var result = stringArgumentValue.ConvertTo(typeof(AbstractClass), new Dictionary<string, LoggingLevelSwitch>());
 
             Assert.IsType<ConcreteClass>(result);
         }
@@ -81,7 +84,7 @@ namespace Serilog.Settings.Configuration.Tests
         {
             var stringArgumentValue = new StringArgumentValue(() => $"{input}");
 
-            var actual = stringArgumentValue.ConvertTo(targetType);
+            var actual = stringArgumentValue.ConvertTo(targetType, new Dictionary<string, LoggingLevelSwitch>());
 
             Assert.IsAssignableFrom(targetType, actual);
             Assert.Equal(ConcreteImpl.Instance, actual);
@@ -98,7 +101,7 @@ namespace Serilog.Settings.Configuration.Tests
         {
             var stringArgumentValue = new StringArgumentValue(() => $"{input}");
             Assert.Throws<TypeLoadException>(() =>
-                stringArgumentValue.ConvertTo(targetType)
+                stringArgumentValue.ConvertTo(targetType, new Dictionary<string, LoggingLevelSwitch>())
             );
         }
 
@@ -117,11 +120,48 @@ namespace Serilog.Settings.Configuration.Tests
         {
             var stringArgumentValue = new StringArgumentValue(() => $"{input}");
             var exception = Assert.Throws<InvalidOperationException>(() =>
-                stringArgumentValue.ConvertTo(targetType)
+                stringArgumentValue.ConvertTo(targetType, new Dictionary<string, LoggingLevelSwitch>())
             );
 
             Assert.Contains("Could not find a public static property or field ", exception.Message);
             Assert.Contains("on type `Serilog.Settings.Configuration.Tests.Support.ClassWithStaticAccessors, Serilog.Settings.Configuration.Tests`", exception.Message);
+        }
+
+        [Fact]
+        public void LevelSwitchesCanBeLookedUpByName()
+        {
+            var @switch = new LoggingLevelSwitch(LogEventLevel.Verbose);
+            var switchName = "$theSwitch";
+            var declaredSwitches = new Dictionary<string, LoggingLevelSwitch>()
+            {
+                {switchName, @switch }
+            };
+
+            var stringArgumentValue = new StringArgumentValue(() => switchName);
+
+            var resolvedSwitch = stringArgumentValue.ConvertTo(typeof(LoggingLevelSwitch), declaredSwitches);
+
+            Assert.IsType<LoggingLevelSwitch>(resolvedSwitch);
+            Assert.Same(@switch, resolvedSwitch);
+        }
+
+
+        [Fact]
+        public void ReferencingUndeclaredLevelSwitchThrows()
+        {
+            var declaredSwitches = new Dictionary<string, LoggingLevelSwitch>()
+            {
+                {"$anotherSwitch", new LoggingLevelSwitch(LogEventLevel.Verbose) }
+            };
+
+            var stringArgumentValue = new StringArgumentValue(() => "$mySwitch");
+
+            var ex = Assert.Throws<InvalidOperationException>(() =>
+                stringArgumentValue.ConvertTo(typeof(LoggingLevelSwitch), declaredSwitches)
+            );
+
+            Assert.Contains("$mySwitch", ex.Message);
+            Assert.Contains("\"LevelSwitches\":{\"$mySwitch\":", ex.Message);
         }
     }
 }

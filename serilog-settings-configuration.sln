@@ -7,11 +7,13 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{4E41FD57-5FA
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "assets", "assets", "{62D0B904-1D11-4962-A4A8-DE28672AA28B}"
 	ProjectSection(SolutionItems) = preProject
+		.editorconfig = .editorconfig
 		appveyor.yml = appveyor.yml
 		Build.ps1 = Build.ps1
 		CHANGES.md = CHANGES.md
 		LICENSE = LICENSE
 		README.md = README.md
+		serilog-settings-configuration.sln.DotSettings = serilog-settings-configuration.sln.DotSettings
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "test", "test", "{D551DCB0-7771-4D01-BEBD-F7B57D1CF0E3}"
