@@ -21,7 +21,7 @@ Configuration is read from the `Serilog` section.
 }
 ```
 
-This example relies on the _Serilog.Sinks.Literate_, _Serilog.Sinks.File_, _Serilog.Enrichers.Environment_ and _Serilog.Enrichers.Thread_ packages also being installed.
+This example relies on the _Serilog.Sinks.Literate_, _Serilog.Sinks.File_, _Serilog.Enrichers.Environment_, _Serilog.Settings.Configuration_ and _Serilog.Enrichers.Thread_ packages also being installed.
 
 After installing this package, use `ReadFrom.Configuration()` and pass an `IConfiguration` object.
 
