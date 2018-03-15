@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <Description>Microsoft.Extensions.Configuration (appsettings.json) support for Serilog.</Description>
-    <VersionPrefix>2.6.0</VersionPrefix>
+    <VersionPrefix>2.6.1</VersionPrefix>
     <Authors>Serilog Contributors</Authors>
     <TargetFrameworks>net451;netstandard1.6</TargetFrameworks>
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
