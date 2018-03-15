@@ -329,7 +329,7 @@ namespace Serilog.Settings.Configuration
         {
             var found = FindConfigurationMethods(configurationAssemblies, typeof(LoggerSinkConfiguration));
             if (configurationAssemblies.Contains(typeof(LoggerSinkConfiguration).GetTypeInfo().Assembly))
-                found.Add(GetSurrogateConfigurationMethod<LoggerSinkConfiguration, Action<LoggerConfiguration>, LoggingLevelSwitch>((c, a, s) => Logger(c, a, s)));
+                found.Add(GetSurrogateConfigurationMethod<LoggerSinkConfiguration, Action<LoggerConfiguration>, LoggingLevelSwitch>((c, a, s) => Logger(c, a, LevelAlias.Minimum, s)));
 
             return found;
         }
@@ -380,8 +380,12 @@ namespace Serilog.Settings.Configuration
             => loggerEnrichmentConfiguration.FromLogContext();
 
         // Unlike the other configuration methods, Logger is an instance method rather than an extension.
-        internal static LoggerConfiguration Logger(LoggerSinkConfiguration loggerSinkConfiguration, Action<LoggerConfiguration> configureLogger, LoggingLevelSwitch restrictedToMinimumLevel = null)
-            => loggerSinkConfiguration.Logger(configureLogger, levelSwitch: restrictedToMinimumLevel);
+        internal static LoggerConfiguration Logger(
+            LoggerSinkConfiguration loggerSinkConfiguration,
+            Action<LoggerConfiguration> configureLogger,
+            LogEventLevel restrictedToMinimumLevel = LevelAlias.Minimum,
+            LoggingLevelSwitch levelSwitch = null)
+            => loggerSinkConfiguration.Logger(configureLogger, restrictedToMinimumLevel, levelSwitch);
 
         internal static MethodInfo GetSurrogateConfigurationMethod<TConfiguration, TArg1, TArg2>(Expression<Action<TConfiguration, TArg1, TArg2>> method)
             => (method.Body as MethodCallExpression)?.Method;
