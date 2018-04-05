@@ -3,7 +3,7 @@
 using Microsoft.Extensions.Configuration;
 using Serilog;
 using System.IO;
-
+using System.Linq;
 using Serilog.Core;
 using Serilog.Events;
 
@@ -22,6 +22,8 @@ namespace Sample
                 .ReadFrom.Configuration(configuration)
                 .CreateLogger();
 
+            logger.Information("Args: {a}", args);
+
             do
             {
                 logger.ForContext<Program>().Information("Hello, world!");
@@ -32,7 +34,7 @@ namespace Sample
 
                 Console.WriteLine();
             }
-            while (Console.ReadKey().KeyChar != 'q');
+            while (!args.Contains("--run-once") && (Console.ReadKey().KeyChar != 'q'));
         }
     }
 

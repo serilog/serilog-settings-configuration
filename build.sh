@@ -13,4 +13,5 @@ for path in test/*.Tests/*.csproj; do
 done
 
 cd sample/Sample/
-dotnet run -f netcoreapp2.0 -c Release 
+dotnet build -f netcoreapp2.0 -c Release 
+dotnet bin/Release/netcoreapp2.0/Sample.dll --run-once
