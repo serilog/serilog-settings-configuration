@@ -7,10 +7,10 @@ Configuration is read from the `Serilog` section.
 ```json
 {
   "Serilog": {
-    "Using":  ["Serilog.Sinks.Literate"],
+    "Using":  ["Serilog.Sinks.Console"],
     "MinimumLevel": "Debug",
     "WriteTo": [
-      { "Name": "LiterateConsole" },
+      { "Name": "Console" },
       { "Name": "File", "Args": { "path": "%TEMP%\\Logs\\serilog-configuration-sample.txt" } }
     ],
     "Enrich": ["FromLogContext", "WithMachineName", "WithThreadId"],
@@ -21,7 +21,7 @@ Configuration is read from the `Serilog` section.
 }
 ```
 
-This example relies on the _Serilog.Sinks.Literate_, _Serilog.Sinks.File_, _Serilog.Enrichers.Environment_, _Serilog.Settings.Configuration_ and _Serilog.Enrichers.Thread_ packages also being installed.
+This example relies on the _Serilog.Sinks.Console_, _Serilog.Sinks.File_, _Serilog.Enrichers.Environment_, _Serilog.Settings.Configuration_ and _Serilog.Enrichers.Thread_ packages also being installed.
 
 After installing this package, use `ReadFrom.Configuration()` and pass an `IConfiguration` object.
 
@@ -46,7 +46,7 @@ public class Program
 The `WriteTo` and `Enrich` sections support the same syntax, for example the following is valid if no arguments are needed by the sinks:
 
 ```json
-"WriteTo": ["LiterateConsole", "DiagnosticTrace"]
+"WriteTo": ["Console", "DiagnosticTrace"]
 ```
 
 Or alternatively, the long-form (`"Name":` ...) syntax from the first example can be used when arguments need to be supplied.
