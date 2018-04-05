@@ -390,5 +390,73 @@ namespace Serilog.Settings.Configuration.Tests
             Assert.False(evt is null, "LoggingLevelSwitch level was changed to Information for logger System.*. It should now log Information events for SourceContext System.Bar.");
             // ReSharper restore HeuristicUnreachableCode
         }
+
+
+        [Trait("Bugfix", "#91")]
+        [Fact]
+        public void WriteToLoggerWithRestrictedToMinimumLevelIsSupported()
+        {
+            var json = @"{
+            ""Serilog"": {            
+                ""Using"": [""TestDummies""],
+                ""WriteTo"": [{
+                    ""Name"": ""Logger"",
+                    ""Args"": {
+                        ""configureLogger"" : {
+                            ""WriteTo"": [{
+                                ""Name"": ""DummyRollingFile"",
+                                ""Args"": {""pathFormat"" : ""C:\\""}
+                            }]},
+                        ""restrictedToMinimumLevel"": ""Warning"" 
+                    }
+                }]        
+            }
+            }";
+
+            var log = ConfigFromJson(json)
+            .CreateLogger();
+
+            DummyRollingFileSink.Emitted.Clear();
+
+            log.Write(Some.InformationEvent());
+            log.Write(Some.WarningEvent());
+
+            Assert.Equal(1, DummyRollingFileSink.Emitted.Count);
+        }
+
+        [Trait("Bugfix", "#91")]
+        [Fact]
+        public void WriteToSubLoggerWithLevelSwitchIsSupported()
+        {
+            var json = @"{
+            ""Serilog"": {            
+                ""Using"": [""TestDummies""],
+                ""LevelSwitches"": {""$switch1"" : ""Warning"" },          
+                ""MinimumLevel"" : {
+                        ""ControlledBy"" : ""$switch1""
+                    },
+                ""WriteTo"": [{
+                    ""Name"": ""Logger"",
+                    ""Args"": {
+                        ""configureLogger"" : {
+                            ""WriteTo"": [{
+                                ""Name"": ""DummyRollingFile"",
+                                ""Args"": {""pathFormat"" : ""C:\\""}
+                            }]}
+                    }
+                }]        
+            }
+            }";            
+             
+            var log = ConfigFromJson(json)
+            .CreateLogger();
+
+            DummyRollingFileSink.Emitted.Clear();
+
+            log.Write(Some.InformationEvent());
+            log.Write(Some.WarningEvent());
+
+            Assert.Equal(1, DummyRollingFileSink.Emitted.Count);
+        }
     }
 }
