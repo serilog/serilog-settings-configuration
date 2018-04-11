@@ -5,7 +5,7 @@ dotnet --info
 dotnet restore
 
 for path in src/**/*.csproj; do
-    dotnet build -f netstandard1.6 -c Release ${path}
+    dotnet build -f netstandard2.0 -c Release ${path}
 done
 
 for path in test/*.Tests/*.csproj; do
