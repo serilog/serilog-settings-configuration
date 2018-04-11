@@ -286,12 +286,10 @@ namespace Serilog.Settings.Configuration
             }
             else
             {
-#if APPDOMAIN
                 query = from outputAssemblyPath in System.IO.Directory.GetFiles(AppDomain.CurrentDomain.BaseDirectory, "*.dll")
                         let assemblyFileName = System.IO.Path.GetFileNameWithoutExtension(outputAssemblyPath)
                         where filter(assemblyFileName)
                         select AssemblyName.GetAssemblyName(outputAssemblyPath);
-#endif
             }
 
             return query.ToArray();

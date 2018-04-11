@@ -32,8 +32,4 @@
     <PackageReference Include="Microsoft.Extensions.Configuration.Abstractions" Version="2.0.1" />
   </ItemGroup>
 
-  <PropertyGroup Condition=" '$(TargetFramework)' == 'net451' ">
-    <DefineConstants>$(DefineConstants);APPDOMAIN</DefineConstants>
-  </PropertyGroup>
-
 </Project>
