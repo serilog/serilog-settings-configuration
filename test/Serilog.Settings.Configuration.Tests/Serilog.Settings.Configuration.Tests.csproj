@@ -1,5 +1,16 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
+  <!-- 
+  Because this is a multi-targeted project/solution, run tests from the command line
+  with the current working directory set to the location of this csproj. Tests will not
+  execute within the VS IDE as of version 15.6.5 (April 2018).
+  
+  dotnet test [dash dash]framework net452
+  dotnet test [dash dash]framework netcoreapp2.0
+  
+  (XML doesn't allow double-dashes in comments...)
+  -->
+  
   <PropertyGroup>
     <TargetFrameworks>net452;netcoreapp2.0</TargetFrameworks>
     <AssemblyName>Serilog.Settings.Configuration.Tests</AssemblyName>
@@ -13,12 +24,18 @@
     <ProjectReference Include="..\TestDummies\TestDummies.csproj" />
   </ItemGroup>
 
+  <ItemGroup Condition="'$(TargetFramework)' == 'net452'">
+    <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="1.1.1" />
+  </ItemGroup>
+
+  <ItemGroup Condition="'$(TargetFramework)' == 'netcoreapp2.0'">
+    <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="2.0.1" />
+  </ItemGroup>
+
   <ItemGroup>
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="15.0.0" />
     <PackageReference Include="xunit.runner.visualstudio" Version="2.2.0" />
     <PackageReference Include="xunit" Version="2.2.0" />
-
-    <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="1.0.0" />
   </ItemGroup>
 
   <ItemGroup>
