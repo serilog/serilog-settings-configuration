@@ -26,7 +26,10 @@ namespace Serilog
     /// </summary>
     public static class ConfigurationLoggerConfigurationExtensions
     {
-        const string DefaultSectionName = "Serilog";
+        /// <summary>
+        /// Configuration section name required by this package.
+        /// </summary>
+        public const string DefaultSectionName = "Serilog";
 
         /// <summary>
         /// Reads logger settings from the provided configuration object using the default section name.

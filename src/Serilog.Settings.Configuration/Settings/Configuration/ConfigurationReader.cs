@@ -24,6 +24,8 @@ namespace Serilog.Settings.Configuration
         readonly DependencyContext _dependencyContext;
         readonly IReadOnlyCollection<Assembly> _configurationAssemblies;
 
+        #region Constructors
+
         public ConfigurationReader(IConfigurationSection configuration, DependencyContext dependencyContext)
         {
             _configuration = configuration ?? throw new ArgumentNullException(nameof(configuration));
@@ -38,6 +40,11 @@ namespace Serilog.Settings.Configuration
             _configurationAssemblies = configurationAssemblies ?? throw new ArgumentNullException(nameof(configurationAssemblies));
         }
 
+        #endregion
+
+        #region Configure and related Apply methods
+
+        // Called by LoggerConfiguration in Serilog Core
         public void Configure(LoggerConfiguration loggerConfiguration)
         {
             var declaredLevelSwitches = ProcessLevelSwitchDeclarations();
@@ -80,8 +87,7 @@ namespace Serilog.Settings.Configuration
             return namedSwitches;
         }
 
-        void ApplyMinimumLevel(LoggerConfiguration loggerConfiguration,
-            IReadOnlyDictionary<string, LoggingLevelSwitch> declaredLevelSwitches)
+        void ApplyMinimumLevel(LoggerConfiguration loggerConfiguration, IReadOnlyDictionary<string, LoggingLevelSwitch> declaredLevelSwitches)
         {
             var minimumLevelDirective = _configuration.GetSection("MinimumLevel");
 
@@ -134,10 +140,7 @@ namespace Serilog.Settings.Configuration
             }
         }
 
-
-
-        void ApplyFilters(LoggerConfiguration loggerConfiguration,
-            IReadOnlyDictionary<string, LoggingLevelSwitch> declaredLevelSwitches)
+        void ApplyFilters(LoggerConfiguration loggerConfiguration, IReadOnlyDictionary<string, LoggingLevelSwitch> declaredLevelSwitches)
         {
             var filterDirective = _configuration.GetSection("Filter");
             if (filterDirective != null)
@@ -147,8 +150,7 @@ namespace Serilog.Settings.Configuration
             }
         }
 
-        void ApplySinks(LoggerConfiguration loggerConfiguration,
-            IReadOnlyDictionary<string, LoggingLevelSwitch> declaredLevelSwitches)
+        void ApplySinks(LoggerConfiguration loggerConfiguration, IReadOnlyDictionary<string, LoggingLevelSwitch> declaredLevelSwitches)
         {
             var writeToDirective = _configuration.GetSection("WriteTo");
             if (writeToDirective != null)
@@ -158,8 +160,7 @@ namespace Serilog.Settings.Configuration
             }
         }
 
-        void ApplyAuditSinks(LoggerConfiguration loggerConfiguration,
-            IReadOnlyDictionary<string, LoggingLevelSwitch> declaredLevelSwitches)
+        void ApplyAuditSinks(LoggerConfiguration loggerConfiguration, IReadOnlyDictionary<string, LoggingLevelSwitch> declaredLevelSwitches)
         {
             var auditToDirective = _configuration.GetSection("AuditTo");
             if (auditToDirective != null)
@@ -169,15 +170,13 @@ namespace Serilog.Settings.Configuration
             }
         }
 
-        void IConfigurationReader.ApplySinks(LoggerSinkConfiguration loggerSinkConfiguration,
-            IReadOnlyDictionary<string, LoggingLevelSwitch> declaredLevelSwitches)
+        void IConfigurationReader.ApplySinks(LoggerSinkConfiguration loggerSinkConfiguration, IReadOnlyDictionary<string, LoggingLevelSwitch> declaredLevelSwitches)
         {
             var methodCalls = GetMethodCalls(_configuration);
             CallConfigurationMethods(methodCalls, FindSinkConfigurationMethods(_configurationAssemblies), loggerSinkConfiguration, declaredLevelSwitches);
         }
 
-        void ApplyEnrichment(LoggerConfiguration loggerConfiguration,
-            IReadOnlyDictionary<string, LoggingLevelSwitch> declaredLevelSwitches)
+        void ApplyEnrichment(LoggerConfiguration loggerConfiguration, IReadOnlyDictionary<string, LoggingLevelSwitch> declaredLevelSwitches)
         {
             var enrichDirective = _configuration.GetSection("Enrich");
             if (enrichDirective != null)
@@ -195,6 +194,10 @@ namespace Serilog.Settings.Configuration
                 }
             }
         }
+
+        #endregion
+
+        #region Internal implementation
 
         internal ILookup<string, Dictionary<string, IConfigurationArgumentValue>> GetMethodCalls(IConfigurationSection directive)
         {
@@ -369,6 +372,10 @@ namespace Serilog.Settings.Configuration
                 .ToList();
         }
 
+        #endregion
+
+        #region Internal helpers
+
         // don't support (yet?) arrays in the parameter list (ILogEventEnricher[])
         internal static LoggerConfiguration With(LoggerFilterConfiguration loggerFilterConfiguration, ILogEventFilter filter)
             => loggerFilterConfiguration.With(filter);
@@ -399,5 +406,7 @@ namespace Serilog.Settings.Configuration
                 throw new InvalidOperationException($"The value {value} is not a valid Serilog level.");
             return parsedLevel;
         }
+
+        #endregion
     }
 }
