@@ -59,31 +59,27 @@ namespace Serilog.Settings.Configuration
         {
             var levelSwitchesDirective = _configuration.GetSection("LevelSwitches");
             var namedSwitches = new Dictionary<string, LoggingLevelSwitch>();
-            if (levelSwitchesDirective != null)
+            foreach (var levelSwitchDeclaration in levelSwitchesDirective.GetChildren())
             {
-                foreach (var levelSwitchDeclaration in levelSwitchesDirective.GetChildren())
+                var switchName = levelSwitchDeclaration.Key;
+                var switchInitialLevel = levelSwitchDeclaration.Value;
+                // switchName must be something like $switch to avoid ambiguities
+                if (!IsValidSwitchName(switchName))
                 {
-                    var switchName = levelSwitchDeclaration.Key;
-                    var switchInitialLevel = levelSwitchDeclaration.Value;
-                    // switchName must be something like $switch to avoid ambiguities
-                    if (!IsValidSwitchName(switchName))
-                    {
-                        throw new FormatException($"\"{switchName}\" is not a valid name for a Level Switch declaration. Level switch must be declared with a '$' sign, like \"LevelSwitches\" : {{\"$switchName\" : \"InitialLevel\"}}");
-                    }
-                    LoggingLevelSwitch newSwitch;
-                    if (string.IsNullOrEmpty(switchInitialLevel))
-                    {
-                        newSwitch = new LoggingLevelSwitch();
-                    }
-                    else
-                    {
-                        var initialLevel = ParseLogEventLevel(switchInitialLevel);
-                        newSwitch = new LoggingLevelSwitch(initialLevel);
-                    }
-                    namedSwitches.Add(switchName, newSwitch);
+                    throw new FormatException($"\"{switchName}\" is not a valid name for a Level Switch declaration. Level switch must be declared with a '$' sign, like \"LevelSwitches\" : {{\"$switchName\" : \"InitialLevel\"}}");
                 }
+                LoggingLevelSwitch newSwitch;
+                if (string.IsNullOrEmpty(switchInitialLevel))
+                {
+                    newSwitch = new LoggingLevelSwitch();
+                }
+                else
+                {
+                    var initialLevel = ParseLogEventLevel(switchInitialLevel);
+                    newSwitch = new LoggingLevelSwitch(initialLevel);
+                }
+                namedSwitches.Add(switchName, newSwitch);
             }
-
             return namedSwitches;
         }
 
@@ -98,7 +94,7 @@ namespace Serilog.Settings.Configuration
             }
 
             var minLevelControlledByDirective = minimumLevelDirective.GetSection("ControlledBy");
-            if (minLevelControlledByDirective?.Value != null)
+            if (minLevelControlledByDirective.Value != null)
             {
                 var globalMinimumLevelSwitch = declaredLevelSwitches.LookUpSwitchByName(minLevelControlledByDirective.Value);
                 // not calling ApplyMinimumLevel local function because here we have a reference to a LogLevelSwitch already
@@ -143,7 +139,7 @@ namespace Serilog.Settings.Configuration
         void ApplyFilters(LoggerConfiguration loggerConfiguration, IReadOnlyDictionary<string, LoggingLevelSwitch> declaredLevelSwitches)
         {
             var filterDirective = _configuration.GetSection("Filter");
-            if (filterDirective != null)
+            if (filterDirective.GetChildren().Any())
             {
                 var methodCalls = GetMethodCalls(filterDirective);
                 CallConfigurationMethods(methodCalls, FindFilterConfigurationMethods(_configurationAssemblies), loggerConfiguration.Filter, declaredLevelSwitches);
@@ -153,7 +149,7 @@ namespace Serilog.Settings.Configuration
         void ApplySinks(LoggerConfiguration loggerConfiguration, IReadOnlyDictionary<string, LoggingLevelSwitch> declaredLevelSwitches)
         {
             var writeToDirective = _configuration.GetSection("WriteTo");
-            if (writeToDirective != null)
+            if (writeToDirective.GetChildren().Any())
             {
                 var methodCalls = GetMethodCalls(writeToDirective);
                 CallConfigurationMethods(methodCalls, FindSinkConfigurationMethods(_configurationAssemblies), loggerConfiguration.WriteTo, declaredLevelSwitches);
@@ -163,7 +159,7 @@ namespace Serilog.Settings.Configuration
         void ApplyAuditSinks(LoggerConfiguration loggerConfiguration, IReadOnlyDictionary<string, LoggingLevelSwitch> declaredLevelSwitches)
         {
             var auditToDirective = _configuration.GetSection("AuditTo");
-            if (auditToDirective != null)
+            if (auditToDirective.GetChildren().Any())
             {
                 var methodCalls = GetMethodCalls(auditToDirective);
                 CallConfigurationMethods(methodCalls, FindAuditSinkConfigurationMethods(_configurationAssemblies), loggerConfiguration.AuditTo, declaredLevelSwitches);
@@ -179,14 +175,14 @@ namespace Serilog.Settings.Configuration
         void ApplyEnrichment(LoggerConfiguration loggerConfiguration, IReadOnlyDictionary<string, LoggingLevelSwitch> declaredLevelSwitches)
         {
             var enrichDirective = _configuration.GetSection("Enrich");
-            if (enrichDirective != null)
+            if (enrichDirective.GetChildren().Any())
             {
                 var methodCalls = GetMethodCalls(enrichDirective);
                 CallConfigurationMethods(methodCalls, FindEventEnricherConfigurationMethods(_configurationAssemblies), loggerConfiguration.Enrich, declaredLevelSwitches);
             }
 
             var propertiesDirective = _configuration.GetSection("Properties");
-            if (propertiesDirective != null)
+            if (propertiesDirective.GetChildren().Any())
             {
                 foreach (var enrichProperyDirective in propertiesDirective.GetChildren())
                 {
@@ -250,7 +246,7 @@ namespace Serilog.Settings.Configuration
             var assemblies = new Dictionary<string, Assembly>();
 
             var usingSection = _configuration.GetSection("Using");
-            if (usingSection != null)
+            if (usingSection.GetChildren().Any())
             {
                 foreach (var simpleName in usingSection.GetChildren().Select(c => c.Value))
                 {
