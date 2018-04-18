@@ -19,6 +19,7 @@ namespace Serilog.Settings.Configuration
     class ConfigurationReader : IConfigurationReader
     {
         const string LevelSwitchNameRegex = @"^\$[A-Za-z]+[A-Za-z0-9]*$";
+        const string ConfigSectionHintChar = ">";
 
         readonly IConfigurationSection _configuration;
         readonly DependencyContext _dependencyContext;
@@ -209,7 +210,7 @@ namespace Serilog.Settings.Configuration
                  let name = GetSectionName(child)
                  let callArgs = (from argument in child.GetSection("Args").GetChildren()
                                  select new {
-                                     Name = argument.Key,
+                                     Name = argument.Key.Replace(ConfigSectionHintChar, string.Empty),
                                      Value = GetArgumentValue(argument) }).ToDictionary(p => p.Name, p => p.Value)
                  select new { Name = name, Args = callArgs }))
                      .ToLookup(p => p.Name, p => p.Args);
@@ -225,7 +226,14 @@ namespace Serilog.Settings.Configuration
                 }
                 else
                 {
-                    argumentValue = new ConfigurationSectionArgumentValue(new ConfigurationReader(argumentSection, _configurationAssemblies, _dependencyContext));
+                    if(argumentSection.Key.EndsWith(ConfigSectionHintChar))
+                    {
+                        argumentValue = new ConfigurationSectionArgumentValue(new ConfigurationReader(argumentSection, _configurationAssemblies, _dependencyContext));
+                    }
+                    else
+                    {
+                        argumentValue = new BoundArgumentValue(argumentSection);
+                    }
                 }
 
                 return argumentValue;
