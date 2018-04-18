@@ -17,8 +17,10 @@
     <PackageProjectUrl>https://github.com/serilog/serilog-settings-configuration</PackageProjectUrl>
     <PackageLicenseUrl>https://www.apache.org/licenses/LICENSE-2.0</PackageLicenseUrl>
     <RootNamespace>Serilog</RootNamespace>
-    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-    <Version>3.0.0.002</Version>
+    <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
+    <Version>3.0.0</Version>
+    <AssemblyVersion>3.0.0.0</AssemblyVersion>
+    <FileVersion>3.0.0</FileVersion>
   </PropertyGroup>
 
   <ItemGroup>

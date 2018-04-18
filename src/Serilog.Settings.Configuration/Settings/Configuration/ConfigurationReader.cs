@@ -21,22 +21,35 @@ namespace Serilog.Settings.Configuration
         const string LevelSwitchNameRegex = @"^\$[A-Za-z]+[A-Za-z0-9]*$";
         const string ConfigSectionHintChar = ">";
 
-        readonly IConfigurationSection _configuration;
+        static IConfiguration _configuration;
+
+        readonly IConfigurationSection _section;
         readonly DependencyContext _dependencyContext;
         readonly IReadOnlyCollection<Assembly> _configurationAssemblies;
 
         #region Constructors
 
-        public ConfigurationReader(IConfigurationSection configuration, DependencyContext dependencyContext)
+        public ConfigurationReader(IConfiguration configuration, DependencyContext dependencyContext)
         {
             _configuration = configuration ?? throw new ArgumentNullException(nameof(configuration));
+            _section = configuration.GetSection(ConfigurationLoggerConfigurationExtensions.DefaultSectionName);
             _dependencyContext = dependencyContext;
             _configurationAssemblies = LoadConfigurationAssemblies();
         }
 
-        ConfigurationReader(IConfigurationSection configuration, IReadOnlyCollection<Assembly> configurationAssemblies, DependencyContext dependencyContext)
+        // Generally the initial call should use IConfiguration rather than IConfigurationSection, otherwise
+        // IConfiguration parameters in the target methods will not be populated.
+        ConfigurationReader(IConfigurationSection configSection, DependencyContext dependencyContext)
         {
-            _configuration = configuration ?? throw new ArgumentNullException(nameof(configuration));
+            _section = configSection ?? throw new ArgumentNullException(nameof(configSection));
+            _dependencyContext = dependencyContext;
+            _configurationAssemblies = LoadConfigurationAssemblies();
+        }
+
+        // Used internally for processing nested configuration sections -- see GetMethodCalls below.
+        ConfigurationReader(IConfigurationSection configSection, IReadOnlyCollection<Assembly> configurationAssemblies, DependencyContext dependencyContext)
+        {
+            _section = configSection ?? throw new ArgumentNullException(nameof(configSection));
             _dependencyContext = dependencyContext;
             _configurationAssemblies = configurationAssemblies ?? throw new ArgumentNullException(nameof(configurationAssemblies));
         }
@@ -45,7 +58,6 @@ namespace Serilog.Settings.Configuration
 
         #region Configure and related Apply methods
 
-        // Called by LoggerConfiguration in Serilog Core
         public void Configure(LoggerConfiguration loggerConfiguration)
         {
             var declaredLevelSwitches = ProcessLevelSwitchDeclarations();
@@ -58,7 +70,7 @@ namespace Serilog.Settings.Configuration
 
         IReadOnlyDictionary<string, LoggingLevelSwitch> ProcessLevelSwitchDeclarations()
         {
-            var levelSwitchesDirective = _configuration.GetSection("LevelSwitches");
+            var levelSwitchesDirective = _section.GetSection("LevelSwitches");
             var namedSwitches = new Dictionary<string, LoggingLevelSwitch>();
             foreach (var levelSwitchDeclaration in levelSwitchesDirective.GetChildren())
             {
@@ -86,7 +98,7 @@ namespace Serilog.Settings.Configuration
 
         void ApplyMinimumLevel(LoggerConfiguration loggerConfiguration, IReadOnlyDictionary<string, LoggingLevelSwitch> declaredLevelSwitches)
         {
-            var minimumLevelDirective = _configuration.GetSection("MinimumLevel");
+            var minimumLevelDirective = _section.GetSection("MinimumLevel");
 
             var defaultMinLevelDirective = minimumLevelDirective.Value != null ? minimumLevelDirective : minimumLevelDirective.GetSection("Default");
             if (defaultMinLevelDirective.Value != null)
@@ -139,7 +151,7 @@ namespace Serilog.Settings.Configuration
 
         void ApplyFilters(LoggerConfiguration loggerConfiguration, IReadOnlyDictionary<string, LoggingLevelSwitch> declaredLevelSwitches)
         {
-            var filterDirective = _configuration.GetSection("Filter");
+            var filterDirective = _section.GetSection("Filter");
             if (filterDirective.GetChildren().Any())
             {
                 var methodCalls = GetMethodCalls(filterDirective);
@@ -149,7 +161,7 @@ namespace Serilog.Settings.Configuration
 
         void ApplySinks(LoggerConfiguration loggerConfiguration, IReadOnlyDictionary<string, LoggingLevelSwitch> declaredLevelSwitches)
         {
-            var writeToDirective = _configuration.GetSection("WriteTo");
+            var writeToDirective = _section.GetSection("WriteTo");
             if (writeToDirective.GetChildren().Any())
             {
                 var methodCalls = GetMethodCalls(writeToDirective);
@@ -159,7 +171,7 @@ namespace Serilog.Settings.Configuration
 
         void ApplyAuditSinks(LoggerConfiguration loggerConfiguration, IReadOnlyDictionary<string, LoggingLevelSwitch> declaredLevelSwitches)
         {
-            var auditToDirective = _configuration.GetSection("AuditTo");
+            var auditToDirective = _section.GetSection("AuditTo");
             if (auditToDirective.GetChildren().Any())
             {
                 var methodCalls = GetMethodCalls(auditToDirective);
@@ -169,20 +181,20 @@ namespace Serilog.Settings.Configuration
 
         void IConfigurationReader.ApplySinks(LoggerSinkConfiguration loggerSinkConfiguration, IReadOnlyDictionary<string, LoggingLevelSwitch> declaredLevelSwitches)
         {
-            var methodCalls = GetMethodCalls(_configuration);
+            var methodCalls = GetMethodCalls(_section);
             CallConfigurationMethods(methodCalls, FindSinkConfigurationMethods(_configurationAssemblies), loggerSinkConfiguration, declaredLevelSwitches);
         }
 
         void ApplyEnrichment(LoggerConfiguration loggerConfiguration, IReadOnlyDictionary<string, LoggingLevelSwitch> declaredLevelSwitches)
         {
-            var enrichDirective = _configuration.GetSection("Enrich");
+            var enrichDirective = _section.GetSection("Enrich");
             if (enrichDirective.GetChildren().Any())
             {
                 var methodCalls = GetMethodCalls(enrichDirective);
                 CallConfigurationMethods(methodCalls, FindEventEnricherConfigurationMethods(_configurationAssemblies), loggerConfiguration.Enrich, declaredLevelSwitches);
             }
 
-            var propertiesDirective = _configuration.GetSection("Properties");
+            var propertiesDirective = _section.GetSection("Properties");
             if (propertiesDirective.GetChildren().Any())
             {
                 foreach (var enrichProperyDirective in propertiesDirective.GetChildren())
@@ -253,7 +265,7 @@ namespace Serilog.Settings.Configuration
         {
             var assemblies = new Dictionary<string, Assembly>();
 
-            var usingSection = _configuration.GetSection("Using");
+            var usingSection = _section.GetSection("Using");
             if (usingSection.GetChildren().Any())
             {
                 foreach (var simpleName in usingSection.GetChildren().Select(c => c.Value))
@@ -313,6 +325,9 @@ namespace Serilog.Settings.Configuration
                     var call = (from p in methodInfo.GetParameters().Skip(1)
                                 let directive = method.Value.FirstOrDefault(s => s.Key == p.Name)
                                 select directive.Key == null ? p.DefaultValue : directive.Value.ConvertTo(p.ParameterType, declaredLevelSwitches)).ToList();
+
+                    var parm = methodInfo.GetParameters().FirstOrDefault(i => i.ParameterType == typeof(IConfiguration));
+                    if(parm != null) call[parm.Position - 1] = _configuration;
 
                     call.Insert(0, receiver);
 
