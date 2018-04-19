@@ -125,3 +125,7 @@ When the configuration specifies a discrete value for a parameter (such as a str
 
 If the parameter value is not a discrete value, the package will use the configuration binding system provided by _Microsoft.Extensions.Options.ConfigurationExtensions_ to attempt to populate the parameter. Almost anything that can be bound by `IConfiguration.Get<T>` should work with this package. An example of this is the optional `List<Column>` parameter used to configure the .NET Standard version of the _Serilog.Sinks.MSSqlServer_ package.
 
+### IConfigurationSection parameters
+
+Certain Serilog packages may require configuration information that can't be easily represented by discrete values or direct binding-friendly representations. An example might be lists of values to remove from a collection of default values. In this case the method can accept an entire `IConfigurationSection` as a call parameter and this package will recognize that and populate the parameter. In this way, Serilog packages can support arbitrarily complex configuration scenarios.
+
