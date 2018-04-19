@@ -19,7 +19,7 @@ namespace Serilog.Settings.Configuration
     class ConfigurationReader : IConfigurationReader
     {
         const string LevelSwitchNameRegex = @"^\$[A-Za-z]+[A-Za-z0-9]*$";
-        const string ConfigSectionHintChar = ">";
+        const string NestedConfigHintChar = ">";
 
         static IConfiguration _configuration;
 
@@ -222,7 +222,7 @@ namespace Serilog.Settings.Configuration
                  let name = GetSectionName(child)
                  let callArgs = (from argument in child.GetSection("Args").GetChildren()
                                  select new {
-                                     Name = argument.Key.Replace(ConfigSectionHintChar, string.Empty),
+                                     Name = argument.Key.Replace(NestedConfigHintChar, string.Empty),
                                      Value = GetArgumentValue(argument) }).ToDictionary(p => p.Name, p => p.Value)
                  select new { Name = name, Args = callArgs }))
                      .ToLookup(p => p.Name, p => p.Args);
@@ -238,7 +238,7 @@ namespace Serilog.Settings.Configuration
                 }
                 else
                 {
-                    if(argumentSection.Key.EndsWith(ConfigSectionHintChar))
+                    if(argumentSection.Key.EndsWith(NestedConfigHintChar))
                     {
                         argumentValue = new ConfigurationSectionArgumentValue(new ConfigurationReader(argumentSection, _configurationAssemblies, _dependencyContext));
                     }
