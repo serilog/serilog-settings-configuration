@@ -244,7 +244,7 @@ namespace Serilog.Settings.Configuration
                     }
                     else
                     {
-                        argumentValue = new BoundArgumentValue(argumentSection);
+                        argumentValue = new ObjectArgumentValue(argumentSection);
                     }
                 }
 
