@@ -199,7 +199,6 @@ namespace Serilog.Settings.Configuration.Tests
             Assert.Equal(ConsoleThemes.Theme1, DummyConsoleSink.Theme);
         }
 
-
         [Theory]
         [InlineData("$switchName", true)]
         [InlineData("$SwitchName", true)]
@@ -389,6 +388,57 @@ namespace Serilog.Settings.Configuration.Tests
             systemLogger.Write(Some.InformationEvent());
             Assert.False(evt is null, "LoggingLevelSwitch level was changed to Information for logger System.*. It should now log Information events for SourceContext System.Bar.");
             // ReSharper restore HeuristicUnreachableCode
+        }
+
+        [Fact]
+        public void SinkWithIConfigurationArguments()
+        {
+            var json = @"{
+                ""Serilog"": {            
+                    ""Using"": [""TestDummies""],
+                    ""WriteTo"": [{
+                        ""Name"": ""DummyRollingFile"",
+                        ""Args"": {""pathFormat"" : ""C:\\"",
+                                   ""configurationSection"" : { ""foo"" : ""bar"" } }
+                    }]        
+                }
+            }";
+
+            // IConfiguration and IConfigurationSection arguments do not have
+            // default values so they will throw if they are not populated
+
+            var log = ConfigFromJson(json)
+                .CreateLogger();
+
+            DummyRollingFileSink.Emitted.Clear();
+
+            log.Write(Some.InformationEvent());
+
+            Assert.Equal(1, DummyRollingFileSink.Emitted.Count);
+        }
+
+        [Fact]
+        public void SinkWithConfigurationBindingArgument()
+        {
+            var json = @"{
+                ""Serilog"": {            
+                    ""Using"": [""TestDummies""],
+                    ""WriteTo"": [{
+                        ""Name"": ""DummyRollingFile"",
+                        ""Args"": {""pathFormat"" : ""C:\\"",
+                                   ""objectBinding"" : [ { ""foo"" : ""bar"" }, { ""abc"" : ""xyz"" } ] }
+                    }]        
+                }
+            }";
+
+            var log = ConfigFromJson(json)
+                .CreateLogger();
+
+            DummyRollingFileSink.Emitted.Clear();
+
+            log.Write(Some.InformationEvent());
+
+            Assert.Equal(1, DummyRollingFileSink.Emitted.Count);
         }
 
 
