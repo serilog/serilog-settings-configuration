@@ -441,6 +441,54 @@ namespace Serilog.Settings.Configuration.Tests
             Assert.Equal(1, DummyRollingFileSink.Emitted.Count);
         }
 
+        [Fact]
+        public void SinkWithStringArrayArgument()
+        {
+            var json = @"{
+                ""Serilog"": {            
+                    ""Using"": [""TestDummies""],
+                    ""WriteTo"": [{
+                        ""Name"": ""DummyRollingFile"",
+                        ""Args"": {""pathFormat"" : ""C:\\"",
+                                   ""stringArrayBinding"" : [ ""foo"", ""bar"", ""baz"" ] }
+                    }]        
+                }
+            }";
+
+            var log = ConfigFromJson(json)
+                .CreateLogger();
+
+            DummyRollingFileSink.Emitted.Clear();
+
+            log.Write(Some.InformationEvent());
+
+            Assert.Equal(1, DummyRollingFileSink.Emitted.Count);
+        }
+
+        [Fact]
+        public void SinkWithIntArrayArgument()
+        {
+            var json = @"{
+                ""Serilog"": {            
+                    ""Using"": [""TestDummies""],
+                    ""WriteTo"": [{
+                        ""Name"": ""DummyRollingFile"",
+                        ""Args"": {""pathFormat"" : ""C:\\"",
+                                   ""intArrayBinding"" : [ 1,2,3,4,5 ] }
+                    }]        
+                }
+            }";
+
+            var log = ConfigFromJson(json)
+                .CreateLogger();
+
+            DummyRollingFileSink.Emitted.Clear();
+
+            log.Write(Some.InformationEvent());
+
+            Assert.Equal(1, DummyRollingFileSink.Emitted.Count);
+        }
+
 
         [Trait("Bugfix", "#91")]
         [Fact]

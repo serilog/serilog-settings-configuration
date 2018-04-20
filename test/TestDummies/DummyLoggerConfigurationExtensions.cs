@@ -57,6 +57,24 @@ namespace TestDummies
         }
 
         public static LoggerConfiguration DummyRollingFile(
+            this LoggerSinkConfiguration loggerSinkConfiguration,
+            string[] stringArrayBinding,
+            string pathFormat,
+            LogEventLevel restrictedToMinimumLevel = LevelAlias.Minimum)
+        {
+            return loggerSinkConfiguration.Sink(new DummyRollingFileSink(), restrictedToMinimumLevel);
+        }
+
+        public static LoggerConfiguration DummyRollingFile(
+            this LoggerSinkConfiguration loggerSinkConfiguration,
+            int[] intArrayBinding,
+            string pathFormat,
+            LogEventLevel restrictedToMinimumLevel = LevelAlias.Minimum)
+        {
+            return loggerSinkConfiguration.Sink(new DummyRollingFileSink(), restrictedToMinimumLevel);
+        }
+
+        public static LoggerConfiguration DummyRollingFile(
             this LoggerAuditSinkConfiguration loggerSinkConfiguration,
             string pathFormat,
             LogEventLevel restrictedToMinimumLevel = LevelAlias.Minimum,
