@@ -402,7 +402,7 @@ namespace Serilog.Settings.Configuration.Tests
                 ""WriteTo"": [{
                     ""Name"": ""Logger"",
                     ""Args"": {
-                        ""configureLogger>"" : {
+                        ""configureLogger"" : {
                             ""WriteTo"": [{
                                 ""Name"": ""DummyRollingFile"",
                                 ""Args"": {""pathFormat"" : ""C:\\""}
@@ -438,7 +438,7 @@ namespace Serilog.Settings.Configuration.Tests
                 ""WriteTo"": [{
                     ""Name"": ""Logger"",
                     ""Args"": {
-                        ""configureLogger>"" : {
+                        ""configureLogger"" : {
                             ""WriteTo"": [{
                                 ""Name"": ""DummyRollingFile"",
                                 ""Args"": {""pathFormat"" : ""C:\\""}

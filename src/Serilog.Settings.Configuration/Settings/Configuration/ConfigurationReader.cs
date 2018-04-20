@@ -19,15 +19,12 @@ namespace Serilog.Settings.Configuration
     class ConfigurationReader : IConfigurationReader
     {
         const string LevelSwitchNameRegex = @"^\$[A-Za-z]+[A-Za-z0-9]*$";
-        const string NestedConfigHintChar = ">";
 
         static IConfiguration _configuration;
 
         readonly IConfigurationSection _section;
         readonly DependencyContext _dependencyContext;
         readonly IReadOnlyCollection<Assembly> _configurationAssemblies;
-
-        #region Constructors
 
         public ConfigurationReader(IConfiguration configuration, DependencyContext dependencyContext)
         {
@@ -47,16 +44,12 @@ namespace Serilog.Settings.Configuration
         }
 
         // Used internally for processing nested configuration sections -- see GetMethodCalls below.
-        ConfigurationReader(IConfigurationSection configSection, IReadOnlyCollection<Assembly> configurationAssemblies, DependencyContext dependencyContext)
+        internal ConfigurationReader(IConfigurationSection configSection, IReadOnlyCollection<Assembly> configurationAssemblies, DependencyContext dependencyContext)
         {
             _section = configSection ?? throw new ArgumentNullException(nameof(configSection));
             _dependencyContext = dependencyContext;
             _configurationAssemblies = configurationAssemblies ?? throw new ArgumentNullException(nameof(configurationAssemblies));
         }
-
-        #endregion
-
-        #region Configure and related Apply methods
 
         public void Configure(LoggerConfiguration loggerConfiguration)
         {
@@ -204,10 +197,6 @@ namespace Serilog.Settings.Configuration
             }
         }
 
-        #endregion
-
-        #region Internal implementation
-
         internal ILookup<string, Dictionary<string, IConfigurationArgumentValue>> GetMethodCalls(IConfigurationSection directive)
         {
             var children = directive.GetChildren().ToList();
@@ -222,7 +211,7 @@ namespace Serilog.Settings.Configuration
                  let name = GetSectionName(child)
                  let callArgs = (from argument in child.GetSection("Args").GetChildren()
                                  select new {
-                                     Name = argument.Key.Replace(NestedConfigHintChar, string.Empty),
+                                     Name = argument.Key,
                                      Value = GetArgumentValue(argument) }).ToDictionary(p => p.Name, p => p.Value)
                  select new { Name = name, Args = callArgs }))
                      .ToLookup(p => p.Name, p => p.Args);
@@ -238,14 +227,7 @@ namespace Serilog.Settings.Configuration
                 }
                 else
                 {
-                    if(argumentSection.Key.EndsWith(NestedConfigHintChar))
-                    {
-                        argumentValue = new ConfigurationSectionArgumentValue(new ConfigurationReader(argumentSection, _configurationAssemblies, _dependencyContext));
-                    }
-                    else
-                    {
-                        argumentValue = new ObjectArgumentValue(argumentSection);
-                    }
+                    argumentValue = new ObjectArgumentValue(argumentSection, _configurationAssemblies, _dependencyContext);
                 }
 
                 return argumentValue;
@@ -391,10 +373,6 @@ namespace Serilog.Settings.Configuration
                 .ToList();
         }
 
-        #endregion
-
-        #region Internal helpers
-
         // don't support (yet?) arrays in the parameter list (ILogEventEnricher[])
         internal static LoggerConfiguration With(LoggerFilterConfiguration loggerFilterConfiguration, ILogEventFilter filter)
             => loggerFilterConfiguration.With(filter);
@@ -426,6 +404,5 @@ namespace Serilog.Settings.Configuration
             return parsedLevel;
         }
 
-        #endregion
     }
 }

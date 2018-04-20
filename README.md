@@ -94,15 +94,13 @@ dotnet run
 
 ### Nested configuration sections
 
-Some Serilog packages require a reference to a logger configuration object. These must be "hinted" by appending a `>` character to the end of the argument name. The sample program in this project illustrates this with the following entry configuring the _Serilog.Sinks.Async_ package to wrap the _Serilog.Sinks.File_ package.
-
-Note the `configure>` parameter name with the trailing hint character:
+Some Serilog packages require a reference to a logger configuration object. The sample program in this project illustrates this with the following entry configuring the _Serilog.Sinks.Async_ package to wrap the _Serilog.Sinks.File_ package. The `configure` parameter references the File sink configuration:
 
 ```json
 "WriteTo:Async": {
   "Name": "Async",
   "Args": {
-    "configure>": [
+    "configure": [
       {
         "Name": "File",
         "Args": {
