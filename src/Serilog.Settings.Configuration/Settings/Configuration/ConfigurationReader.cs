@@ -222,7 +222,7 @@ namespace Serilog.Settings.Configuration
             {
                 IConfigurationArgumentValue argumentValue;
 
-                if(argumentSection.Value != null && argumentSection.GetChildren().Any())
+                if (argumentSection.Value != null && argumentSection.GetChildren().Any())
                     throw new InvalidOperationException($"Combined configuration sources must result in a discrete value (string, int, etc.) or complex value (section, list, etc.), not both. Argument: {argumentSection.Path}");
 
                 if (argumentSection.Value != null)

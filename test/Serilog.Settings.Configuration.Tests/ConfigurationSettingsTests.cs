@@ -15,7 +15,8 @@ namespace Serilog.Settings.Configuration.Tests
         static LoggerConfiguration ConfigFromJson(string jsonString, string secondJsonSource = null)
         {
             var builder = new ConfigurationBuilder().AddJsonString(jsonString);
-            if(secondJsonSource != null) builder.AddJsonString(secondJsonSource);
+            if (secondJsonSource != null)
+                builder.AddJsonString(secondJsonSource);
             var config = builder.Build();
             return new LoggerConfiguration()
                 .ReadFrom.Configuration(config);
@@ -33,7 +34,7 @@ namespace Serilog.Settings.Configuration.Tests
                     }
                 }
             }";
-            
+
             var log = ConfigFromJson(json)
                 .WriteTo.Sink(new DelegatingSink(e => evt = e))
                 .CreateLogger();
@@ -116,7 +117,7 @@ namespace Serilog.Settings.Configuration.Tests
 
             var log = ConfigFromJson(json)
                 .CreateLogger();
-            
+
             DummyRollingFileSink.Emitted.Clear();
             DummyRollingFileAuditSink.Emitted.Clear();
 
@@ -229,7 +230,7 @@ namespace Serilog.Settings.Configuration.Tests
                     ""LevelSwitches"": {""switchNameNotStartingWithDollar"" : ""Warning"" }
                 }
             }";
-            
+
             var ex = Assert.Throws<FormatException>(() => ConfigFromJson(json));
 
             Assert.Contains("\"switchNameNotStartingWithDollar\"", ex.Message);
@@ -273,7 +274,7 @@ namespace Serilog.Settings.Configuration.Tests
                     }
                 }
             }";
-            
+
             var ex = Assert.Throws<InvalidOperationException>(() =>
                 ConfigFromJson(json)
                     .CreateLogger());
@@ -334,7 +335,7 @@ namespace Serilog.Settings.Configuration.Tests
                     }]      
                 }
             }";
-            
+
             var ex = Assert.Throws<InvalidOperationException>(() =>
                 ConfigFromJson(json)
                     .CreateLogger());
@@ -546,8 +547,8 @@ namespace Serilog.Settings.Configuration.Tests
                     }
                 }]        
             }
-            }";            
-             
+            }";
+
             var log = ConfigFromJson(json)
             .CreateLogger();
 
@@ -590,7 +591,8 @@ namespace Serilog.Settings.Configuration.Tests
             // the multiple values are recognized; it will never attempt to locate
             // a matching argument.
 
-            var ex = Assert.Throws<InvalidOperationException>(() => ConfigFromJson(jsonDiscreteValue, jsonComplexValue));
+            var ex = Assert.Throws<InvalidOperationException>(()
+                => ConfigFromJson(jsonDiscreteValue, jsonComplexValue));
 
             Assert.Contains("Combined configuration sources", ex.Message);
             Assert.Contains("pathFormat", ex.Message);
