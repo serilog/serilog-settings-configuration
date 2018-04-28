@@ -562,7 +562,7 @@ namespace Serilog.Settings.Configuration.Tests
 
         [Trait("Bugfix", "#103")]
         [Fact]
-        public void MultipleArgumentValuesThrowsInvalidOperationException()
+        public void InconsistentComplexVsScalarArgumentValuesThrowsIOE()
         {
             var jsonDiscreteValue = @"{
                 ""Serilog"": {            

@@ -222,8 +222,14 @@ namespace Serilog.Settings.Configuration
             {
                 IConfigurationArgumentValue argumentValue;
 
+                // Reject configurations where an element has both scalar and complex
+                // values as a result of reading multiple configuration sources.
                 if (argumentSection.Value != null && argumentSection.GetChildren().Any())
-                    throw new InvalidOperationException($"Combined configuration sources must result in a discrete value (string, int, etc.) or complex value (section, list, etc.), not both. Argument: {argumentSection.Path}");
+                    throw new InvalidOperationException(
+                        $"The value for the argument {argumentSection.Path} is assigned different value " +
+                        "types in more than one configuration source. Ensure all configurations consistently " +
+                        "use either a scalar (int, string, boolean) or a complex (array, section, list, " +
+                        "POCO, etc.) type for this argument value.");
 
                 if (argumentSection.Value != null)
                 {
