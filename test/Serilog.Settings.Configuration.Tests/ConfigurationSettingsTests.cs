@@ -594,8 +594,8 @@ namespace Serilog.Settings.Configuration.Tests
             var ex = Assert.Throws<InvalidOperationException>(()
                 => ConfigFromJson(jsonDiscreteValue, jsonComplexValue));
 
-            Assert.Contains("Combined configuration sources", ex.Message);
-            Assert.Contains("pathFormat", ex.Message);
+            Assert.Contains("The value for the argument", ex.Message);
+            Assert.Contains("'Serilog:WriteTo:0:Args:pathFormat'", ex.Message);
         }
     }
 }

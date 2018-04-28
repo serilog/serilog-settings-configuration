@@ -226,7 +226,7 @@ namespace Serilog.Settings.Configuration
                 // values as a result of reading multiple configuration sources.
                 if (argumentSection.Value != null && argumentSection.GetChildren().Any())
                     throw new InvalidOperationException(
-                        $"The value for the argument {argumentSection.Path} is assigned different value " +
+                        $"The value for the argument '{argumentSection.Path}' is assigned different value " +
                         "types in more than one configuration source. Ensure all configurations consistently " +
                         "use either a scalar (int, string, boolean) or a complex (array, section, list, " +
                         "POCO, etc.) type for this argument value.");
