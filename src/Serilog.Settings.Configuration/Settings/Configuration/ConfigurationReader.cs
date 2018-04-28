@@ -221,6 +221,10 @@ namespace Serilog.Settings.Configuration
             IConfigurationArgumentValue GetArgumentValue(IConfigurationSection argumentSection)
             {
                 IConfigurationArgumentValue argumentValue;
+
+                if(argumentSection.Value != null && argumentSection.GetChildren().Any())
+                    throw new InvalidOperationException($"Combined configuration sources must result in a discrete value (string, int, etc.) or complex value (section, list, etc.), not both. Argument: {argumentSection.Path}");
+
                 if (argumentSection.Value != null)
                 {
                     argumentValue = new StringArgumentValue(() => argumentSection.Value, argumentSection.GetReloadToken);
