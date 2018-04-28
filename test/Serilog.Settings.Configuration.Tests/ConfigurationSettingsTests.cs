@@ -12,9 +12,11 @@ namespace Serilog.Settings.Configuration.Tests
 {
     public class ConfigurationSettingsTests
     {
-        static LoggerConfiguration ConfigFromJson(string jsonString)
+        static LoggerConfiguration ConfigFromJson(string jsonString, string secondJsonSource = null)
         {
-            var config = new ConfigurationBuilder().AddJsonString(jsonString).Build();
+            var builder = new ConfigurationBuilder().AddJsonString(jsonString);
+            if(secondJsonSource != null) builder.AddJsonString(secondJsonSource);
+            var config = builder.Build();
             return new LoggerConfiguration()
                 .ReadFrom.Configuration(config);
         }
@@ -555,6 +557,43 @@ namespace Serilog.Settings.Configuration.Tests
             log.Write(Some.WarningEvent());
 
             Assert.Equal(1, DummyRollingFileSink.Emitted.Count);
+        }
+
+        [Trait("Bugfix", "#103")]
+        [Fact]
+        public void MultipleArgumentValuesThrowsInvalidOperationException()
+        {
+            var jsonDiscreteValue = @"{
+                ""Serilog"": {            
+                    ""Using"": [""TestDummies""],
+                    ""WriteTo"": [{
+                        ""Name"": ""DummyRollingFile"",
+                        ""Args"": {""pathFormat"" : ""C:\\""}
+                    }]        
+                }
+            }";
+
+            var jsonComplexValue = @"{
+                ""Serilog"": {            
+                    ""Using"": [""TestDummies""],
+                    ""WriteTo"": [{
+                        ""Name"": ""DummyRollingFile"",
+                        ""Args"": {""pathFormat"" : { ""foo"" : ""bar"" } }
+                    }]        
+                }
+            }";
+
+            // These will combine into a ConfigurationSection object that has both
+            // Value == "C:\" and GetChildren() == List<string>. No configuration
+            // extension matching this exists (in theory an "object" argument could
+            // accept either value). ConfigurationReader should throw as soon as
+            // the multiple values are recognized; it will never attempt to locate
+            // a matching argument.
+
+            var ex = Assert.Throws<InvalidOperationException>(() => ConfigFromJson(jsonDiscreteValue, jsonComplexValue));
+
+            Assert.Contains("Combined configuration sources", ex.Message);
+            Assert.Contains("pathFormat", ex.Message);
         }
     }
 }
