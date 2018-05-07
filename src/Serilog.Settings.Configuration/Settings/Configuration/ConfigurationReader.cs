@@ -350,7 +350,7 @@ namespace Serilog.Settings.Configuration
 
         internal static IList<MethodInfo> FindSinkConfigurationMethods(IReadOnlyCollection<Assembly> configurationAssemblies)
         {
-            var found = FindConfigurationExtensions(configurationAssemblies, typeof(LoggerSinkConfiguration));
+            var found = FindConfigurationExtensionMethods(configurationAssemblies, typeof(LoggerSinkConfiguration));
             if (configurationAssemblies.Contains(typeof(LoggerSinkConfiguration).GetTypeInfo().Assembly))
                 found.Add(GetSurrogateConfigurationMethod<LoggerSinkConfiguration, Action<LoggerConfiguration>, LoggingLevelSwitch>((c, a, s) => Logger(c, a, LevelAlias.Minimum, s)));
 
@@ -359,14 +359,14 @@ namespace Serilog.Settings.Configuration
 
         internal static IList<MethodInfo> FindAuditSinkConfigurationMethods(IReadOnlyCollection<Assembly> configurationAssemblies)
         {
-            var found = FindConfigurationExtensions(configurationAssemblies, typeof(LoggerAuditSinkConfiguration));
+            var found = FindConfigurationExtensionMethods(configurationAssemblies, typeof(LoggerAuditSinkConfiguration));
 
             return found;
         }
 
         internal static IList<MethodInfo> FindFilterConfigurationMethods(IReadOnlyCollection<Assembly> configurationAssemblies)
         {
-            var found = FindConfigurationExtensions(configurationAssemblies, typeof(LoggerFilterConfiguration));
+            var found = FindConfigurationExtensionMethods(configurationAssemblies, typeof(LoggerFilterConfiguration));
             if (configurationAssemblies.Contains(typeof(LoggerFilterConfiguration).GetTypeInfo().Assembly))
                 found.Add(GetSurrogateConfigurationMethod<LoggerFilterConfiguration, ILogEventFilter, object>((c, f, _) => With(c, f)));
 
@@ -375,7 +375,7 @@ namespace Serilog.Settings.Configuration
 
         internal static IList<MethodInfo> FindDestructureConfigurationMethods(IReadOnlyCollection<Assembly> configurationAssemblies)
         {
-            var found = FindConfigurationExtensions(configurationAssemblies, typeof(LoggerDestructuringConfiguration));
+            var found = FindConfigurationExtensionMethods(configurationAssemblies, typeof(LoggerDestructuringConfiguration));
             if(configurationAssemblies.Contains(typeof(LoggerDestructuringConfiguration).GetTypeInfo().Assembly))
             {
                 found.Add(GetSurrogateConfigurationMethod<LoggerDestructuringConfiguration, IDestructuringPolicy, object>((c, d, _) => With(c, d)));
@@ -389,14 +389,14 @@ namespace Serilog.Settings.Configuration
 
         internal static IList<MethodInfo> FindEventEnricherConfigurationMethods(IReadOnlyCollection<Assembly> configurationAssemblies)
         {
-            var found = FindConfigurationExtensions(configurationAssemblies, typeof(LoggerEnrichmentConfiguration));
+            var found = FindConfigurationExtensionMethods(configurationAssemblies, typeof(LoggerEnrichmentConfiguration));
             if (configurationAssemblies.Contains(typeof(LoggerEnrichmentConfiguration).GetTypeInfo().Assembly))
                 found.Add(GetSurrogateConfigurationMethod<LoggerEnrichmentConfiguration, object, object>((c, _, __) => FromLogContext(c)));
 
             return found;
         }
 
-        internal static IList<MethodInfo> FindConfigurationExtensions(IReadOnlyCollection<Assembly> configurationAssemblies, Type configType)
+        internal static IList<MethodInfo> FindConfigurationExtensionMethods(IReadOnlyCollection<Assembly> configurationAssemblies, Type configType)
         {
             return configurationAssemblies
                 .SelectMany(a => a.ExportedTypes

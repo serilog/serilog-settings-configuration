@@ -15,6 +15,7 @@ Configuration is read from the `Serilog` section.
     ],
     "Enrich": ["FromLogContext", "WithMachineName", "WithThreadId"],
     "Destructure": [
+      { "Name": "With", "Args": { "policy": "Sample.CustomPolicy, Sample" } },
       { "Name": "ToMaximumDepth", "Args": { "maximumDestructuringDepth": 4 } },
       { "Name": "ToMaximumStringLength", "Args": { "maximumStringLength": 100 } },
       { "Name": "ToMaximumCollectionCount", "Args": { "maximumCollectionCount": 10 } }
