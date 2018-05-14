@@ -492,7 +492,6 @@ namespace Serilog.Settings.Configuration.Tests
             Assert.Equal(1, DummyRollingFileSink.Emitted.Count);
         }
 
-
         [Trait("Bugfix", "#91")]
         [Fact]
         public void WriteToLoggerWithRestrictedToMinimumLevelIsSupported()
@@ -596,6 +595,89 @@ namespace Serilog.Settings.Configuration.Tests
 
             Assert.Contains("The value for the argument", ex.Message);
             Assert.Contains("'Serilog:WriteTo:0:Args:pathFormat'", ex.Message);
+        }
+
+        [Fact]
+        public void DestructureLimitsNestingDepth()
+        {
+            var json = @"{
+                ""Serilog"": {
+                    ""Destructure"": [
+                    {
+                        ""Name"": ""ToMaximumDepth"",
+                        ""Args"": { ""maximumDestructuringDepth"": 3 }
+                    }]
+                }
+            }";
+
+            var NestedObject = new
+            {
+                A = new
+                {
+                    B = new
+                    {
+                        C = new
+                        {
+                            D = "F"
+                        }
+                    }
+                }
+            };
+
+            var msg = GetDestructuredProperty(NestedObject, json);
+
+            Assert.Contains("C", msg);
+            Assert.DoesNotContain("D", msg);
+        }
+
+        [Fact]
+        public void DestructureLimitsStringLength()
+        {
+            var json = @"{
+                ""Serilog"": {
+                    ""Destructure"": [
+                    {
+                        ""Name"": ""ToMaximumStringLength"",
+                        ""Args"": { ""maximumStringLength"": 3 }
+                    }]
+                }
+            }";
+
+            var inputString = "ABCDEFGH";
+            var msg = GetDestructuredProperty(inputString, json);
+
+            Assert.Equal("\"AB…\"", msg);
+        }
+
+        [Fact]
+        public void DestructureLimitsCollectionCount()
+        {
+            var json = @"{
+                ""Serilog"": {
+                    ""Destructure"": [
+                    {
+                        ""Name"": ""ToMaximumCollectionCount"",
+                        ""Args"": { ""maximumCollectionCount"": 3 }
+                    }]
+                }
+            }";
+
+            var collection = new[] { 1, 2, 3, 4, 5, 6 };
+            var msg = GetDestructuredProperty(collection, json);
+
+            Assert.Contains("3", msg);
+            Assert.DoesNotContain("4", msg);
+        }
+
+        private string GetDestructuredProperty(object x, string json)
+        {
+            LogEvent evt = null;
+            var log = ConfigFromJson(json)
+                .WriteTo.Sink(new DelegatingSink(e => evt = e))
+                .CreateLogger();
+            log.Information("{@X}", x);
+            var result = evt.Properties["X"].ToString();
+            return result;
         }
     }
 }

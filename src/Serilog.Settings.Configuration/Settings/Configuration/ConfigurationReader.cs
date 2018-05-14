@@ -57,6 +57,7 @@ namespace Serilog.Settings.Configuration
             ApplyMinimumLevel(loggerConfiguration, declaredLevelSwitches);
             ApplyEnrichment(loggerConfiguration, declaredLevelSwitches);
             ApplyFilters(loggerConfiguration, declaredLevelSwitches);
+            ApplyDestructuring(loggerConfiguration, declaredLevelSwitches);
             ApplySinks(loggerConfiguration, declaredLevelSwitches);
             ApplyAuditSinks(loggerConfiguration, declaredLevelSwitches);
         }
@@ -149,6 +150,16 @@ namespace Serilog.Settings.Configuration
             {
                 var methodCalls = GetMethodCalls(filterDirective);
                 CallConfigurationMethods(methodCalls, FindFilterConfigurationMethods(_configurationAssemblies), loggerConfiguration.Filter, declaredLevelSwitches);
+            }
+        }
+
+        void ApplyDestructuring(LoggerConfiguration loggerConfiguration, IReadOnlyDictionary<string, LoggingLevelSwitch> declaredLevelSwitches)
+        {
+            var filterDirective = _section.GetSection("Destructure");
+            if(filterDirective.GetChildren().Any())
+            {
+                var methodCalls = GetMethodCalls(filterDirective);
+                CallConfigurationMethods(methodCalls, FindDestructureConfigurationMethods(_configurationAssemblies), loggerConfiguration.Destructure, declaredLevelSwitches);
             }
         }
 
@@ -339,7 +350,7 @@ namespace Serilog.Settings.Configuration
 
         internal static IList<MethodInfo> FindSinkConfigurationMethods(IReadOnlyCollection<Assembly> configurationAssemblies)
         {
-            var found = FindConfigurationMethods(configurationAssemblies, typeof(LoggerSinkConfiguration));
+            var found = FindConfigurationExtensionMethods(configurationAssemblies, typeof(LoggerSinkConfiguration));
             if (configurationAssemblies.Contains(typeof(LoggerSinkConfiguration).GetTypeInfo().Assembly))
                 found.Add(GetSurrogateConfigurationMethod<LoggerSinkConfiguration, Action<LoggerConfiguration>, LoggingLevelSwitch>((c, a, s) => Logger(c, a, LevelAlias.Minimum, s)));
 
@@ -348,30 +359,44 @@ namespace Serilog.Settings.Configuration
 
         internal static IList<MethodInfo> FindAuditSinkConfigurationMethods(IReadOnlyCollection<Assembly> configurationAssemblies)
         {
-            var found = FindConfigurationMethods(configurationAssemblies, typeof(LoggerAuditSinkConfiguration));
+            var found = FindConfigurationExtensionMethods(configurationAssemblies, typeof(LoggerAuditSinkConfiguration));
 
             return found;
         }
 
         internal static IList<MethodInfo> FindFilterConfigurationMethods(IReadOnlyCollection<Assembly> configurationAssemblies)
         {
-            var found = FindConfigurationMethods(configurationAssemblies, typeof(LoggerFilterConfiguration));
+            var found = FindConfigurationExtensionMethods(configurationAssemblies, typeof(LoggerFilterConfiguration));
             if (configurationAssemblies.Contains(typeof(LoggerFilterConfiguration).GetTypeInfo().Assembly))
                 found.Add(GetSurrogateConfigurationMethod<LoggerFilterConfiguration, ILogEventFilter, object>((c, f, _) => With(c, f)));
 
             return found;
         }
 
+        internal static IList<MethodInfo> FindDestructureConfigurationMethods(IReadOnlyCollection<Assembly> configurationAssemblies)
+        {
+            var found = FindConfigurationExtensionMethods(configurationAssemblies, typeof(LoggerDestructuringConfiguration));
+            if(configurationAssemblies.Contains(typeof(LoggerDestructuringConfiguration).GetTypeInfo().Assembly))
+            {
+                found.Add(GetSurrogateConfigurationMethod<LoggerDestructuringConfiguration, IDestructuringPolicy, object>((c, d, _) => With(c, d)));
+                found.Add(GetSurrogateConfigurationMethod<LoggerDestructuringConfiguration, int, object>((c, m, _) => ToMaximumDepth(c, m)));
+                found.Add(GetSurrogateConfigurationMethod<LoggerDestructuringConfiguration, int, object>((c, m, _) => ToMaximumStringLength(c, m)));
+                found.Add(GetSurrogateConfigurationMethod<LoggerDestructuringConfiguration, int, object>((c, m, _) => ToMaximumCollectionCount(c, m)));
+            }
+
+            return found;
+        }
+
         internal static IList<MethodInfo> FindEventEnricherConfigurationMethods(IReadOnlyCollection<Assembly> configurationAssemblies)
         {
-            var found = FindConfigurationMethods(configurationAssemblies, typeof(LoggerEnrichmentConfiguration));
+            var found = FindConfigurationExtensionMethods(configurationAssemblies, typeof(LoggerEnrichmentConfiguration));
             if (configurationAssemblies.Contains(typeof(LoggerEnrichmentConfiguration).GetTypeInfo().Assembly))
                 found.Add(GetSurrogateConfigurationMethod<LoggerEnrichmentConfiguration, object, object>((c, _, __) => FromLogContext(c)));
 
             return found;
         }
 
-        internal static IList<MethodInfo> FindConfigurationMethods(IReadOnlyCollection<Assembly> configurationAssemblies, Type configType)
+        internal static IList<MethodInfo> FindConfigurationExtensionMethods(IReadOnlyCollection<Assembly> configurationAssemblies, Type configType)
         {
             return configurationAssemblies
                 .SelectMany(a => a.ExportedTypes
@@ -383,15 +408,34 @@ namespace Serilog.Settings.Configuration
                 .ToList();
         }
 
-        // don't support (yet?) arrays in the parameter list (ILogEventEnricher[])
+        /*
+        Pass-through calls to various Serilog config methods which are
+        implemented as instance methods rather than extension methods. The
+        FindXXXConfigurationMethods calls (above) use these to add method
+        invocation expressions as surrogates so that SelectConfigurationMethod
+        has a way to match and invoke these instance methods.
+        */
+
+        // TODO: add overload for array argument (ILogEventEnricher[])
         internal static LoggerConfiguration With(LoggerFilterConfiguration loggerFilterConfiguration, ILogEventFilter filter)
             => loggerFilterConfiguration.With(filter);
 
-        // Unlike the other configuration methods, FromLogContext is an instance method rather than an extension.
+        // TODO: add overload for array argument (IDestructuringPolicy[])
+        internal static LoggerConfiguration With(LoggerDestructuringConfiguration loggerDestructuringConfiguration, IDestructuringPolicy policy)
+            => loggerDestructuringConfiguration.With(policy);
+
+        internal static LoggerConfiguration ToMaximumDepth(LoggerDestructuringConfiguration loggerDestructuringConfiguration, int maximumDestructuringDepth)
+            => loggerDestructuringConfiguration.ToMaximumDepth(maximumDestructuringDepth);
+
+        internal static LoggerConfiguration ToMaximumStringLength(LoggerDestructuringConfiguration loggerDestructuringConfiguration, int maximumStringLength)
+            => loggerDestructuringConfiguration.ToMaximumStringLength(maximumStringLength);
+
+        internal static LoggerConfiguration ToMaximumCollectionCount(LoggerDestructuringConfiguration loggerDestructuringConfiguration, int maximumCollectionCount)
+            => loggerDestructuringConfiguration.ToMaximumCollectionCount(maximumCollectionCount);
+
         internal static LoggerConfiguration FromLogContext(LoggerEnrichmentConfiguration loggerEnrichmentConfiguration)
             => loggerEnrichmentConfiguration.FromLogContext();
 
-        // Unlike the other configuration methods, Logger is an instance method rather than an extension.
         internal static LoggerConfiguration Logger(
             LoggerSinkConfiguration loggerSinkConfiguration,
             Action<LoggerConfiguration> configureLogger,

@@ -14,6 +14,12 @@ Configuration is read from the `Serilog` section.
       { "Name": "File", "Args": { "path": "%TEMP%\\Logs\\serilog-configuration-sample.txt" } }
     ],
     "Enrich": ["FromLogContext", "WithMachineName", "WithThreadId"],
+    "Destructure": [
+      { "Name": "With", "Args": { "policy": "Sample.CustomPolicy, Sample" } },
+      { "Name": "ToMaximumDepth", "Args": { "maximumDestructuringDepth": 4 } },
+      { "Name": "ToMaximumStringLength", "Args": { "maximumStringLength": 100 } },
+      { "Name": "ToMaximumCollectionCount", "Args": { "maximumCollectionCount": 10 } }
+    ],
     "Properties": {
 		"Application": "Sample"
     }
