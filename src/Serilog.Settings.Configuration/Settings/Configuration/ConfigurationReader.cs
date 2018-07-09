@@ -436,6 +436,7 @@ namespace Serilog.Settings.Configuration
         internal static LoggerConfiguration FromLogContext(LoggerEnrichmentConfiguration loggerEnrichmentConfiguration)
             => loggerEnrichmentConfiguration.FromLogContext();
 
+        // Unlike the other configuration methods, Logger is an instance method rather than an extension.
         internal static LoggerConfiguration Logger(
             LoggerSinkConfiguration loggerSinkConfiguration,
             Action<LoggerConfiguration> configureLogger,
