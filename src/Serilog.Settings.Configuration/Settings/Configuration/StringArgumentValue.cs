@@ -27,7 +27,8 @@ namespace Serilog.Settings.Configuration
         static readonly Dictionary<Type, Func<string, object>> ExtendedTypeConversions = new Dictionary<Type, Func<string, object>>
             {
                 { typeof(Uri), s => new Uri(s) },
-                { typeof(TimeSpan), s => TimeSpan.Parse(s) }
+                { typeof(TimeSpan), s => TimeSpan.Parse(s) },
+                { typeof(Type), s => Type.GetType(s, throwOnError:true) },
             };
 
         public object ConvertTo(Type toType, IReadOnlyDictionary<string, LoggingLevelSwitch> declaredLevelSwitches)
