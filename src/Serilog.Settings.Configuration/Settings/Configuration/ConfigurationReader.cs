@@ -384,6 +384,7 @@ namespace Serilog.Settings.Configuration
                 found.Add(GetSurrogateConfigurationMethod<LoggerDestructuringConfiguration, int, object>((c, m, _) => ToMaximumDepth(c, m)));
                 found.Add(GetSurrogateConfigurationMethod<LoggerDestructuringConfiguration, int, object>((c, m, _) => ToMaximumStringLength(c, m)));
                 found.Add(GetSurrogateConfigurationMethod<LoggerDestructuringConfiguration, int, object>((c, m, _) => ToMaximumCollectionCount(c, m)));
+                found.Add(GetSurrogateConfigurationMethod<LoggerDestructuringConfiguration, Type, object>((c, t, _) => AsScalar(c, t)));
             }
 
             return found;
@@ -434,6 +435,9 @@ namespace Serilog.Settings.Configuration
 
         internal static LoggerConfiguration ToMaximumCollectionCount(LoggerDestructuringConfiguration loggerDestructuringConfiguration, int maximumCollectionCount)
             => loggerDestructuringConfiguration.ToMaximumCollectionCount(maximumCollectionCount);
+
+        internal static LoggerConfiguration AsScalar(LoggerDestructuringConfiguration loggerDestructuringConfiguration, Type scalarType)
+            => loggerDestructuringConfiguration.AsScalar(scalarType);
 
         internal static LoggerConfiguration FromLogContext(LoggerEnrichmentConfiguration loggerEnrichmentConfiguration)
             => loggerEnrichmentConfiguration.FromLogContext();
