@@ -155,10 +155,10 @@ namespace Serilog.Settings.Configuration
 
         void ApplyDestructuring(LoggerConfiguration loggerConfiguration, IReadOnlyDictionary<string, LoggingLevelSwitch> declaredLevelSwitches)
         {
-            var filterDirective = _section.GetSection("Destructure");
-            if(filterDirective.GetChildren().Any())
+            var destructureDirective = _section.GetSection("Destructure");
+            if (destructureDirective.GetChildren().Any())
             {
-                var methodCalls = GetMethodCalls(filterDirective);
+                var methodCalls = GetMethodCalls(destructureDirective);
                 CallConfigurationMethods(methodCalls, FindDestructureConfigurationMethods(_configurationAssemblies), loggerConfiguration.Destructure, declaredLevelSwitches);
             }
         }
@@ -221,9 +221,11 @@ namespace Serilog.Settings.Configuration
                  where child.Value == null
                  let name = GetSectionName(child)
                  let callArgs = (from argument in child.GetSection("Args").GetChildren()
-                                 select new {
+                                 select new
+                                 {
                                      Name = argument.Key,
-                                     Value = GetArgumentValue(argument) }).ToDictionary(p => p.Name, p => p.Value)
+                                     Value = GetArgumentValue(argument)
+                                 }).ToDictionary(p => p.Name, p => p.Value)
                  select new { Name = name, Args = callArgs }))
                      .ToLookup(p => p.Name, p => p.Args);
 
@@ -330,7 +332,7 @@ namespace Serilog.Settings.Configuration
                                 select directive.Key == null ? p.DefaultValue : directive.Value.ConvertTo(p.ParameterType, declaredLevelSwitches)).ToList();
 
                     var parm = methodInfo.GetParameters().FirstOrDefault(i => i.ParameterType == typeof(IConfiguration));
-                    if(parm != null) call[parm.Position - 1] = _configuration;
+                    if (parm != null) call[parm.Position - 1] = _configuration;
 
                     call.Insert(0, receiver);
 
@@ -376,7 +378,7 @@ namespace Serilog.Settings.Configuration
         internal static IList<MethodInfo> FindDestructureConfigurationMethods(IReadOnlyCollection<Assembly> configurationAssemblies)
         {
             var found = FindConfigurationExtensionMethods(configurationAssemblies, typeof(LoggerDestructuringConfiguration));
-            if(configurationAssemblies.Contains(typeof(LoggerDestructuringConfiguration).GetTypeInfo().Assembly))
+            if (configurationAssemblies.Contains(typeof(LoggerDestructuringConfiguration).GetTypeInfo().Assembly))
             {
                 found.Add(GetSurrogateConfigurationMethod<LoggerDestructuringConfiguration, IDestructuringPolicy, object>((c, d, _) => With(c, d)));
                 found.Add(GetSurrogateConfigurationMethod<LoggerDestructuringConfiguration, int, object>((c, m, _) => ToMaximumDepth(c, m)));
