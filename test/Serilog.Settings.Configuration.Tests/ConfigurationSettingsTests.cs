@@ -679,5 +679,77 @@ namespace Serilog.Settings.Configuration.Tests
             var result = evt.Properties["X"].ToString();
             return result;
         }
+
+        [Fact]
+        public void DestructuringWithCustomExtensionMethodIsApplied()
+        {
+            var json = @"{
+                ""Serilog"": {
+                    ""Using"": [""TestDummies""],
+                    ""Destructure"": [
+                    {
+                        ""Name"": ""WithDummyHardCodedString"",
+                        ""Args"": { ""hardCodedString"": ""hardcoded"" }
+                    }]
+                }
+            }";
+
+            LogEvent evt = null;
+            var log = ConfigFromJson(json)
+                .WriteTo.Sink(new DelegatingSink(e => evt = e))
+                .CreateLogger();
+            log.Information("Destructuring with hard-coded policy {@Input}", new { Foo = "Bar" });
+            var formattedProperty = evt.Properties["Input"].ToString();
+
+            Assert.Equal("\"hardcoded\"", formattedProperty);
+        }
+
+        [Fact]
+        public void DestructuringAsScalarIsAppliedWithShortTypeName()
+        {
+            var json = @"{
+                ""Serilog"": {
+                    ""Destructure"": [
+                    {
+                        ""Name"": ""AsScalar"",
+                        ""Args"": { ""scalarType"": ""System.Version"" }
+                    }]
+                }
+            }";
+
+            LogEvent evt = null;
+            var log = ConfigFromJson(json)
+                .WriteTo.Sink(new DelegatingSink(e => evt = e))
+                .CreateLogger();
+
+            log.Information("Destructuring as scalar {@Scalarized}", new Version(2,3));
+            var prop = evt.Properties["Scalarized"];
+
+            Assert.IsType<ScalarValue>(prop);
+        }
+
+        [Fact]
+        public void DestructuringAsScalarIsAppliedWithAssemblyQualifiedName()
+        {
+            var json = $@"{{
+                ""Serilog"": {{
+                    ""Destructure"": [
+                    {{
+                        ""Name"": ""AsScalar"",
+                        ""Args"": {{ ""scalarType"": ""{typeof(Version).AssemblyQualifiedName}"" }}
+                    }}]
+                }}
+            }}";
+
+            LogEvent evt = null;
+            var log = ConfigFromJson(json)
+                .WriteTo.Sink(new DelegatingSink(e => evt = e))
+                .CreateLogger();
+
+            log.Information("Destructuring as scalar {@Scalarized}", new Version(2,3));
+            var prop = evt.Properties["Scalarized"];
+
+            Assert.IsType<ScalarValue>(prop);
+        }
     }
 }

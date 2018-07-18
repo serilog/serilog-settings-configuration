@@ -40,7 +40,7 @@ namespace Sample
                     new { TwentyChars = "0123456789abcdefghij" });
 
                 logger.Information("Destructure with max collection count:\n{@BigData}",
-                    new { TenItems = new string[] { "one", "two", "three", "four", "five", "six", "seven", "eight", "nine", "ten" } });
+                    new { TenItems = new[] { "one", "two", "three", "four", "five", "six", "seven", "eight", "nine", "ten" } });
 
                 logger.Information("Destructure with policy to strip password:\n{@LoginData}",
                     new LoginData { Username = "BGates", Password = "isityearoflinuxyet" });

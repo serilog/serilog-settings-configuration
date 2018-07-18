@@ -109,6 +109,14 @@ namespace TestDummies
                 s => new DummyWrappingSink(s),
                 wrappedSinkAction);
         }
-        
+
+        public static LoggerConfiguration WithDummyHardCodedString(
+            this LoggerDestructuringConfiguration loggerDestructuringConfiguration,
+            string hardCodedString
+        )
+        {
+            return loggerDestructuringConfiguration.With(new DummyHardCodedStringDestructuringPolicy(hardCodedString));
+        }
+
     }
 }
