@@ -492,6 +492,30 @@ namespace Serilog.Settings.Configuration.Tests
             Assert.Equal(1, DummyRollingFileSink.Emitted.Count);
         }
 
+        [Trait("Bugfix", "#111")]
+        [Fact]
+        public void CaseInsensitiveArgumentNameMatching()
+        {
+            var json = @"{
+                ""Serilog"": {            
+                    ""Using"": [""TestDummies""],
+                    ""WriteTo"": [{
+                        ""Name"": ""DummyRollingFile"",
+                        ""Args"": {""PATHFORMAT"" : ""C:\\""}
+                    }]        
+                }
+            }";
+
+            var log = ConfigFromJson(json)
+                .CreateLogger();
+
+            DummyRollingFileSink.Emitted.Clear();
+
+            log.Write(Some.InformationEvent());
+
+            Assert.Equal(1, DummyRollingFileSink.Emitted.Count);
+        }
+
         [Trait("Bugfix", "#91")]
         [Fact]
         public void WriteToLoggerWithRestrictedToMinimumLevelIsSupported()
