@@ -327,7 +327,7 @@ namespace Serilog.Settings.Configuration
                 if (methodInfo != null)
                 {
                     var call = (from p in methodInfo.GetParameters().Skip(1)
-                                let directive = method.Value.FirstOrDefault(s => s.Key == p.Name)
+                                let directive = method.Value.FirstOrDefault(s => s.Key.Equals(p.Name, StringComparison.OrdinalIgnoreCase))
                                 select directive.Key == null ? p.DefaultValue : directive.Value.ConvertTo(p.ParameterType, declaredLevelSwitches)).ToList();
 
                     var parm = methodInfo.GetParameters().FirstOrDefault(i => i.ParameterType == typeof(IConfiguration));
@@ -342,10 +342,15 @@ namespace Serilog.Settings.Configuration
 
         internal static MethodInfo SelectConfigurationMethod(IEnumerable<MethodInfo> candidateMethods, string name, Dictionary<string, IConfigurationArgumentValue> suppliedArgumentValues)
         {
+            // Per issue #111, it is safe to use case-insensitive matching on argument names. The CLR doesn't permit this type
+            // of overloading, and the Microsoft.Extensions.Configuration keys are case-insensitive (case is preserved with some
+            // config sources, but key-matching is case-insensitive and case-preservation does not appear to be guaranteed).
             return candidateMethods
                 .Where(m => m.Name == name &&
-                            m.GetParameters().Skip(1).All(p => p.HasDefaultValue || suppliedArgumentValues.Any(s => s.Key == p.Name)))
-                .OrderByDescending(m => m.GetParameters().Count(p => suppliedArgumentValues.Any(s => s.Key == p.Name)))
+                            m.GetParameters().Skip(1)
+                            .All(p => p.HasDefaultValue || suppliedArgumentValues.Any(s => s.Key.Equals(p.Name, StringComparison.OrdinalIgnoreCase))))
+                .OrderByDescending(m =>
+                            m.GetParameters().Count(p => suppliedArgumentValues.Any(s => s.Key.Equals(p.Name, StringComparison.OrdinalIgnoreCase))))
                 .FirstOrDefault();
         }
 
