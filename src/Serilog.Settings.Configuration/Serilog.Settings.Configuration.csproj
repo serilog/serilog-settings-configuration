@@ -16,6 +16,8 @@
     <PackageIconUrl>https://serilog.net/images/serilog-configuration-nuget.png</PackageIconUrl>
     <PackageProjectUrl>https://github.com/serilog/serilog-settings-configuration</PackageProjectUrl>
     <PackageLicenseUrl>https://www.apache.org/licenses/LICENSE-2.0</PackageLicenseUrl>
+    <RepositoryUrl>https://github.com/serilog/serilog-settings-configuration</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
     <RootNamespace>Serilog</RootNamespace>
   </PropertyGroup>
 
