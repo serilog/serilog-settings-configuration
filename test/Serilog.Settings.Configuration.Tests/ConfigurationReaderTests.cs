@@ -165,5 +165,20 @@ namespace Serilog.Settings.Configuration.Tests
             var selected = ConfigurationReader.SelectConfigurationMethod(options, "DummyRollingFile", suppliedArguments);
             Assert.Equal(typeof(ITextFormatter), selected.GetParameters()[1].ParameterType);
         }
+
+        [Fact]
+        public void MethodsAreSelectedBasedOnCountOfMatchedArgumentsAndThenStringType()
+        {
+            var options = typeof(DummyLoggerConfigurationWithMultipleMethodsExtensions).GetTypeInfo().DeclaredMethods.ToList();
+            Assert.Equal(3, options.Count(mi => mi.Name == "DummyRollingFile"));
+            var suppliedArguments = new Dictionary<string, IConfigurationArgumentValue>()
+            {
+                { "pathFormat", new StringArgumentValue(() => "C:\\") },
+                { "formatter", new StringArgumentValue(() => "SomeFormatter, SomeAssembly") }
+            };
+
+            var selected = ConfigurationReader.SelectConfigurationMethod(options, "DummyRollingFile", suppliedArguments);
+            Assert.Equal(typeof(string), selected.GetParameters()[2].ParameterType);
+        }
     }
 }
