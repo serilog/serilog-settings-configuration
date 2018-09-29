@@ -22,6 +22,22 @@ using System.Reflection;
 namespace Serilog
 {
     /// <summary>
+    /// Defines the interpretation of a null DependencyContext configuration parameter.
+    /// </summary>
+    public enum ConfigurationAssemblySource
+    {
+        /// <summary>
+        /// Try to scan the assemblies already in memory. This is the default. If GetEntryAssembly is null, fallback to DLL scanning.
+        /// </summary>
+        UseLoadedAssemblies,
+
+        /// <summary>
+        /// Scan for assemblies in DLLs from the working directory. This is the fallback when GetEntryAssembly is null.
+        /// </summary>
+        AlwaysScanDllFiles
+    }
+
+    /// <summary>
     /// Extends <see cref="LoggerConfiguration"/> with support for System.Configuration appSettings elements.
     /// </summary>
     public static class ConfigurationLoggerConfigurationExtensions
@@ -38,19 +54,23 @@ namespace Serilog
         /// </summary>
         /// <param name="settingConfiguration">Logger setting configuration.</param>
         /// <param name="configuration">A configuration object which contains a Serilog section.</param>
-        /// <param name="dependencyContext">The dependency context from which sink/enricher packages can be located. If not supplied, the platform
-        /// default will be used.</param>
+        /// <param name="dependencyContext">The dependency context from which sink/enricher packages can be located.</param>
+        /// <param name="onNullDependencyContext">If dependency context is not supplied, either the platform default or DLL scanning may be used.</param>
         /// <returns>An object allowing configuration to continue.</returns>
         public static LoggerConfiguration Configuration(
             this LoggerSettingsConfiguration settingConfiguration,
             IConfiguration configuration,
-            DependencyContext dependencyContext = null)
+            DependencyContext dependencyContext = null,
+            ConfigurationAssemblySource onNullDependencyContext = ConfigurationAssemblySource.UseLoadedAssemblies)
         {
             if (configuration == null) throw new ArgumentNullException(nameof(configuration));
             return settingConfiguration.Settings(
                 new ConfigurationReader(
                     configuration,
-                    dependencyContext ?? (Assembly.GetEntryAssembly() != null ? DependencyContext.Default : null)));
+                    dependencyContext ??
+                        (onNullDependencyContext == ConfigurationAssemblySource.UseLoadedAssemblies
+                        && Assembly.GetEntryAssembly() != null
+                        ? DependencyContext.Default : null)));
         }
 
         /// <summary>
@@ -59,13 +79,14 @@ namespace Serilog
         /// </summary>
         /// <param name="settingConfiguration">Logger setting configuration.</param>
         /// <param name="configSection">The Serilog configuration section</param>
-        /// <param name="dependencyContext">The dependency context from which sink/enricher packages can be located. If not supplied, the platform
-        /// default will be used.</param>
+        /// <param name="dependencyContext">The dependency context from which sink/enricher packages can be located.</param>
+        /// <param name="onNullDependencyContext">If dependency context is not supplied, either the platform default or DLL scanning may be used.</param>
         /// <returns>An object allowing configuration to continue.</returns>
         public static LoggerConfiguration ConfigurationSection(
             this LoggerSettingsConfiguration settingConfiguration,
             IConfigurationSection configSection,
-            DependencyContext dependencyContext = null)
+            DependencyContext dependencyContext = null,
+            ConfigurationAssemblySource onNullDependencyContext = ConfigurationAssemblySource.UseLoadedAssemblies)
         {
             if (settingConfiguration == null) throw new ArgumentNullException(nameof(settingConfiguration));
             if (configSection == null) throw new ArgumentNullException(nameof(configSection));
@@ -73,7 +94,10 @@ namespace Serilog
             return settingConfiguration.Settings(
                 new ConfigurationReader(
                     configSection,
-                    dependencyContext ?? (Assembly.GetEntryAssembly() != null ? DependencyContext.Default : null)));
+                    dependencyContext ??
+                        (onNullDependencyContext == ConfigurationAssemblySource.UseLoadedAssemblies
+                        && Assembly.GetEntryAssembly() != null
+                        ? DependencyContext.Default : null)));
         }
     }
 }
