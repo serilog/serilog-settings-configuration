@@ -163,5 +163,27 @@ namespace Serilog.Settings.Configuration.Tests
             Assert.Contains("$mySwitch", ex.Message);
             Assert.Contains("\"LevelSwitches\":{\"$mySwitch\":", ex.Message);
         }
+
+        [Fact]
+        public void StringValuesConvertToTypeFromShortTypeName()
+        {
+            var shortTypeName = "System.Version";
+            var stringArgumentValue = new StringArgumentValue(() => shortTypeName);
+
+            var actual = (Type)stringArgumentValue.ConvertTo(typeof(Type), new Dictionary<string, LoggingLevelSwitch>());
+
+            Assert.Equal(typeof(Version), actual);
+        }
+
+        [Fact]
+        public void StringValuesConvertToTypeFromAssemblyQualifiedName()
+        {
+            var assemblyQualifiedName = typeof(Version).AssemblyQualifiedName;
+            var stringArgumentValue = new StringArgumentValue(() => assemblyQualifiedName);
+
+            var actual = (Type)stringArgumentValue.ConvertTo(typeof(Type), new Dictionary<string, LoggingLevelSwitch>());
+
+            Assert.Equal(typeof(Version), actual);
+        }
     }
 }

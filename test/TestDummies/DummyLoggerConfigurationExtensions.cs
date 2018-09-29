@@ -6,6 +6,8 @@ using Serilog.Configuration;
 using Serilog.Core;
 using TestDummies.Console;
 using TestDummies.Console.Themes;
+using Microsoft.Extensions.Configuration;
+using System.Collections.Generic;
 
 namespace TestDummies
 {
@@ -29,6 +31,43 @@ namespace TestDummies
         public static LoggerConfiguration DummyRollingFile(
             this LoggerSinkConfiguration loggerSinkConfiguration,
             ITextFormatter formatter,
+            string pathFormat,
+            LogEventLevel restrictedToMinimumLevel = LevelAlias.Minimum)
+        {
+            return loggerSinkConfiguration.Sink(new DummyRollingFileSink(), restrictedToMinimumLevel);
+        }
+
+        public static LoggerConfiguration DummyRollingFile(
+            this LoggerSinkConfiguration loggerSinkConfiguration,
+            IConfiguration appConfiguration,
+            IConfigurationSection configurationSection,
+            string pathFormat,
+            LogEventLevel restrictedToMinimumLevel = LevelAlias.Minimum)
+        {
+            return loggerSinkConfiguration.Sink(new DummyRollingFileSink(), restrictedToMinimumLevel);
+        }
+
+        public static LoggerConfiguration DummyRollingFile(
+            this LoggerSinkConfiguration loggerSinkConfiguration,
+            List<string> objectBinding,
+            string pathFormat,
+            LogEventLevel restrictedToMinimumLevel = LevelAlias.Minimum)
+        {
+            return loggerSinkConfiguration.Sink(new DummyRollingFileSink(), restrictedToMinimumLevel);
+        }
+
+        public static LoggerConfiguration DummyRollingFile(
+            this LoggerSinkConfiguration loggerSinkConfiguration,
+            string[] stringArrayBinding,
+            string pathFormat,
+            LogEventLevel restrictedToMinimumLevel = LevelAlias.Minimum)
+        {
+            return loggerSinkConfiguration.Sink(new DummyRollingFileSink(), restrictedToMinimumLevel);
+        }
+
+        public static LoggerConfiguration DummyRollingFile(
+            this LoggerSinkConfiguration loggerSinkConfiguration,
+            int[] intArrayBinding,
             string pathFormat,
             LogEventLevel restrictedToMinimumLevel = LevelAlias.Minimum)
         {
@@ -70,6 +109,14 @@ namespace TestDummies
                 s => new DummyWrappingSink(s),
                 wrappedSinkAction);
         }
-        
+
+        public static LoggerConfiguration WithDummyHardCodedString(
+            this LoggerDestructuringConfiguration loggerDestructuringConfiguration,
+            string hardCodedString
+        )
+        {
+            return loggerDestructuringConfiguration.With(new DummyHardCodedStringDestructuringPolicy(hardCodedString));
+        }
+
     }
 }

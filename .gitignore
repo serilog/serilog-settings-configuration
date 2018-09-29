@@ -199,3 +199,6 @@ FakesAssemblies/
 *.opt
 
 project.lock.json
+
+#Test files
+*.txt
