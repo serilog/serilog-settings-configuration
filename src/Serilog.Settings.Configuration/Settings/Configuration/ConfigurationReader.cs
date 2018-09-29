@@ -351,7 +351,8 @@ namespace Serilog.Settings.Configuration
                             .All(p => p.HasDefaultValue || suppliedArgumentValues.Any(s => s.Key.Equals(p.Name, StringComparison.OrdinalIgnoreCase))))
                 .OrderByDescending(m =>
                 {
-                    var matchingArgs = m.GetParameters().Where(p => suppliedArgumentValues.Any(s => s.Key.Equals(p.Name, StringComparison.OrdinalIgnoreCase)))).ToList();
+                    var matchingArgs = m.GetParameters().Where(p => suppliedArgumentValues.Any(s => s.Key.Equals(p.Name, StringComparison.OrdinalIgnoreCase)))
+                        do.ToList();
 
                     // Prefer the configuration method with most number of matching arguments and of those the ones with
                     // the most string type parameters to predict best match with least type casting
