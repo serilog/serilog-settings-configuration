@@ -92,8 +92,7 @@ namespace Serilog.Settings.Configuration.Tests
             var log = new LoggerConfiguration()
                 .ReadFrom.Configuration(
                     configuration: config,
-                    dependencyContext: null,
-                    onNullDependencyContext: ConfigurationAssemblySource.AlwaysScanDllFiles)
+                    configurationAssemblySource: ConfigurationAssemblySource.AlwaysScanDllFiles)
                 .CreateLogger();
 
             DummyConsoleSink.Emitted.Clear();
