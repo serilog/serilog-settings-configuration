@@ -1,5 +1,5 @@
-﻿using Microsoft.Extensions.Configuration;
-using System;
+﻿using System;
+using Microsoft.Extensions.Configuration;
 using Xunit;
 
 namespace Serilog.Settings.Configuration.Tests

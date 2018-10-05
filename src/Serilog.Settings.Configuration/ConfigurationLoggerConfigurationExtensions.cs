@@ -47,6 +47,7 @@ namespace Serilog
             DependencyContext dependencyContext = null)
         {
             if (configuration == null) throw new ArgumentNullException(nameof(configuration));
+
             return settingConfiguration.Settings(
                 new ConfigurationReader(
                     configuration,
@@ -69,11 +70,63 @@ namespace Serilog
         {
             if (settingConfiguration == null) throw new ArgumentNullException(nameof(settingConfiguration));
             if (configSection == null) throw new ArgumentNullException(nameof(configSection));
-            
+
             return settingConfiguration.Settings(
                 new ConfigurationReader(
                     configSection,
                     dependencyContext ?? (Assembly.GetEntryAssembly() != null ? DependencyContext.Default : null)));
+        }
+
+        /// <summary>
+        /// Reads logger settings from the provided configuration object using the default section name. Generally this
+        /// is preferable over the other method that takes a configuration section. Only this version will populate
+        /// IConfiguration parameters on target methods.
+        /// </summary>
+        /// <param name="settingConfiguration">Logger setting configuration.</param>
+        /// <param name="configuration">A configuration object which contains a Serilog section.</param>
+        /// <param name="configurationAssemblySource">Defines how the package identifies assemblies to scan for sinks and other Types.</param>
+        /// <returns>An object allowing configuration to continue.</returns>
+        public static LoggerConfiguration Configuration(
+            this LoggerSettingsConfiguration settingConfiguration,
+            IConfiguration configuration,
+            ConfigurationAssemblySource configurationAssemblySource)
+        {
+            if (configuration == null) throw new ArgumentNullException(nameof(configuration));
+
+            if(configurationAssemblySource == ConfigurationAssemblySource.UseLoadedAssemblies)
+            {
+                return Configuration(settingConfiguration, configuration);
+            }
+            else
+            {
+                return settingConfiguration.Settings(new ConfigurationReader(configuration, null));
+            }
+        }
+
+        /// <summary>
+        /// Reads logger settings from the provided configuration section. Generally it is preferable to use the other
+        /// extension method that takes the full configuration object.
+        /// </summary>
+        /// <param name="settingConfiguration">Logger setting configuration.</param>
+        /// <param name="configSection">The Serilog configuration section</param>
+        /// <param name="configurationAssemblySource">Defines how the package identifies assemblies to scan for sinks and other Types.</param>
+        /// <returns>An object allowing configuration to continue.</returns>
+        public static LoggerConfiguration ConfigurationSection(
+            this LoggerSettingsConfiguration settingConfiguration,
+            IConfigurationSection configSection,
+            ConfigurationAssemblySource configurationAssemblySource)
+        {
+            if (settingConfiguration == null) throw new ArgumentNullException(nameof(settingConfiguration));
+            if (configSection == null) throw new ArgumentNullException(nameof(configSection));
+
+            if (configurationAssemblySource == ConfigurationAssemblySource.UseLoadedAssemblies)
+            {
+                return Configuration(settingConfiguration, configSection);
+            }
+            else
+            {
+                return settingConfiguration.Settings(new ConfigurationReader(configSection, null));
+            }
         }
     }
 }
