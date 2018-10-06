@@ -23,6 +23,7 @@ namespace Serilog.Settings.Configuration
             get
             {
                 yield return GetSurrogateConfigurationMethod<LoggerSinkConfiguration, Action<LoggerConfiguration>, LoggingLevelSwitch>((c, a, s) => Logger(c, a, LevelAlias.Minimum, s));
+                yield return GetSurrogateConfigurationMethod<LoggerSinkConfiguration, ILogEventSink, LoggingLevelSwitch>((c, sink, s) => Sink(c, sink, LevelAlias.Minimum, s));
             }
         }
 
@@ -64,6 +65,15 @@ namespace Serilog.Settings.Configuration
         invocation expressions as surrogates so that SelectConfigurationMethod
         has a way to match and invoke these instance methods.
         */
+
+        internal static LoggerConfiguration Sink(
+            LoggerSinkConfiguration loggerSinkConfiguration,
+            ILogEventSink sink,
+            LogEventLevel restrictedToMinimumLevel = LevelAlias.Minimum,
+            LoggingLevelSwitch levelSwitch = null)
+        {
+            return loggerSinkConfiguration.Sink(sink, restrictedToMinimumLevel, levelSwitch);
+        }
 
         // TODO: add overload for array argument (ILogEventEnricher[])
         static LoggerConfiguration With(LoggerFilterConfiguration loggerFilterConfiguration, ILogEventFilter filter)

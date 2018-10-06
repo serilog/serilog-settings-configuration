@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using Microsoft.Extensions.Configuration;
 using Serilog.Core;
 using Serilog.Events;
@@ -799,6 +799,87 @@ namespace Serilog.Settings.Configuration.Tests
             var prop = evt.Properties["Scalarized"];
 
             Assert.IsType<ScalarValue>(prop);
+        }
+
+
+        [Fact]
+        public void WriteToSinkIsAppliedWithCustomSink()
+        {
+            var json = $@"{{
+                ""Serilog"": {{
+                    ""Using"": [""TestDummies""],
+                    ""WriteTo"": [
+                    {{
+                        ""Name"": ""Sink"",
+                        ""Args"": {{
+                            ""sink"": ""{typeof(DummyRollingFileSink).AssemblyQualifiedName}""
+                        }}
+                    }}]
+                }}
+            }}";
+
+            var log = ConfigFromJson(json)
+                .CreateLogger();
+
+            DummyRollingFileSink.Reset();
+            log.Write(Some.InformationEvent());
+
+            Assert.Single(DummyRollingFileSink.Emitted);
+        }
+
+        [Fact]
+        public void WriteToSinkIsAppliedWithCustomSinkAndMinimumLevel()
+        {
+            var json = $@"{{
+                ""Serilog"": {{
+                    ""Using"": [""TestDummies""],
+                    ""WriteTo"": [
+                    {{
+                        ""Name"": ""Sink"",
+                        ""Args"": {{
+                            ""sink"": ""{typeof(DummyRollingFileSink).AssemblyQualifiedName}"",
+                            ""restrictedToMinimumLevel"": ""Warning""
+                        }}
+                    }}]
+                }}
+            }}";
+
+            var log = ConfigFromJson(json)
+                .CreateLogger();
+
+            DummyRollingFileSink.Reset();
+            log.Write(Some.InformationEvent());
+            log.Write(Some.WarningEvent());
+
+            Assert.Single(DummyRollingFileSink.Emitted);
+        }
+
+        [Fact]
+        public void WriteToSinkIsAppliedWithCustomSinkAndLevelSwitch()
+        {
+            var json = $@"{{
+                ""Serilog"": {{
+                    ""Using"": [""TestDummies""],
+                    ""LevelSwitches"": {{""$switch1"": ""Warning"" }},
+                    ""WriteTo"": [
+                    {{
+                        ""Name"": ""Sink"",
+                        ""Args"": {{
+                            ""sink"": ""{typeof(DummyRollingFileSink).AssemblyQualifiedName}"",
+                            ""levelSwitch"": ""$switch1""
+                        }}
+                    }}]
+                }}
+            }}";
+
+            var log = ConfigFromJson(json)
+                .CreateLogger();
+
+            DummyRollingFileSink.Reset();
+            log.Write(Some.InformationEvent());
+            log.Write(Some.WarningEvent());
+
+            Assert.Single(DummyRollingFileSink.Emitted);
         }
     }
 }
