@@ -881,5 +881,86 @@ namespace Serilog.Settings.Configuration.Tests
 
             Assert.Single(DummyRollingFileSink.Emitted);
         }
+
+        
+        [Fact]
+        public void AuditToSinkIsAppliedWithCustomSink()
+        {
+            var json = $@"{{
+                ""Serilog"": {{
+                    ""Using"": [""TestDummies""],
+                    ""AuditTo"": [
+                    {{
+                        ""Name"": ""Sink"",
+                        ""Args"": {{
+                            ""sink"": ""{typeof(DummyRollingFileSink).AssemblyQualifiedName}""
+                        }}
+                    }}]
+                }}
+            }}";
+
+            var log = ConfigFromJson(json)
+                .CreateLogger();
+
+            DummyRollingFileSink.Reset();
+            log.Write(Some.InformationEvent());
+
+            Assert.Single(DummyRollingFileSink.Emitted);
+        }
+
+        [Fact]
+        public void AuditToSinkIsAppliedWithCustomSinkAndMinimumLevel()
+        {
+            var json = $@"{{
+                ""Serilog"": {{
+                    ""Using"": [""TestDummies""],
+                    ""AuditTo"": [
+                    {{
+                        ""Name"": ""Sink"",
+                        ""Args"": {{
+                            ""sink"": ""{typeof(DummyRollingFileSink).AssemblyQualifiedName}"",
+                            ""restrictedToMinimumLevel"": ""Warning""
+                        }}
+                    }}]
+                }}
+            }}";
+
+            var log = ConfigFromJson(json)
+                .CreateLogger();
+
+            DummyRollingFileSink.Reset();
+            log.Write(Some.InformationEvent());
+            log.Write(Some.WarningEvent());
+
+            Assert.Single(DummyRollingFileSink.Emitted);
+        }
+
+        [Fact]
+        public void AuditToSinkIsAppliedWithCustomSinkAndLevelSwitch()
+        {
+            var json = $@"{{
+                ""Serilog"": {{
+                    ""Using"": [""TestDummies""],
+                    ""LevelSwitches"": {{""$switch1"": ""Warning"" }},
+                    ""AuditTo"": [
+                    {{
+                        ""Name"": ""Sink"",
+                        ""Args"": {{
+                            ""sink"": ""{typeof(DummyRollingFileSink).AssemblyQualifiedName}"",
+                            ""levelSwitch"": ""$switch1""
+                        }}
+                    }}]
+                }}
+            }}";
+
+            var log = ConfigFromJson(json)
+                .CreateLogger();
+
+            DummyRollingFileSink.Reset();
+            log.Write(Some.InformationEvent());
+            log.Write(Some.WarningEvent());
+
+            Assert.Single(DummyRollingFileSink.Emitted);
+        }
     }
 }

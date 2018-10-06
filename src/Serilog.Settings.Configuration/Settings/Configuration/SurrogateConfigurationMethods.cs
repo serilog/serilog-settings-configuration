@@ -27,6 +27,14 @@ namespace Serilog.Settings.Configuration
             }
         }
 
+        public static IEnumerable<MethodInfo> AuditTo
+        {
+            get
+            {
+                yield return GetSurrogateConfigurationMethod<LoggerAuditSinkConfiguration, ILogEventSink, LoggingLevelSwitch>((c, sink, s) => Sink(c, sink, LevelAlias.Minimum, s));
+            }
+        }
+
         public static IEnumerable<MethodInfo> Filter
         {
             get
@@ -66,7 +74,9 @@ namespace Serilog.Settings.Configuration
         has a way to match and invoke these instance methods.
         */
 
-        internal static LoggerConfiguration Sink(
+        // .WriteTo...
+        // ========
+        static LoggerConfiguration Sink(
             LoggerSinkConfiguration loggerSinkConfiguration,
             ILogEventSink sink,
             LogEventLevel restrictedToMinimumLevel = LevelAlias.Minimum,
@@ -75,10 +85,32 @@ namespace Serilog.Settings.Configuration
             return loggerSinkConfiguration.Sink(sink, restrictedToMinimumLevel, levelSwitch);
         }
 
+        static LoggerConfiguration Logger(
+            LoggerSinkConfiguration loggerSinkConfiguration,
+            Action<LoggerConfiguration> configureLogger,
+            LogEventLevel restrictedToMinimumLevel = LevelAlias.Minimum,
+            LoggingLevelSwitch levelSwitch = null)
+            => loggerSinkConfiguration.Logger(configureLogger, restrictedToMinimumLevel, levelSwitch);
+
+        // .AuditTo...
+        // ========
+        static LoggerConfiguration Sink(
+            LoggerAuditSinkConfiguration auditSinkConfiguration,
+            ILogEventSink sink,
+            LogEventLevel restrictedToMinimumLevel = LevelAlias.Minimum,
+            LoggingLevelSwitch levelSwitch = null)
+        {
+            return auditSinkConfiguration.Sink(sink, restrictedToMinimumLevel, levelSwitch);
+        }
+
+        // .Filter...
+        // =======
         // TODO: add overload for array argument (ILogEventEnricher[])
         static LoggerConfiguration With(LoggerFilterConfiguration loggerFilterConfiguration, ILogEventFilter filter)
             => loggerFilterConfiguration.With(filter);
 
+        // .Destructure...
+        // ============
         // TODO: add overload for array argument (IDestructuringPolicy[])
         static LoggerConfiguration With(LoggerDestructuringConfiguration loggerDestructuringConfiguration, IDestructuringPolicy policy)
             => loggerDestructuringConfiguration.With(policy);
@@ -95,15 +127,10 @@ namespace Serilog.Settings.Configuration
         static LoggerConfiguration AsScalar(LoggerDestructuringConfiguration loggerDestructuringConfiguration, Type scalarType)
             => loggerDestructuringConfiguration.AsScalar(scalarType);
 
+        // .Enrich...
+        // =======
         static LoggerConfiguration FromLogContext(LoggerEnrichmentConfiguration loggerEnrichmentConfiguration)
             => loggerEnrichmentConfiguration.FromLogContext();
 
-        // Unlike the other configuration methods, Logger is an instance method rather than an extension.
-        static LoggerConfiguration Logger(
-            LoggerSinkConfiguration loggerSinkConfiguration,
-            Action<LoggerConfiguration> configureLogger,
-            LogEventLevel restrictedToMinimumLevel = LevelAlias.Minimum,
-            LoggingLevelSwitch levelSwitch = null)
-            => loggerSinkConfiguration.Logger(configureLogger, restrictedToMinimumLevel, levelSwitch);
     }
 }

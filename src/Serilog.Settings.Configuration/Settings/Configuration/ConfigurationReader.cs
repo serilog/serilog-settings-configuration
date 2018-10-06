@@ -374,7 +374,8 @@ namespace Serilog.Settings.Configuration
         internal static IList<MethodInfo> FindAuditSinkConfigurationMethods(IReadOnlyCollection<Assembly> configurationAssemblies)
         {
             var found = FindConfigurationExtensionMethods(configurationAssemblies, typeof(LoggerAuditSinkConfiguration));
-
+            if (configurationAssemblies.Contains(typeof(LoggerAuditSinkConfiguration).GetTypeInfo().Assembly))
+                found.AddRange(SurrogateConfigurationMethods.AuditTo);
             return found;
         }
 
