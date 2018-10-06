@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using Microsoft.Extensions.Configuration;
 using Serilog.Core;
 using Serilog.Events;
@@ -118,8 +118,8 @@ namespace Serilog.Settings.Configuration.Tests
             var log = ConfigFromJson(json)
                 .CreateLogger();
 
-            DummyRollingFileSink.Emitted.Clear();
-            DummyRollingFileAuditSink.Emitted.Clear();
+            DummyRollingFileSink.Reset();
+            DummyRollingFileAuditSink.Reset();
 
             log.Write(Some.InformationEvent());
 
@@ -143,8 +143,8 @@ namespace Serilog.Settings.Configuration.Tests
             var log = ConfigFromJson(json)
                 .CreateLogger();
 
-            DummyRollingFileSink.Emitted.Clear();
-            DummyRollingFileAuditSink.Emitted.Clear();
+            DummyRollingFileSink.Reset();
+            DummyRollingFileAuditSink.Reset();
 
             log.Write(Some.InformationEvent());
 
@@ -438,7 +438,7 @@ namespace Serilog.Settings.Configuration.Tests
             var log = ConfigFromJson(json)
                 .CreateLogger();
 
-            DummyRollingFileSink.Emitted.Clear();
+            DummyRollingFileSink.Reset();
 
             log.Write(Some.InformationEvent());
 
@@ -462,7 +462,7 @@ namespace Serilog.Settings.Configuration.Tests
             var log = ConfigFromJson(json)
                 .CreateLogger();
 
-            DummyRollingFileSink.Emitted.Clear();
+            DummyRollingFileSink.Reset();
 
             log.Write(Some.InformationEvent());
 
@@ -486,7 +486,7 @@ namespace Serilog.Settings.Configuration.Tests
             var log = ConfigFromJson(json)
                 .CreateLogger();
 
-            DummyRollingFileSink.Emitted.Clear();
+            DummyRollingFileSink.Reset();
 
             log.Write(Some.InformationEvent());
 
@@ -510,7 +510,7 @@ namespace Serilog.Settings.Configuration.Tests
             var log = ConfigFromJson(json)
                 .CreateLogger();
 
-            DummyRollingFileSink.Emitted.Clear();
+            DummyRollingFileSink.Reset();
 
             log.Write(Some.InformationEvent());
 
@@ -534,7 +534,7 @@ namespace Serilog.Settings.Configuration.Tests
             var log = ConfigFromJson(json)
                 .CreateLogger();
 
-            DummyRollingFileSink.Emitted.Clear();
+            DummyRollingFileSink.Reset();
 
             log.Write(Some.InformationEvent());
 
@@ -565,7 +565,7 @@ namespace Serilog.Settings.Configuration.Tests
             var log = ConfigFromJson(json)
             .CreateLogger();
 
-            DummyRollingFileSink.Emitted.Clear();
+            DummyRollingFileSink.Reset();
 
             log.Write(Some.InformationEvent());
             log.Write(Some.WarningEvent());
@@ -598,9 +598,9 @@ namespace Serilog.Settings.Configuration.Tests
             }";
 
             var log = ConfigFromJson(json)
-            .CreateLogger();
+                .CreateLogger();
 
-            DummyRollingFileSink.Emitted.Clear();
+            DummyRollingFileSink.Reset();
 
             log.Write(Some.InformationEvent());
             log.Write(Some.WarningEvent());
@@ -771,7 +771,7 @@ namespace Serilog.Settings.Configuration.Tests
                 .WriteTo.Sink(new DelegatingSink(e => evt = e))
                 .CreateLogger();
 
-            log.Information("Destructuring as scalar {@Scalarized}", new Version(2,3));
+            log.Information("Destructuring as scalar {@Scalarized}", new Version(2, 3));
             var prop = evt.Properties["Scalarized"];
 
             Assert.IsType<ScalarValue>(prop);
@@ -795,7 +795,7 @@ namespace Serilog.Settings.Configuration.Tests
                 .WriteTo.Sink(new DelegatingSink(e => evt = e))
                 .CreateLogger();
 
-            log.Information("Destructuring as scalar {@Scalarized}", new Version(2,3));
+            log.Information("Destructuring as scalar {@Scalarized}", new Version(2, 3));
             var prop = evt.Properties["Scalarized"];
 
             Assert.IsType<ScalarValue>(prop);
