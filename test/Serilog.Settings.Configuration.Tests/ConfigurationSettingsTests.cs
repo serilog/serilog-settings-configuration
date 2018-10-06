@@ -801,7 +801,6 @@ namespace Serilog.Settings.Configuration.Tests
             Assert.IsType<ScalarValue>(prop);
         }
 
-
         [Fact]
         public void WriteToSinkIsAppliedWithCustomSink()
         {
@@ -882,7 +881,6 @@ namespace Serilog.Settings.Configuration.Tests
             Assert.Single(DummyRollingFileSink.Emitted);
         }
 
-        
         [Fact]
         public void AuditToSinkIsAppliedWithCustomSink()
         {
@@ -963,7 +961,6 @@ namespace Serilog.Settings.Configuration.Tests
             Assert.Single(DummyRollingFileSink.Emitted);
         }
 
-        
         [Fact]
         public void EnrichWithIsAppliedWithCustomEnricher()
         {
