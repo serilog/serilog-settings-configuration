@@ -991,5 +991,33 @@ namespace Serilog.Settings.Configuration.Tests
             Assert.NotNull(evt);
             Assert.True(evt.Properties.ContainsKey("ThreadId"), "Event should have enriched property ThreadId");
         }
+
+        [Fact]
+        public void FilterWithIsAppliedWithCustomFilter()
+        {
+            LogEvent evt = null;
+
+            var json = $@"{{
+                ""Serilog"": {{
+                    ""Using"": [""TestDummies""],
+                    ""Filter"": [
+                    {{
+                        ""Name"": ""With"",
+                        ""Args"": {{
+                            ""filter"": ""{typeof(DummyAnonymousUserFilter).AssemblyQualifiedName}""
+                        }}
+                    }}]
+                }}
+            }}";
+
+            var log = ConfigFromJson(json)
+                .WriteTo.Sink(new DelegatingSink(e => evt = e))
+                .CreateLogger();
+
+            log.ForContext("User", "anonymous").Write(Some.InformationEvent());
+            Assert.Null(evt);
+            log.ForContext("User", "the user").Write(Some.InformationEvent());
+            Assert.NotNull(evt);
+        }
     }
 }
