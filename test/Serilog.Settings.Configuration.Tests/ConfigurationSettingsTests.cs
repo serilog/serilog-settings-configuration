@@ -962,5 +962,34 @@ namespace Serilog.Settings.Configuration.Tests
 
             Assert.Single(DummyRollingFileSink.Emitted);
         }
+
+        
+        [Fact]
+        public void EnrichWithIsAppliedWithCustomEnricher()
+        {
+            LogEvent evt = null;
+
+            var json = $@"{{
+                ""Serilog"": {{
+                    ""Using"": [""TestDummies""],
+                    ""Enrich"": [
+                    {{
+                        ""Name"": ""With"",
+                        ""Args"": {{
+                            ""enricher"": ""{typeof(DummyThreadIdEnricher).AssemblyQualifiedName}""
+                        }}
+                    }}]
+                }}
+            }}";
+
+            var log = ConfigFromJson(json)
+                .WriteTo.Sink(new DelegatingSink(e => evt = e))
+                .CreateLogger();
+
+            log.Write(Some.InformationEvent());
+
+            Assert.NotNull(evt);
+            Assert.True(evt.Properties.ContainsKey("ThreadId"), "Event should have enriched property ThreadId");
+        }
     }
 }

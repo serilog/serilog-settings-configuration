@@ -60,6 +60,7 @@ namespace Serilog.Settings.Configuration
             get
             {
                 yield return GetSurrogateConfigurationMethod<LoggerEnrichmentConfiguration, object, object>((c, _, __) => FromLogContext(c));
+                yield return GetSurrogateConfigurationMethod<LoggerEnrichmentConfiguration, ILogEventEnricher, object>((c, e, __) => With(c, e));
             }
         }
 
@@ -131,6 +132,11 @@ namespace Serilog.Settings.Configuration
         // =======
         static LoggerConfiguration FromLogContext(LoggerEnrichmentConfiguration loggerEnrichmentConfiguration)
             => loggerEnrichmentConfiguration.FromLogContext();
+
+        static LoggerConfiguration With(LoggerEnrichmentConfiguration loggerEnrichmentConfiguration, ILogEventEnricher enricher)
+        {
+            return loggerEnrichmentConfiguration.With(enricher);
+        }
 
     }
 }
