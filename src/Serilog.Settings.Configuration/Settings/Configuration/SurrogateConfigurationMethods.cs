@@ -32,10 +32,9 @@ namespace Serilog.Settings.Configuration
 
         /*
         Pass-through calls to various Serilog config methods which are
-        implemented as instance methods rather than extension methods. The
-        FindXXXConfigurationMethods calls (above) use these to add method
-        invocation expressions as surrogates so that SelectConfigurationMethod
-        has a way to match and invoke these instance methods.
+        implemented as instance methods rather than extension methods.
+        ConfigurationReader adds those to the already discovered extension methods
+        so they can be invoked as well.
         */
 
         // ReSharper disable UnusedMember.Local
@@ -49,9 +48,7 @@ namespace Serilog.Settings.Configuration
             ILogEventSink sink,
             LogEventLevel restrictedToMinimumLevel = LevelAlias.Minimum,
             LoggingLevelSwitch levelSwitch = null)
-        {
-            return loggerSinkConfiguration.Sink(sink, restrictedToMinimumLevel, levelSwitch);
-        }
+            => loggerSinkConfiguration.Sink(sink, restrictedToMinimumLevel, levelSwitch);
 
         static LoggerConfiguration Logger(
             LoggerSinkConfiguration loggerSinkConfiguration,
@@ -67,19 +64,19 @@ namespace Serilog.Settings.Configuration
             ILogEventSink sink,
             LogEventLevel restrictedToMinimumLevel = LevelAlias.Minimum,
             LoggingLevelSwitch levelSwitch = null)
-        {
-            return auditSinkConfiguration.Sink(sink, restrictedToMinimumLevel, levelSwitch);
-        }
+            => auditSinkConfiguration.Sink(sink, restrictedToMinimumLevel, levelSwitch);
 
         // .Filter...
         // =======
         // TODO: add overload for array argument (ILogEventEnricher[])
+        // expose `With(params ILogEventFilter[] filters)` as if it was `With(ILogEventFilter filter)`
         static LoggerConfiguration With(LoggerFilterConfiguration loggerFilterConfiguration, ILogEventFilter filter)
             => loggerFilterConfiguration.With(filter);
 
         // .Destructure...
         // ============
         // TODO: add overload for array argument (IDestructuringPolicy[])
+        // expose `With(params IDestructuringPolicy[] destructuringPolicies)` as if it was `With(IDestructuringPolicy policy)`
         static LoggerConfiguration With(LoggerDestructuringConfiguration loggerDestructuringConfiguration, IDestructuringPolicy policy)
             => loggerDestructuringConfiguration.With(policy);
 
@@ -97,13 +94,14 @@ namespace Serilog.Settings.Configuration
 
         // .Enrich...
         // =======
+        // expose `With(params ILogEventEnricher[] enrichers)` as if it was `With(ILogEventEnricher enricher)`
+        static LoggerConfiguration With(
+            LoggerEnrichmentConfiguration loggerEnrichmentConfiguration,
+            ILogEventEnricher enricher)
+            => loggerEnrichmentConfiguration.With(enricher);
+
         static LoggerConfiguration FromLogContext(LoggerEnrichmentConfiguration loggerEnrichmentConfiguration)
             => loggerEnrichmentConfiguration.FromLogContext();
-
-        static LoggerConfiguration With(LoggerEnrichmentConfiguration loggerEnrichmentConfiguration, ILogEventEnricher enricher)
-        {
-            return loggerEnrichmentConfiguration.With(enricher);
-        }
 
         // ReSharper restore UnusedMember.Local
     }
