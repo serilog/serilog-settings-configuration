@@ -118,8 +118,8 @@ namespace Serilog.Settings.Configuration.Tests
             var log = ConfigFromJson(json)
                 .CreateLogger();
 
-            DummyRollingFileSink.Emitted.Clear();
-            DummyRollingFileAuditSink.Emitted.Clear();
+            DummyRollingFileSink.Reset();
+            DummyRollingFileAuditSink.Reset();
 
             log.Write(Some.InformationEvent());
 
@@ -143,8 +143,8 @@ namespace Serilog.Settings.Configuration.Tests
             var log = ConfigFromJson(json)
                 .CreateLogger();
 
-            DummyRollingFileSink.Emitted.Clear();
-            DummyRollingFileAuditSink.Emitted.Clear();
+            DummyRollingFileSink.Reset();
+            DummyRollingFileAuditSink.Reset();
 
             log.Write(Some.InformationEvent());
 
@@ -438,7 +438,7 @@ namespace Serilog.Settings.Configuration.Tests
             var log = ConfigFromJson(json)
                 .CreateLogger();
 
-            DummyRollingFileSink.Emitted.Clear();
+            DummyRollingFileSink.Reset();
 
             log.Write(Some.InformationEvent());
 
@@ -462,7 +462,7 @@ namespace Serilog.Settings.Configuration.Tests
             var log = ConfigFromJson(json)
                 .CreateLogger();
 
-            DummyRollingFileSink.Emitted.Clear();
+            DummyRollingFileSink.Reset();
 
             log.Write(Some.InformationEvent());
 
@@ -486,7 +486,7 @@ namespace Serilog.Settings.Configuration.Tests
             var log = ConfigFromJson(json)
                 .CreateLogger();
 
-            DummyRollingFileSink.Emitted.Clear();
+            DummyRollingFileSink.Reset();
 
             log.Write(Some.InformationEvent());
 
@@ -510,7 +510,7 @@ namespace Serilog.Settings.Configuration.Tests
             var log = ConfigFromJson(json)
                 .CreateLogger();
 
-            DummyRollingFileSink.Emitted.Clear();
+            DummyRollingFileSink.Reset();
 
             log.Write(Some.InformationEvent());
 
@@ -534,7 +534,7 @@ namespace Serilog.Settings.Configuration.Tests
             var log = ConfigFromJson(json)
                 .CreateLogger();
 
-            DummyRollingFileSink.Emitted.Clear();
+            DummyRollingFileSink.Reset();
 
             log.Write(Some.InformationEvent());
 
@@ -565,7 +565,7 @@ namespace Serilog.Settings.Configuration.Tests
             var log = ConfigFromJson(json)
             .CreateLogger();
 
-            DummyRollingFileSink.Emitted.Clear();
+            DummyRollingFileSink.Reset();
 
             log.Write(Some.InformationEvent());
             log.Write(Some.WarningEvent());
@@ -598,9 +598,9 @@ namespace Serilog.Settings.Configuration.Tests
             }";
 
             var log = ConfigFromJson(json)
-            .CreateLogger();
+                .CreateLogger();
 
-            DummyRollingFileSink.Emitted.Clear();
+            DummyRollingFileSink.Reset();
 
             log.Write(Some.InformationEvent());
             log.Write(Some.WarningEvent());
@@ -771,7 +771,7 @@ namespace Serilog.Settings.Configuration.Tests
                 .WriteTo.Sink(new DelegatingSink(e => evt = e))
                 .CreateLogger();
 
-            log.Information("Destructuring as scalar {@Scalarized}", new Version(2,3));
+            log.Information("Destructuring as scalar {@Scalarized}", new Version(2, 3));
             var prop = evt.Properties["Scalarized"];
 
             Assert.IsType<ScalarValue>(prop);
@@ -795,10 +795,226 @@ namespace Serilog.Settings.Configuration.Tests
                 .WriteTo.Sink(new DelegatingSink(e => evt = e))
                 .CreateLogger();
 
-            log.Information("Destructuring as scalar {@Scalarized}", new Version(2,3));
+            log.Information("Destructuring as scalar {@Scalarized}", new Version(2, 3));
             var prop = evt.Properties["Scalarized"];
 
             Assert.IsType<ScalarValue>(prop);
+        }
+
+        [Fact]
+        public void WriteToSinkIsAppliedWithCustomSink()
+        {
+            var json = $@"{{
+                ""Serilog"": {{
+                    ""Using"": [""TestDummies""],
+                    ""WriteTo"": [
+                    {{
+                        ""Name"": ""Sink"",
+                        ""Args"": {{
+                            ""sink"": ""{typeof(DummyRollingFileSink).AssemblyQualifiedName}""
+                        }}
+                    }}]
+                }}
+            }}";
+
+            var log = ConfigFromJson(json)
+                .CreateLogger();
+
+            DummyRollingFileSink.Reset();
+            log.Write(Some.InformationEvent());
+
+            Assert.Single(DummyRollingFileSink.Emitted);
+        }
+
+        [Fact]
+        public void WriteToSinkIsAppliedWithCustomSinkAndMinimumLevel()
+        {
+            var json = $@"{{
+                ""Serilog"": {{
+                    ""Using"": [""TestDummies""],
+                    ""WriteTo"": [
+                    {{
+                        ""Name"": ""Sink"",
+                        ""Args"": {{
+                            ""sink"": ""{typeof(DummyRollingFileSink).AssemblyQualifiedName}"",
+                            ""restrictedToMinimumLevel"": ""Warning""
+                        }}
+                    }}]
+                }}
+            }}";
+
+            var log = ConfigFromJson(json)
+                .CreateLogger();
+
+            DummyRollingFileSink.Reset();
+            log.Write(Some.InformationEvent());
+            log.Write(Some.WarningEvent());
+
+            Assert.Single(DummyRollingFileSink.Emitted);
+        }
+
+        [Fact]
+        public void WriteToSinkIsAppliedWithCustomSinkAndLevelSwitch()
+        {
+            var json = $@"{{
+                ""Serilog"": {{
+                    ""Using"": [""TestDummies""],
+                    ""LevelSwitches"": {{""$switch1"": ""Warning"" }},
+                    ""WriteTo"": [
+                    {{
+                        ""Name"": ""Sink"",
+                        ""Args"": {{
+                            ""sink"": ""{typeof(DummyRollingFileSink).AssemblyQualifiedName}"",
+                            ""levelSwitch"": ""$switch1""
+                        }}
+                    }}]
+                }}
+            }}";
+
+            var log = ConfigFromJson(json)
+                .CreateLogger();
+
+            DummyRollingFileSink.Reset();
+            log.Write(Some.InformationEvent());
+            log.Write(Some.WarningEvent());
+
+            Assert.Single(DummyRollingFileSink.Emitted);
+        }
+
+        [Fact]
+        public void AuditToSinkIsAppliedWithCustomSink()
+        {
+            var json = $@"{{
+                ""Serilog"": {{
+                    ""Using"": [""TestDummies""],
+                    ""AuditTo"": [
+                    {{
+                        ""Name"": ""Sink"",
+                        ""Args"": {{
+                            ""sink"": ""{typeof(DummyRollingFileSink).AssemblyQualifiedName}""
+                        }}
+                    }}]
+                }}
+            }}";
+
+            var log = ConfigFromJson(json)
+                .CreateLogger();
+
+            DummyRollingFileSink.Reset();
+            log.Write(Some.InformationEvent());
+
+            Assert.Single(DummyRollingFileSink.Emitted);
+        }
+
+        [Fact]
+        public void AuditToSinkIsAppliedWithCustomSinkAndMinimumLevel()
+        {
+            var json = $@"{{
+                ""Serilog"": {{
+                    ""Using"": [""TestDummies""],
+                    ""AuditTo"": [
+                    {{
+                        ""Name"": ""Sink"",
+                        ""Args"": {{
+                            ""sink"": ""{typeof(DummyRollingFileSink).AssemblyQualifiedName}"",
+                            ""restrictedToMinimumLevel"": ""Warning""
+                        }}
+                    }}]
+                }}
+            }}";
+
+            var log = ConfigFromJson(json)
+                .CreateLogger();
+
+            DummyRollingFileSink.Reset();
+            log.Write(Some.InformationEvent());
+            log.Write(Some.WarningEvent());
+
+            Assert.Single(DummyRollingFileSink.Emitted);
+        }
+
+        [Fact]
+        public void AuditToSinkIsAppliedWithCustomSinkAndLevelSwitch()
+        {
+            var json = $@"{{
+                ""Serilog"": {{
+                    ""Using"": [""TestDummies""],
+                    ""LevelSwitches"": {{""$switch1"": ""Warning"" }},
+                    ""AuditTo"": [
+                    {{
+                        ""Name"": ""Sink"",
+                        ""Args"": {{
+                            ""sink"": ""{typeof(DummyRollingFileSink).AssemblyQualifiedName}"",
+                            ""levelSwitch"": ""$switch1""
+                        }}
+                    }}]
+                }}
+            }}";
+
+            var log = ConfigFromJson(json)
+                .CreateLogger();
+
+            DummyRollingFileSink.Reset();
+            log.Write(Some.InformationEvent());
+            log.Write(Some.WarningEvent());
+
+            Assert.Single(DummyRollingFileSink.Emitted);
+        }
+
+        [Fact]
+        public void EnrichWithIsAppliedWithCustomEnricher()
+        {
+            LogEvent evt = null;
+
+            var json = $@"{{
+                ""Serilog"": {{
+                    ""Using"": [""TestDummies""],
+                    ""Enrich"": [
+                    {{
+                        ""Name"": ""With"",
+                        ""Args"": {{
+                            ""enricher"": ""{typeof(DummyThreadIdEnricher).AssemblyQualifiedName}""
+                        }}
+                    }}]
+                }}
+            }}";
+
+            var log = ConfigFromJson(json)
+                .WriteTo.Sink(new DelegatingSink(e => evt = e))
+                .CreateLogger();
+
+            log.Write(Some.InformationEvent());
+
+            Assert.NotNull(evt);
+            Assert.True(evt.Properties.ContainsKey("ThreadId"), "Event should have enriched property ThreadId");
+        }
+
+        [Fact]
+        public void FilterWithIsAppliedWithCustomFilter()
+        {
+            LogEvent evt = null;
+
+            var json = $@"{{
+                ""Serilog"": {{
+                    ""Using"": [""TestDummies""],
+                    ""Filter"": [
+                    {{
+                        ""Name"": ""With"",
+                        ""Args"": {{
+                            ""filter"": ""{typeof(DummyAnonymousUserFilter).AssemblyQualifiedName}""
+                        }}
+                    }}]
+                }}
+            }}";
+
+            var log = ConfigFromJson(json)
+                .WriteTo.Sink(new DelegatingSink(e => evt = e))
+                .CreateLogger();
+
+            log.ForContext("User", "anonymous").Write(Some.InformationEvent());
+            Assert.Null(evt);
+            log.ForContext("User", "the user").Write(Some.InformationEvent());
+            Assert.NotNull(evt);
         }
     }
 }
