@@ -7,6 +7,13 @@ build_script:
 test: off
 artifacts:
 - path: artifacts/Serilog.*.nupkg
+
+only_commits:
+  files:
+    - serilog-settings-configuration.sln
+    - src/Serilog.Settings.Configuration/
+    - Build.ps1
+    - assets/
 deploy:
 - provider: NuGet
   api_key:
