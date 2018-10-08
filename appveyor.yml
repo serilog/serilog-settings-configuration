@@ -14,6 +14,7 @@ only_commits:
     - src/Serilog.Settings.Configuration/
     - Build.ps1
     - assets/
+    - test/
 deploy:
 - provider: NuGet
   api_key:
