@@ -35,9 +35,10 @@ namespace Serilog.Settings.Configuration
 
         // Generally the initial call should use IConfiguration rather than IConfigurationSection, otherwise
         // IConfiguration parameters in the target methods will not be populated.
-        ConfigurationReader(IConfigurationSection configSection, DependencyContext dependencyContext)
+        public ConfigurationReader(IConfigurationSection configSection, DependencyContext dependencyContext)
         {
-            _section = configSection ?? throw new ArgumentNullException(nameof(configSection));
+            _configuration = configSection ?? throw new ArgumentNullException(nameof(configSection));
+            _section = configSection;
             _dependencyContext = dependencyContext;
             _configurationAssemblies = LoadConfigurationAssemblies();
         }

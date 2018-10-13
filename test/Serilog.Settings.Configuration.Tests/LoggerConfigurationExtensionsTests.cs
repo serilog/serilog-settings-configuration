@@ -1,5 +1,7 @@
-﻿using System;
+using System;
 using Microsoft.Extensions.Configuration;
+using Serilog.Events;
+using Serilog.Settings.Configuration.Tests.Support;
 using Xunit;
 
 namespace Serilog.Settings.Configuration.Tests
@@ -13,6 +15,35 @@ namespace Serilog.Settings.Configuration.Tests
 
             // should not throw
             act();
+        }
+
+        [Fact]
+        [Trait("BugFix", "https://github.com/serilog/serilog-settings-configuration/issues/143")]
+        public void ReadFromConfigurationSectionReadsFromAnArbitrarySection()
+        {
+            LogEvent evt = null;
+
+            var json = @"{
+		        ""NotSerilog"": {            
+			        ""Properties"": {
+				        ""App"": ""Test""
+			        }
+		        }
+	        }";
+
+            var config = new ConfigurationBuilder()
+                .AddJsonString(json)
+                .Build();
+
+            var log = new LoggerConfiguration()
+                .ReadFrom.ConfigurationSection(config.GetSection("NotSerilog"))
+                .WriteTo.Sink(new DelegatingSink(e => evt = e))
+                .CreateLogger();
+
+            log.Information("Has a test property");
+
+            Assert.NotNull(evt);
+            Assert.Equal("Test", evt.Properties["App"].LiteralValue());
         }
     }
 }
