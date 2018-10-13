@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
@@ -331,7 +331,15 @@ namespace Serilog.Settings.Configuration
                                 select directive.Key == null ? p.DefaultValue : directive.Value.ConvertTo(p.ParameterType, declaredLevelSwitches)).ToList();
 
                     var parm = methodInfo.GetParameters().FirstOrDefault(i => i.ParameterType == typeof(IConfiguration));
-                    if (parm != null) call[parm.Position - 1] = _configuration;
+                    if (parm != null)
+                    {
+                        if (_configuration is null)
+                        {
+                            throw new InvalidOperationException("Trying to invoke a configuration method accepting a `IConfiguration` argument. " +
+                                                                $"This is not supported when only a `IConfigSection` has been provided. (method '{methodInfo}')");
+                        }
+                        call[parm.Position - 1] = _configuration;
+                    }
 
                     call.Insert(0, receiver);
 
@@ -348,7 +356,11 @@ namespace Serilog.Settings.Configuration
             return candidateMethods
                 .Where(m => m.Name == name &&
                             m.GetParameters().Skip(1)
-                            .All(p => p.HasDefaultValue || suppliedArgumentValues.Any(s => s.Key.Equals(p.Name, StringComparison.OrdinalIgnoreCase))))
+                            .All(p => p.HasDefaultValue
+                                      || suppliedArgumentValues.Any(s => s.Key.Equals(p.Name, StringComparison.OrdinalIgnoreCase))
+                                      // parameters of type IConfiguration are implicitly populated with provided Configuration
+                                      || p.ParameterType == typeof(IConfiguration)
+                                      ))
                 .OrderByDescending(m =>
                 {
                     var matchingArgs = m.GetParameters().Where(p => suppliedArgumentValues.Any(s => s.Key.Equals(p.Name, StringComparison.OrdinalIgnoreCase))).ToList();

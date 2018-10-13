@@ -45,5 +45,38 @@ namespace Serilog.Settings.Configuration.Tests
             Assert.NotNull(evt);
             Assert.Equal("Test", evt.Properties["App"].LiteralValue());
         }
+
+
+
+        [Fact]
+        [Trait("BugFix", "https://github.com/serilog/serilog-settings-configuration/issues/143")]
+        public void ReadFromConfigurationSectionThrowsWhenTryingToCallConfigurationMethodWithIConfigurationParam()
+        {
+            var json = @"{
+                ""NotSerilog"": {            
+                    ""Using"": [""TestDummies""],
+                    ""WriteTo"": [{
+                        ""Name"": ""DummyRollingFile"",
+                        ""Args"": {""pathFormat"" : ""C:\\"",
+                                   ""configurationSection"" : { ""foo"" : ""bar"" } }
+                    }]        
+                }
+            }";
+
+            var config = new ConfigurationBuilder()
+                .AddJsonString(json)
+                .Build();
+
+            var exception = Assert.Throws<InvalidOperationException>(() =>
+               new LoggerConfiguration()
+                   .ReadFrom.ConfigurationSection(config.GetSection("NotSerilog"))
+                   .CreateLogger());
+
+            Assert.Equal("Trying to invoke a configuration method accepting a `IConfiguration` argument. " +
+                         "This is not supported when only a `IConfigSection` has been provided. " +
+                         "(method 'Serilog.LoggerConfiguration DummyRollingFile(Serilog.Configuration.LoggerSinkConfiguration, Microsoft.Extensions.Configuration.IConfiguration, Microsoft.Extensions.Configuration.IConfigurationSection, System.String, Serilog.Events.LogEventLevel)')",
+                exception.Message);
+
+        }
     }
 }
