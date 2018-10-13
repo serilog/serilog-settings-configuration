@@ -425,7 +425,7 @@ namespace Serilog.Settings.Configuration.Tests
                 ""Serilog"": {            
                     ""Using"": [""TestDummies""],
                     ""WriteTo"": [{
-                        ""Name"": ""DummyRollingFile"",
+                        ""Name"": ""DummyWithConfiguration"",
                         ""Args"": {""pathFormat"" : ""C:\\"",
                                    ""configurationSection"" : { ""foo"" : ""bar"" } }
                     }]        
@@ -435,14 +435,17 @@ namespace Serilog.Settings.Configuration.Tests
             // IConfiguration and IConfigurationSection arguments do not have
             // default values so they will throw if they are not populated
 
+
+            DummyConfigurationSink.Reset();
             var log = ConfigFromJson(json)
                 .CreateLogger();
 
-            DummyRollingFileSink.Reset();
 
             log.Write(Some.InformationEvent());
 
-            Assert.Equal(1, DummyRollingFileSink.Emitted.Count);
+            Assert.NotNull(DummyConfigurationSink.Configuration);
+            Assert.NotNull(DummyConfigurationSink.ConfigSection);
+            Assert.Equal("bar", DummyConfigurationSink.ConfigSection["foo"]);
         }
 
         [Fact]
