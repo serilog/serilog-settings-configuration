@@ -56,7 +56,7 @@ namespace Serilog.Settings.Configuration.Tests
                 ""NotSerilog"": {            
                     ""Using"": [""TestDummies""],
                     ""WriteTo"": [{
-                        ""Name"": ""DummyRollingFile"",
+                        ""Name"": ""DummyWithConfiguration"",
                         ""Args"": {""pathFormat"" : ""C:\\"",
                                    ""configurationSection"" : { ""foo"" : ""bar"" } }
                     }]        
@@ -74,7 +74,7 @@ namespace Serilog.Settings.Configuration.Tests
 
             Assert.Equal("Trying to invoke a configuration method accepting a `IConfiguration` argument. " +
                          "This is not supported when only a `IConfigSection` has been provided. " +
-                         "(method 'Serilog.LoggerConfiguration DummyRollingFile(Serilog.Configuration.LoggerSinkConfiguration, Microsoft.Extensions.Configuration.IConfiguration, Microsoft.Extensions.Configuration.IConfigurationSection, System.String, Serilog.Events.LogEventLevel)')",
+                         "(method 'Serilog.LoggerConfiguration DummyWithConfiguration(Serilog.Configuration.LoggerSinkConfiguration, Microsoft.Extensions.Configuration.IConfiguration, Microsoft.Extensions.Configuration.IConfigurationSection, System.String, Serilog.Events.LogEventLevel)')",
                 exception.Message);
 
         }
