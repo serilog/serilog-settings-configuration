@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
@@ -37,8 +37,7 @@ namespace Serilog.Settings.Configuration
         // IConfiguration parameters in the target methods will not be populated.
         public ConfigurationReader(IConfigurationSection configSection, DependencyContext dependencyContext)
         {
-            _configuration = configSection ?? throw new ArgumentNullException(nameof(configSection));
-            _section = configSection;
+            _section = configSection ?? throw new ArgumentNullException(nameof(configSection));
             _dependencyContext = dependencyContext;
             _configurationAssemblies = LoadConfigurationAssemblies();
         }
