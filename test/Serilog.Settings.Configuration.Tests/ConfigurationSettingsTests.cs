@@ -419,6 +419,8 @@ namespace Serilog.Settings.Configuration.Tests
         }
 
         [Fact]
+        
+        [Trait("BugFix", "https://github.com/serilog/serilog-settings-configuration/issues/142")]
         public void SinkWithIConfigurationArguments()
         {
             var json = @"{
@@ -441,6 +443,7 @@ namespace Serilog.Settings.Configuration.Tests
         }
         
         [Fact]
+        [Trait("BugFix", "https://github.com/serilog/serilog-settings-configuration/issues/142")]
         public void SinkWithOptionalIConfigurationArguments()
         {
             var json = @"{
