@@ -40,11 +40,25 @@ namespace TestDummies
         public static LoggerConfiguration DummyWithConfiguration(
             this LoggerSinkConfiguration loggerSinkConfiguration,
             IConfiguration appConfiguration,
-            IConfigurationSection configurationSection,
-            string pathFormat,
             LogEventLevel restrictedToMinimumLevel = LevelAlias.Minimum)
         {
-            return loggerSinkConfiguration.Sink(new DummyConfigurationSink(appConfiguration, configurationSection), restrictedToMinimumLevel);
+            return loggerSinkConfiguration.Sink(new DummyConfigurationSink(appConfiguration, null), restrictedToMinimumLevel);
+        }
+
+        public static LoggerConfiguration DummyWithOptionalConfiguration(
+            this LoggerSinkConfiguration loggerSinkConfiguration,
+            IConfiguration appConfiguration = null,
+            LogEventLevel restrictedToMinimumLevel = LevelAlias.Minimum)
+        {
+            return loggerSinkConfiguration.Sink(new DummyConfigurationSink(appConfiguration, null), restrictedToMinimumLevel);
+        }
+
+        public static LoggerConfiguration DummyWithConfigSection(
+            this LoggerSinkConfiguration loggerSinkConfiguration,
+            IConfigurationSection configurationSection,
+            LogEventLevel restrictedToMinimumLevel = LevelAlias.Minimum)
+        {
+            return loggerSinkConfiguration.Sink(new DummyConfigurationSink(null, configurationSection), restrictedToMinimumLevel);
         }
 
         public static LoggerConfiguration DummyRollingFile(

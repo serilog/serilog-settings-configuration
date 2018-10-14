@@ -426,27 +426,65 @@ namespace Serilog.Settings.Configuration.Tests
                     ""Using"": [""TestDummies""],
                     ""WriteTo"": [{
                         ""Name"": ""DummyWithConfiguration"",
-                        ""Args"": {""pathFormat"" : ""C:\\"",
-                                   ""configurationSection"" : { ""foo"" : ""bar"" } }
+                        ""Args"": {}
                     }]        
                 }
             }";
-
-            // IConfiguration and IConfigurationSection arguments do not have
-            // default values so they will throw if they are not populated
-
 
             DummyConfigurationSink.Reset();
             var log = ConfigFromJson(json)
                 .CreateLogger();
 
+            log.Write(Some.InformationEvent());
+
+            Assert.NotNull(DummyConfigurationSink.Configuration);
+        }
+        
+        [Fact]
+        public void SinkWithOptionalIConfigurationArguments()
+        {
+            var json = @"{
+                ""Serilog"": {            
+                    ""Using"": [""TestDummies""],
+                    ""WriteTo"": [{
+                        ""Name"": ""DummyWithOptionalConfiguration"",
+                        ""Args"": {}
+                    }]        
+                }
+            }";
+
+            DummyConfigurationSink.Reset();
+            var log = ConfigFromJson(json)
+                .CreateLogger();
 
             log.Write(Some.InformationEvent());
 
             Assert.NotNull(DummyConfigurationSink.Configuration);
+        }
+        
+        [Fact]
+        public void SinkWithIConfigSectionArguments()
+        {
+            var json = @"{
+                ""Serilog"": {            
+                    ""Using"": [""TestDummies""],
+                    ""WriteTo"": [{
+                        ""Name"": ""DummyWithConfigSection"",
+                        ""Args"": {""configurationSection"" : { ""foo"" : ""bar"" } }
+                    }]        
+                }
+            }";
+
+            DummyConfigurationSink.Reset();
+            var log = ConfigFromJson(json)
+                .CreateLogger();
+
+            log.Write(Some.InformationEvent());
+            
             Assert.NotNull(DummyConfigurationSink.ConfigSection);
             Assert.Equal("bar", DummyConfigurationSink.ConfigSection["foo"]);
         }
+
 
         [Fact]
         public void SinkWithConfigurationBindingArgument()
