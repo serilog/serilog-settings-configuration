@@ -331,7 +331,7 @@ namespace Serilog.Settings.Configuration
                                 select directive.Key == null ? p.DefaultValue : directive.Value.ConvertTo(p.ParameterType, declaredLevelSwitches)).ToList();
 
                     var parm = methodInfo.GetParameters().FirstOrDefault(i => i.ParameterType == typeof(IConfiguration));
-                    if (parm != null)
+                    if (parm != null && !parm.HasDefaultValue)
                     {
                         if (_configuration is null)
                         {

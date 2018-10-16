@@ -55,8 +55,7 @@ namespace Serilog.Settings.Configuration.Tests
                     ""Using"": [""TestDummies""],
                     ""WriteTo"": [{
                         ""Name"": ""DummyWithConfiguration"",
-                        ""Args"": {""pathFormat"" : ""C:\\"",
-                                   ""configurationSection"" : { ""foo"" : ""bar"" } }
+                        ""Args"": {}
                     }]        
                 }
             }";
@@ -74,6 +73,31 @@ namespace Serilog.Settings.Configuration.Tests
                          "This is not supported when only a `IConfigSection` has been provided. " +
                          "(method 'Serilog.LoggerConfiguration DummyWithConfiguration(Serilog.Configuration.LoggerSinkConfiguration, Microsoft.Extensions.Configuration.IConfiguration, Microsoft.Extensions.Configuration.IConfigurationSection, System.String, Serilog.Events.LogEventLevel)')",
                 exception.Message);
+
+        }
+
+        [Fact]
+        [Trait("BugFix", "https://github.com/serilog/serilog-settings-configuration/issues/143")]
+        public void ReadFromConfigurationSectionDoesNotThrowWhenTryingToCallConfigurationMethodWithOptionalIConfigurationParam()
+        {
+            var json = @"{
+                ""NotSerilog"": {            
+                    ""Using"": [""TestDummies""],
+                    ""WriteTo"": [{
+                        ""Name"": ""DummyWithOptionalConfiguration"",
+                        ""Args"": {}
+                    }]        
+                }
+            }";
+
+            var config = new ConfigurationBuilder()
+                .AddJsonString(json)
+                .Build();
+
+            // this should not throw because DummyWithOptionalConfiguration accepts an optional config
+            new LoggerConfiguration()
+                .ReadFrom.ConfigurationSection(config.GetSection("NotSerilog"))
+                .CreateLogger();
 
         }
     }
