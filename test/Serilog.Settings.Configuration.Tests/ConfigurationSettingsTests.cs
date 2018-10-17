@@ -462,7 +462,8 @@ namespace Serilog.Settings.Configuration.Tests
 
             log.Write(Some.InformationEvent());
 
-            Assert.NotNull(DummyConfigurationSink.Configuration);
+            // null is the default value
+            Assert.Null(DummyConfigurationSink.Configuration);
         }
         
         [Fact]
