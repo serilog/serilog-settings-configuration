@@ -18,7 +18,7 @@ namespace Serilog.Settings.Configuration.Tests
         {
             var stringArgumentValue = new StringArgumentValue(() => "Serilog.Formatting.Json.JsonFormatter, Serilog");
 
-            var result = stringArgumentValue.ConvertTo(typeof(ITextFormatter), new Dictionary<string, LoggingLevelSwitch>());
+            var result = stringArgumentValue.ConvertTo(typeof(ITextFormatter), SettingValueResolver.Default());
 
             Assert.IsType<JsonFormatter>(result);
         }
@@ -28,7 +28,7 @@ namespace Serilog.Settings.Configuration.Tests
         {
             var stringArgumentValue = new StringArgumentValue(() => "Serilog.Settings.Configuration.Tests.Support.ConcreteClass, Serilog.Settings.Configuration.Tests");
 
-            var result = stringArgumentValue.ConvertTo(typeof(AbstractClass), new Dictionary<string, LoggingLevelSwitch>());
+            var result = stringArgumentValue.ConvertTo(typeof(AbstractClass), SettingValueResolver.Default());
 
             Assert.IsType<ConcreteClass>(result);
         }
@@ -84,7 +84,7 @@ namespace Serilog.Settings.Configuration.Tests
         {
             var stringArgumentValue = new StringArgumentValue(() => $"{input}");
 
-            var actual = stringArgumentValue.ConvertTo(targetType, new Dictionary<string, LoggingLevelSwitch>());
+            var actual = stringArgumentValue.ConvertTo(targetType, SettingValueResolver.Default());
 
             Assert.IsAssignableFrom(targetType, actual);
             Assert.Equal(ConcreteImpl.Instance, actual);
@@ -101,7 +101,7 @@ namespace Serilog.Settings.Configuration.Tests
         {
             var stringArgumentValue = new StringArgumentValue(() => $"{input}");
             Assert.Throws<TypeLoadException>(() =>
-                stringArgumentValue.ConvertTo(targetType, new Dictionary<string, LoggingLevelSwitch>())
+                stringArgumentValue.ConvertTo(targetType, SettingValueResolver.Default())
             );
         }
 
@@ -120,7 +120,7 @@ namespace Serilog.Settings.Configuration.Tests
         {
             var stringArgumentValue = new StringArgumentValue(() => $"{input}");
             var exception = Assert.Throws<InvalidOperationException>(() =>
-                stringArgumentValue.ConvertTo(targetType, new Dictionary<string, LoggingLevelSwitch>())
+                stringArgumentValue.ConvertTo(targetType, SettingValueResolver.Default())
             );
 
             Assert.Contains("Could not find a public static property or field ", exception.Message);
@@ -139,7 +139,7 @@ namespace Serilog.Settings.Configuration.Tests
 
             var stringArgumentValue = new StringArgumentValue(() => switchName);
 
-            var resolvedSwitch = stringArgumentValue.ConvertTo(typeof(LoggingLevelSwitch), declaredSwitches);
+            var resolvedSwitch = stringArgumentValue.ConvertTo(typeof(LoggingLevelSwitch), new SettingValueResolver(declaredSwitches, null));
 
             Assert.IsType<LoggingLevelSwitch>(resolvedSwitch);
             Assert.Same(@switch, resolvedSwitch);
@@ -157,7 +157,7 @@ namespace Serilog.Settings.Configuration.Tests
             var stringArgumentValue = new StringArgumentValue(() => "$mySwitch");
 
             var ex = Assert.Throws<InvalidOperationException>(() =>
-                stringArgumentValue.ConvertTo(typeof(LoggingLevelSwitch), declaredSwitches)
+                stringArgumentValue.ConvertTo(typeof(LoggingLevelSwitch), new SettingValueResolver(declaredSwitches, null))
             );
 
             Assert.Contains("$mySwitch", ex.Message);
@@ -170,7 +170,7 @@ namespace Serilog.Settings.Configuration.Tests
             var shortTypeName = "System.Version";
             var stringArgumentValue = new StringArgumentValue(() => shortTypeName);
 
-            var actual = (Type)stringArgumentValue.ConvertTo(typeof(Type), new Dictionary<string, LoggingLevelSwitch>());
+            var actual = (Type)stringArgumentValue.ConvertTo(typeof(Type), SettingValueResolver.Default());
 
             Assert.Equal(typeof(Version), actual);
         }
@@ -181,7 +181,7 @@ namespace Serilog.Settings.Configuration.Tests
             var assemblyQualifiedName = typeof(Version).AssemblyQualifiedName;
             var stringArgumentValue = new StringArgumentValue(() => assemblyQualifiedName);
 
-            var actual = (Type)stringArgumentValue.ConvertTo(typeof(Type), new Dictionary<string, LoggingLevelSwitch>());
+            var actual = (Type)stringArgumentValue.ConvertTo(typeof(Type), SettingValueResolver.Default());
 
             Assert.Equal(typeof(Version), actual);
         }

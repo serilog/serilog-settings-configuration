@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using System.Text.RegularExpressions;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Primitives;
 
 using Serilog.Core;
@@ -31,13 +32,13 @@ namespace Serilog.Settings.Configuration
                 { typeof(Type), s => Type.GetType(s, throwOnError:true) },
             };
 
-        public object ConvertTo(Type toType, IReadOnlyDictionary<string, LoggingLevelSwitch> declaredLevelSwitches)
+        public object ConvertTo(Type toType, SettingValueResolver valueResolver)
         {
             var argumentValue = Environment.ExpandEnvironmentVariables(_valueProducer());
 
             if (toType == typeof(LoggingLevelSwitch))
             {
-                return declaredLevelSwitches.LookUpSwitchByName(argumentValue);
+                return valueResolver.LookUpSwitchByName(argumentValue);
             }
 
             var toTypeInfo = toType.GetTypeInfo();

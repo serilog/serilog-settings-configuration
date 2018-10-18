@@ -3,7 +3,6 @@ using Serilog.Formatting;
 using Xunit;
 using System.Reflection;
 using System.Linq;
-using Serilog.Core;
 using Serilog.Settings.Configuration.Tests.Support;
 
 namespace Serilog.Settings.Configuration.Tests
@@ -75,7 +74,7 @@ namespace Serilog.Settings.Configuration.Tests
 
             Assert.Equal(1, args.Length);
             Assert.Equal("outputTemplate", args[0].Key);
-            Assert.Equal("{Message}", args[0].Value.ConvertTo(typeof(string), new Dictionary<string, LoggingLevelSwitch>()));
+            Assert.Equal("{Message}", args[0].Value.ConvertTo(typeof(string), SettingValueResolver.Default()));
         }
 
         [Fact]
