@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
@@ -325,50 +325,66 @@ namespace Serilog.Settings.Configuration
         {
             foreach (var method in methods.SelectMany(g => g.Select(x => new { g.Key, Value = x })))
             {
-                var methodInfo = SelectConfigurationMethod(configurationMethods, method.Key, method.Value);
+                var methodInfo = SelectConfigurationMethod(configurationMethods, method.Key, method.Value.Keys);
 
                 if (methodInfo != null)
                 {
                     var call = (from p in methodInfo.GetParameters().Skip(1)
-                                let directive = method.Value.FirstOrDefault(s => s.Key.Equals(p.Name, StringComparison.OrdinalIgnoreCase))
+                                let directive = method.Value.FirstOrDefault(s => ParameterNameMatches(p.Name, s.Key))
                                 select directive.Key == null
-                                    ? p.DefaultValue
+                                    ? GetImplicitValueForNotSpecifiedKey(p, valueResolver, methodInfo)
                                     : directive.Value.ConvertTo(p.ParameterType, valueResolver)).ToList();
 
-                    var parm = methodInfo.GetParameters().FirstOrDefault(i => i.ParameterType == typeof(IConfiguration));
-                    if (parm != null && !parm.HasDefaultValue)
-                    {
-                        if (valueResolver.AppConfiguration is null)
-                        {
-                            throw new InvalidOperationException("Trying to invoke a configuration method accepting a `IConfiguration` argument. " +
-                                                                $"This is not supported when only a `IConfigSection` has been provided. (method '{methodInfo}')");
-                        }
-                        call[parm.Position - 1] = valueResolver.AppConfiguration;
-                    }
-
                     call.Insert(0, receiver);
-
                     methodInfo.Invoke(null, call.ToArray());
                 }
             }
         }
 
-        internal static MethodInfo SelectConfigurationMethod(IEnumerable<MethodInfo> candidateMethods, string name, Dictionary<string, IConfigurationArgumentValue> suppliedArgumentValues)
+        static bool HasImplicitValueWhenNotSpecified(ParameterInfo paramInfo)
+        {
+            return paramInfo.HasDefaultValue
+               // parameters of type IConfiguration are implicitly populated with provided Configuration
+               || paramInfo.ParameterType == typeof(IConfiguration);
+        }
+
+        static object GetImplicitValueForNotSpecifiedKey(ParameterInfo parameter, SettingValueResolver valueResolver, MethodInfo methodToInvoke)
+        {
+            if (!HasImplicitValueWhenNotSpecified(parameter))
+            {
+                throw new InvalidOperationException("GetImplicitValueForNotSpecifiedKey() should only be called for parameters for which HasImplicitValueWhenNotSpecified() is true. " +
+                                                    "This means something is wrong in the Serilog.Settings.Configuration code.");
+            }
+
+            if (parameter.ParameterType == typeof(IConfiguration))
+            {
+                if (parameter.HasDefaultValue)
+                {
+                    return valueResolver.AppConfiguration ?? parameter.DefaultValue;
+                }
+
+                return valueResolver.AppConfiguration
+                       ?? throw new InvalidOperationException("Trying to invoke a configuration method accepting a `IConfiguration` argument. " +
+                                                              $"This is not supported when only a `IConfigSection` has been provided. (method '{methodToInvoke}')");
+            }
+
+            return parameter.DefaultValue;
+        }
+
+        internal static MethodInfo SelectConfigurationMethod(IEnumerable<MethodInfo> candidateMethods, string name, IEnumerable<string> suppliedArgumentNames)
         {
             // Per issue #111, it is safe to use case-insensitive matching on argument names. The CLR doesn't permit this type
             // of overloading, and the Microsoft.Extensions.Configuration keys are case-insensitive (case is preserved with some
             // config sources, but key-matching is case-insensitive and case-preservation does not appear to be guaranteed).
             return candidateMethods
-                .Where(m => m.Name == name &&
-                            m.GetParameters().Skip(1)
-                            .All(p => p.HasDefaultValue
-                                      || suppliedArgumentValues.Any(s => s.Key.Equals(p.Name, StringComparison.OrdinalIgnoreCase))
-                                      // parameters of type IConfiguration are implicitly populated with provided Configuration
-                                      || p.ParameterType == typeof(IConfiguration)
-                                      ))
+                .Where(m => m.Name == name)
+                .Where(m => m.GetParameters()
+                            .Skip(1)
+                            .All(p => HasImplicitValueWhenNotSpecified(p) ||
+                                      ParameterNameMatches(p.Name, suppliedArgumentNames)))
                 .OrderByDescending(m =>
                 {
-                    var matchingArgs = m.GetParameters().Where(p => suppliedArgumentValues.Any(s => s.Key.Equals(p.Name, StringComparison.OrdinalIgnoreCase))).ToList();
+                    var matchingArgs = m.GetParameters().Where(p => ParameterNameMatches(p.Name, suppliedArgumentNames)).ToList();
 
                     // Prefer the configuration method with most number of matching arguments and of those the ones with
                     // the most string type parameters to predict best match with least type casting
@@ -377,6 +393,16 @@ namespace Serilog.Settings.Configuration
                         matchingArgs.Count(p => p.ParameterType == typeof(string)));
                 })
                 .FirstOrDefault();
+        }
+
+        static bool ParameterNameMatches(string actualParameterName, string suppliedName)
+        {
+            return suppliedName.Equals(actualParameterName, StringComparison.OrdinalIgnoreCase);
+        }
+
+        static bool ParameterNameMatches(string actualParameterName, IEnumerable<string> suppliedNames)
+        {
+            return suppliedNames.Any(s => ParameterNameMatches(actualParameterName, s));
         }
 
         static IList<MethodInfo> FindSinkConfigurationMethods(IReadOnlyCollection<Assembly> configurationAssemblies)
