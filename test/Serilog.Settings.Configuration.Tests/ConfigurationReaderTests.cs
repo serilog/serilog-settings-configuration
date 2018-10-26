@@ -2,6 +2,7 @@
 using System.Reflection;
 using System.Linq;
 using Serilog.Formatting;
+using Serilog.Settings.Configuration.Assemblies;
 using Serilog.Settings.Configuration.Tests.Support;
 
 namespace Serilog.Settings.Configuration.Tests
@@ -12,7 +13,9 @@ namespace Serilog.Settings.Configuration.Tests
 
         public ConfigurationReaderTests()
         {
-            _configurationReader = new ConfigurationReader(JsonStringConfigSource.LoadSection(@"{ 'Serilog': {  } }", "Serilog"), null);
+            _configurationReader = new ConfigurationReader(
+                JsonStringConfigSource.LoadSection(@"{ 'Serilog': {  } }", "Serilog"),
+                AssemblyFinder.ForSource(ConfigurationAssemblySource.UseLoadedAssemblies));
         }
 
         [Fact]

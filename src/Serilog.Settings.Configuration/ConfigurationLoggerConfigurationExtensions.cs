@@ -17,7 +17,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyModel;
 using Serilog.Configuration;
 using Serilog.Settings.Configuration;
-using System.Reflection;
+using Serilog.Settings.Configuration.Assemblies;
 
 namespace Serilog
 {
@@ -48,10 +48,15 @@ namespace Serilog
         {
             if (configuration == null) throw new ArgumentNullException(nameof(configuration));
 
+            var assemblyFinder = dependencyContext == null
+                ? AssemblyFinder.Auto()
+                : AssemblyFinder.ForDependencyContext(dependencyContext);
+
             return settingConfiguration.Settings(
                 new ConfigurationReader(
-                    configuration,
-                    dependencyContext ?? (Assembly.GetEntryAssembly() != null ? DependencyContext.Default : null)));
+                    configuration.GetSection(DefaultSectionName),
+                    assemblyFinder,
+                    configuration));
         }
 
         /// <summary>
@@ -71,10 +76,15 @@ namespace Serilog
             if (settingConfiguration == null) throw new ArgumentNullException(nameof(settingConfiguration));
             if (configSection == null) throw new ArgumentNullException(nameof(configSection));
 
+            var assemblyFinder = dependencyContext == null
+                ? AssemblyFinder.Auto()
+                : AssemblyFinder.ForDependencyContext(dependencyContext);
+
             return settingConfiguration.Settings(
                 new ConfigurationReader(
                     configSection,
-                    dependencyContext ?? (Assembly.GetEntryAssembly() != null ? DependencyContext.Default : null)));
+                    assemblyFinder,
+                    configuration: null));
         }
 
         /// <summary>
@@ -93,14 +103,9 @@ namespace Serilog
         {
             if (configuration == null) throw new ArgumentNullException(nameof(configuration));
 
-            if(configurationAssemblySource == ConfigurationAssemblySource.UseLoadedAssemblies)
-            {
-                return Configuration(settingConfiguration, configuration);
-            }
-            else
-            {
-                return settingConfiguration.Settings(new ConfigurationReader(configuration, null));
-            }
+            var assemblyFinder = AssemblyFinder.ForSource(configurationAssemblySource);
+
+            return settingConfiguration.Settings(new ConfigurationReader(configuration.GetSection(DefaultSectionName), assemblyFinder, configuration));
         }
 
         /// <summary>
@@ -119,14 +124,9 @@ namespace Serilog
             if (settingConfiguration == null) throw new ArgumentNullException(nameof(settingConfiguration));
             if (configSection == null) throw new ArgumentNullException(nameof(configSection));
 
-            if (configurationAssemblySource == ConfigurationAssemblySource.UseLoadedAssemblies)
-            {
-                return Configuration(settingConfiguration, configSection);
-            }
-            else
-            {
-                return settingConfiguration.Settings(new ConfigurationReader(configSection, null));
-            }
+            var assemblyFinder = AssemblyFinder.ForSource(configurationAssemblySource);
+
+            return settingConfiguration.Settings(new ConfigurationReader(configSection, assemblyFinder, configuration: null));
         }
     }
 }

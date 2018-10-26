@@ -4,14 +4,14 @@ using System.Linq;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.DependencyModel;
 using Microsoft.Extensions.Primitives;
+using System.Text.RegularExpressions;
 
 using Serilog.Configuration;
 using Serilog.Core;
 using Serilog.Debugging;
 using Serilog.Events;
-using System.Text.RegularExpressions;
+using Serilog.Settings.Configuration.Assemblies;
 
 namespace Serilog.Settings.Configuration
 {
@@ -22,32 +22,23 @@ namespace Serilog.Settings.Configuration
         readonly IConfiguration _configuration;
 
         readonly IConfigurationSection _section;
-        readonly DependencyContext _dependencyContext;
+        readonly AssemblyFinder _assemblyFinder;
         readonly IReadOnlyCollection<Assembly> _configurationAssemblies;
 
-        public ConfigurationReader(IConfiguration configuration, DependencyContext dependencyContext)
-        {
-            _configuration = configuration ?? throw new ArgumentNullException(nameof(configuration));
-            _section = configuration.GetSection(ConfigurationLoggerConfigurationExtensions.DefaultSectionName);
-            _dependencyContext = dependencyContext;
-            _configurationAssemblies = LoadConfigurationAssemblies();
-        }
-
-        // Generally the initial call should use IConfiguration rather than IConfigurationSection, otherwise
-        // IConfiguration parameters in the target methods will not be populated.
-        public ConfigurationReader(IConfigurationSection configSection, DependencyContext dependencyContext)
+        public ConfigurationReader(IConfigurationSection configSection, AssemblyFinder assemblyFinder, IConfiguration configuration = null)
         {
             _section = configSection ?? throw new ArgumentNullException(nameof(configSection));
-            _dependencyContext = dependencyContext;
-            _configurationAssemblies = LoadConfigurationAssemblies();
+            _assemblyFinder = assemblyFinder ?? throw new ArgumentNullException(nameof(assemblyFinder));
+            _configuration = configuration;
+            _configurationAssemblies = LoadConfigurationAssemblies(_section, _assemblyFinder);
         }
 
         // Used internally for processing nested configuration sections -- see GetMethodCalls below.
-        internal ConfigurationReader(IConfigurationSection configSection, IReadOnlyCollection<Assembly> configurationAssemblies, DependencyContext dependencyContext, SettingValueResolver valueResolver)
+        internal ConfigurationReader(IConfigurationSection configSection, IReadOnlyCollection<Assembly> configurationAssemblies, AssemblyFinder assemblyFinder, SettingValueResolver valueResolver)
         {
             _section = configSection ?? throw new ArgumentNullException(nameof(configSection));
-            _dependencyContext = dependencyContext;
             _configurationAssemblies = configurationAssemblies ?? throw new ArgumentNullException(nameof(configurationAssemblies));
+            _assemblyFinder = assemblyFinder ?? throw new ArgumentNullException(nameof(assemblyFinder));
             _configuration = valueResolver.AppConfiguration;
         }
 
@@ -252,7 +243,7 @@ namespace Serilog.Settings.Configuration
                 }
                 else
                 {
-                    argumentValue = new ObjectArgumentValue(argumentSection, _configurationAssemblies, _dependencyContext);
+                    argumentValue = new ObjectArgumentValue(argumentSection, _configurationAssemblies, _assemblyFinder);
                 }
 
                 return argumentValue;
@@ -268,11 +259,11 @@ namespace Serilog.Settings.Configuration
             }
         }
 
-        IReadOnlyCollection<Assembly> LoadConfigurationAssemblies()
+        static IReadOnlyCollection<Assembly> LoadConfigurationAssemblies(IConfigurationSection section, AssemblyFinder assemblyFinder)
         {
             var assemblies = new Dictionary<string, Assembly>();
 
-            var usingSection = _section.GetSection("Using");
+            var usingSection = section.GetSection("Using");
             if (usingSection.GetChildren().Any())
             {
                 foreach (var simpleName in usingSection.GetChildren().Select(c => c.Value))
@@ -287,7 +278,7 @@ namespace Serilog.Settings.Configuration
                 }
             }
 
-            foreach (var assemblyName in GetSerilogConfigurationAssemblies())
+            foreach (var assemblyName in assemblyFinder.FindAssembliesContainingName("serilog"))
             {
                 var assumed = Assembly.Load(assemblyName);
                 if (assumed != null && !assemblies.ContainsKey(assumed.FullName))
@@ -295,30 +286,6 @@ namespace Serilog.Settings.Configuration
             }
 
             return assemblies.Values.ToList().AsReadOnly();
-        }
-
-        AssemblyName[] GetSerilogConfigurationAssemblies()
-        {
-            // ReSharper disable once RedundantAssignment
-            var query = Enumerable.Empty<AssemblyName>();
-            var filter = new Func<string, bool>(name => name != null && name.ToLowerInvariant().Contains("serilog"));
-
-            if (_dependencyContext != null)
-            {
-                query = from library in _dependencyContext.RuntimeLibraries
-                        from assemblyName in library.GetDefaultAssemblyNames(_dependencyContext)
-                        where filter(assemblyName.Name)
-                        select assemblyName;
-            }
-            else
-            {
-                query = from outputAssemblyPath in System.IO.Directory.GetFiles(AppDomain.CurrentDomain.BaseDirectory, "*.dll")
-                        let assemblyFileName = System.IO.Path.GetFileNameWithoutExtension(outputAssemblyPath)
-                        where filter(assemblyFileName)
-                        select AssemblyName.GetAssemblyName(outputAssemblyPath);
-            }
-
-            return query.ToArray();
         }
 
         static void CallConfigurationMethods(ILookup<string, Dictionary<string, IConfigurationArgumentValue>> methods, IList<MethodInfo> configurationMethods, object receiver, SettingValueResolver valueResolver)

@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+
 using Serilog.Configuration;
 using Serilog.Core;
 using Serilog.Events;

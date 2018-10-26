@@ -1,8 +1,7 @@
-﻿
-
-using System;
+﻿using System;
 using System.Collections.Generic;
 using Microsoft.Extensions.Configuration;
+
 using Serilog.Core;
 
 namespace Serilog.Settings.Configuration
