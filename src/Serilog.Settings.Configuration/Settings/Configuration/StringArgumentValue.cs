@@ -31,13 +31,13 @@ namespace Serilog.Settings.Configuration
                 { typeof(Type), s => Type.GetType(s, throwOnError:true) },
             };
 
-        public object ConvertTo(Type toType, SettingValueResolver valueResolver)
+        public object ConvertTo(Type toType, ResolutionContext resolutionContext)
         {
             var argumentValue = Environment.ExpandEnvironmentVariables(_valueProducer());
 
             if (toType == typeof(LoggingLevelSwitch))
             {
-                return valueResolver.LookUpSwitchByName(argumentValue);
+                return resolutionContext.LookUpSwitchByName(argumentValue);
             }
 
             var toTypeInfo = toType.GetTypeInfo();

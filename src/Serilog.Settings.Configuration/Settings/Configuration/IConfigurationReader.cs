@@ -4,6 +4,6 @@ namespace Serilog.Settings.Configuration
 {
     interface IConfigurationReader : ILoggerSettings
     {
-        void ApplySinks(LoggerSinkConfiguration loggerSinkConfiguration, SettingValueResolver valueResolver);
+        void ApplySinks(LoggerSinkConfiguration loggerSinkConfiguration);
     }
 }

@@ -4,7 +4,6 @@ using System.Collections.Generic;
 using System.Reflection;
 
 using Serilog.Configuration;
-using Serilog.Settings.Configuration.Assemblies;
 
 namespace Serilog.Settings.Configuration
 {
@@ -12,18 +11,16 @@ namespace Serilog.Settings.Configuration
     {
         readonly IConfigurationSection _section;
         readonly IReadOnlyCollection<Assembly> _configurationAssemblies;
-        readonly AssemblyFinder _assemblyFinder;
 
-        public ObjectArgumentValue(IConfigurationSection section, IReadOnlyCollection<Assembly> configurationAssemblies, AssemblyFinder assemblyFinder)
+        public ObjectArgumentValue(IConfigurationSection section, IReadOnlyCollection<Assembly> configurationAssemblies)
         {
             _section = section ?? throw new ArgumentNullException(nameof(section));
 
             // used by nested logger configurations to feed a new pass by ConfigurationReader
             _configurationAssemblies = configurationAssemblies ?? throw new ArgumentNullException(nameof(configurationAssemblies));
-            _assemblyFinder = assemblyFinder ?? throw new ArgumentNullException(nameof(assemblyFinder));
         }
 
-        public object ConvertTo(Type toType, SettingValueResolver valueResolver)
+        public object ConvertTo(Type toType, ResolutionContext resolutionContext)
         {
             // return the entire section for internal processing
             if (toType == typeof(IConfigurationSection)) return _section;
@@ -37,7 +34,7 @@ namespace Serilog.Settings.Configuration
                 if (configType != typeof(LoggerConfiguration) && configType != typeof(LoggerSinkConfiguration))
                     throw new ArgumentException($"Configuration for Action<{configType}> is not implemented.");
 
-                IConfigurationReader configReader = new ConfigurationReader(_section, _configurationAssemblies, _assemblyFinder, valueResolver);
+                IConfigurationReader configReader = new ConfigurationReader(_section, _configurationAssemblies, resolutionContext);
 
                 if (configType == typeof(LoggerConfiguration))
                 {
@@ -46,7 +43,7 @@ namespace Serilog.Settings.Configuration
 
                 if (configType == typeof(LoggerSinkConfiguration))
                 {
-                    return new Action<LoggerSinkConfiguration>(loggerSinkConfig => configReader.ApplySinks(loggerSinkConfig, valueResolver));
+                    return new Action<LoggerSinkConfiguration>(loggerSinkConfig => configReader.ApplySinks(loggerSinkConfig));
                 }
             }
 

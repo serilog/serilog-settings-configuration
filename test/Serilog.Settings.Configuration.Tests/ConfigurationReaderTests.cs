@@ -76,7 +76,7 @@ namespace Serilog.Settings.Configuration.Tests
 
             Assert.Equal(1, args.Length);
             Assert.Equal("outputTemplate", args[0].Key);
-            Assert.Equal("{Message}", args[0].Value.ConvertTo(typeof(string), SettingValueResolver.Default()));
+            Assert.Equal("{Message}", args[0].Value.ConvertTo(typeof(string), new ResolutionContext()));
         }
 
         [Fact]
