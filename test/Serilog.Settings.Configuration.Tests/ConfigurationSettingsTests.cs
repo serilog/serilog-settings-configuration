@@ -14,12 +14,22 @@ namespace Serilog.Settings.Configuration.Tests
     {
         static LoggerConfiguration ConfigFromJson(string jsonString, string secondJsonSource = null)
         {
+            return ConfigFromJson(jsonString, secondJsonSource, out _);
+        }
+
+        static LoggerConfiguration ConfigFromJson(string jsonString, out IConfiguration configuration)
+        {
+            return ConfigFromJson(jsonString, null, out configuration);
+        }
+
+        static LoggerConfiguration ConfigFromJson(string jsonString, string secondJsonSource, out IConfiguration configuration)
+        {
             var builder = new ConfigurationBuilder().AddJsonString(jsonString);
             if (secondJsonSource != null)
                 builder.AddJsonString(secondJsonSource);
-            var config = builder.Build();
+            configuration = builder.Build();
             return new LoggerConfiguration()
-                .ReadFrom.Configuration(config);
+                .ReadFrom.Configuration(configuration);
         }
 
         [Fact]
@@ -419,7 +429,7 @@ namespace Serilog.Settings.Configuration.Tests
         }
 
         [Fact]
-        
+
         [Trait("BugFix", "https://github.com/serilog/serilog-settings-configuration/issues/142")]
         public void SinkWithIConfigurationArguments()
         {
@@ -434,14 +444,15 @@ namespace Serilog.Settings.Configuration.Tests
             }";
 
             DummyConfigurationSink.Reset();
-            var log = ConfigFromJson(json)
+            var log = ConfigFromJson(json, out var expectedConfig)
                 .CreateLogger();
 
             log.Write(Some.InformationEvent());
 
             Assert.NotNull(DummyConfigurationSink.Configuration);
+            Assert.Same(expectedConfig, DummyConfigurationSink.Configuration);
         }
-        
+
         [Fact]
         [Trait("BugFix", "https://github.com/serilog/serilog-settings-configuration/issues/142")]
         public void SinkWithOptionalIConfigurationArguments()
@@ -457,15 +468,16 @@ namespace Serilog.Settings.Configuration.Tests
             }";
 
             DummyConfigurationSink.Reset();
-            var log = ConfigFromJson(json)
+            var log = ConfigFromJson(json, out var expectedConfig)
                 .CreateLogger();
 
             log.Write(Some.InformationEvent());
 
             // null is the default value, but we have a configuration to provide
             Assert.NotNull(DummyConfigurationSink.Configuration);
+            Assert.Same(expectedConfig, DummyConfigurationSink.Configuration);
         }
-        
+
         [Fact]
         public void SinkWithIConfigSectionArguments()
         {
@@ -484,7 +496,7 @@ namespace Serilog.Settings.Configuration.Tests
                 .CreateLogger();
 
             log.Write(Some.InformationEvent());
-            
+
             Assert.NotNull(DummyConfigurationSink.ConfigSection);
             Assert.Equal("bar", DummyConfigurationSink.ConfigSection["foo"]);
         }
@@ -763,7 +775,7 @@ namespace Serilog.Settings.Configuration.Tests
             Assert.DoesNotContain("4", msg);
         }
 
-        private string GetDestructuredProperty(object x, string json)
+        private static string GetDestructuredProperty(object x, string json)
         {
             LogEvent evt = null;
             var log = ConfigFromJson(json)
