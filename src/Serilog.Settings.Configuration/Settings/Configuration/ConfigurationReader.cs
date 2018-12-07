@@ -382,7 +382,7 @@ namespace Serilog.Settings.Configuration
                 if (!methodsByName.Any())
                     throw new MissingMethodException($"Unable to find a method called {name}. Candidate methods are:{Environment.NewLine}{string.Join(Environment.NewLine, candidateMethods)}");
 
-                string msg = $"Unable to find a method called {name}"
+                string msg = $"Unable to find a method called {name} "
                     + (suppliedArgumentValues.Any()
                         ? "for supplied arguments: " + string.Join(", ", suppliedArgumentValues.Keys)
                         : "with no supplied arguments")
