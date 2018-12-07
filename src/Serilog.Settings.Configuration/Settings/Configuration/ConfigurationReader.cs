@@ -353,7 +353,7 @@ namespace Serilog.Settings.Configuration
             // Per issue #111, it is safe to use case-insensitive matching on argument names. The CLR doesn't permit this type
             // of overloading, and the Microsoft.Extensions.Configuration keys are case-insensitive (case is preserved with some
             // config sources, but key-matching is case-insensitive and case-preservation does not appear to be guaranteed).
-            return candidateMethods
+            var selectedMethod = candidateMethods
                 .Where(m => m.Name == name &&
                             m.GetParameters().Skip(1)
                             .All(p => p.HasDefaultValue
@@ -372,6 +372,25 @@ namespace Serilog.Settings.Configuration
                         matchingArgs.Count(p => p.ParameterType == typeof(string)));
                 })
                 .FirstOrDefault();
+
+            if (selectedMethod == null)
+            {
+                var methodsByName = candidateMethods.Where(m => m.Name == name).ToList();
+                if (!methodsByName.Any())
+                    throw new MissingMethodException($"Unable to find a method called {name}. Candidate methods are:{Environment.NewLine}{string.Join(Environment.NewLine, candidateMethods)}");
+
+                string msg = $"Unable to find a method called {name}"
+                    + (suppliedArgumentValues.Any()
+                        ? "for supplied arguments: " + string.Join(", ", suppliedArgumentValues.Keys)
+                        : "with no supplied arguments")
+                    + ". Candidate methods are:"
+                    + Environment.NewLine
+                    + string.Join(Environment.NewLine, methodsByName);
+
+                throw new MissingMethodException(msg);
+            }
+
+            return selectedMethod;
         }
 
         static IList<MethodInfo> FindSinkConfigurationMethods(IReadOnlyCollection<Assembly> configurationAssemblies)
