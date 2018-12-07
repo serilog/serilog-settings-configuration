@@ -375,7 +375,10 @@ namespace Serilog.Settings.Configuration
 
             if (selectedMethod == null)
             {
-                var methodsByName = candidateMethods.Where(m => m.Name == name).ToList();
+                var methodsByName = candidateMethods
+                    .Where(m => m.Name == name)
+                    .Select(m => $"{m.Name}({string.Join(", ", m.GetParameters().Skip(1).Select(p => p.Name))}")
+                    .ToList();
                 if (!methodsByName.Any())
                     throw new MissingMethodException($"Unable to find a method called {name}. Candidate methods are:{Environment.NewLine}{string.Join(Environment.NewLine, candidateMethods)}");
 
