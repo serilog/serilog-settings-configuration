@@ -16,7 +16,9 @@ namespace Serilog.Settings.Configuration.Assemblies
 
         public static AssemblyFinder Auto()
         {
-            if (Assembly.GetEntryAssembly() != null)
+            // Need to check `Assembly.GetEntryAssembly()` first because 
+            // `DependencyContext.Default` throws an exception when `Assembly.GetEntryAssembly()` returns null
+            if (Assembly.GetEntryAssembly() != null && DependencyContext.Default != null)
             {
                 return new DependencyContextAssemblyFinder(DependencyContext.Default);
             }
