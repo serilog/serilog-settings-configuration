@@ -15,7 +15,7 @@ namespace Serilog.Settings.Configuration.Tests
         [Fact]
         public void StringValuesConvertToDefaultInstancesIfTargetIsInterface()
         {
-            var stringArgumentValue = new StringArgumentValue(() => "Serilog.Formatting.Json.JsonFormatter, Serilog");
+            var stringArgumentValue = new StringArgumentValue("Serilog.Formatting.Json.JsonFormatter, Serilog");
 
             var result = stringArgumentValue.ConvertTo(typeof(ITextFormatter), new ResolutionContext());
 
@@ -25,7 +25,7 @@ namespace Serilog.Settings.Configuration.Tests
         [Fact]
         public void StringValuesConvertToDefaultInstancesIfTargetIsAbstractClass()
         {
-            var stringArgumentValue = new StringArgumentValue(() => "Serilog.Settings.Configuration.Tests.Support.ConcreteClass, Serilog.Settings.Configuration.Tests");
+            var stringArgumentValue = new StringArgumentValue("Serilog.Settings.Configuration.Tests.Support.ConcreteClass, Serilog.Settings.Configuration.Tests");
 
             var result = stringArgumentValue.ConvertTo(typeof(AbstractClass), new ResolutionContext());
 
@@ -81,7 +81,7 @@ namespace Serilog.Settings.Configuration.Tests
         [InlineData("Serilog.Settings.Configuration.Tests.Support.ClassWithStaticAccessors::AbstractField, Serilog.Settings.Configuration.Tests", typeof(AnAbstractClass))]
         public void StaticMembersAccessorsCanBeUsedForReferenceTypes(string input, Type targetType)
         {
-            var stringArgumentValue = new StringArgumentValue(() => $"{input}");
+            var stringArgumentValue = new StringArgumentValue($"{input}");
 
             var actual = stringArgumentValue.ConvertTo(targetType, new ResolutionContext());
 
@@ -98,7 +98,7 @@ namespace Serilog.Settings.Configuration.Tests
         [InlineData("Serilog.Settings.Configuration.Tests.Support.ClassWithStaticAccessors::InterfaceProperty", typeof(IAmAnInterface))]
         public void StaticAccessorOnUnknownTypeThrowsTypeLoadException(string input, Type targetType)
         {
-            var stringArgumentValue = new StringArgumentValue(() => $"{input}");
+            var stringArgumentValue = new StringArgumentValue($"{input}");
             Assert.Throws<TypeLoadException>(() =>
                 stringArgumentValue.ConvertTo(targetType, new ResolutionContext())
             );
@@ -117,7 +117,7 @@ namespace Serilog.Settings.Configuration.Tests
         [InlineData("Serilog.Settings.Configuration.Tests.Support.ClassWithStaticAccessors::InstanceInterfaceField, Serilog.Settings.Configuration.Tests", typeof(IAmAnInterface))]
         public void StaticAccessorWithInvalidMemberThrowsInvalidOperationException(string input, Type targetType)
         {
-            var stringArgumentValue = new StringArgumentValue(() => $"{input}");
+            var stringArgumentValue = new StringArgumentValue($"{input}");
             var exception = Assert.Throws<InvalidOperationException>(() =>
                 stringArgumentValue.ConvertTo(targetType, new ResolutionContext())
             );
@@ -134,7 +134,7 @@ namespace Serilog.Settings.Configuration.Tests
             var resolutionContext = new ResolutionContext();
             resolutionContext.AddLevelSwitch(switchName, @switch);
 
-            var stringArgumentValue = new StringArgumentValue(() => switchName);
+            var stringArgumentValue = new StringArgumentValue(switchName);
 
             var resolvedSwitch = stringArgumentValue.ConvertTo(typeof(LoggingLevelSwitch), resolutionContext);
 
@@ -149,7 +149,7 @@ namespace Serilog.Settings.Configuration.Tests
             var resolutionContext = new ResolutionContext();
             resolutionContext.AddLevelSwitch("$anotherSwitch", new LoggingLevelSwitch(LogEventLevel.Verbose));
 
-            var stringArgumentValue = new StringArgumentValue(() => "$mySwitch");
+            var stringArgumentValue = new StringArgumentValue("$mySwitch");
 
             var ex = Assert.Throws<InvalidOperationException>(() =>
                 stringArgumentValue.ConvertTo(typeof(LoggingLevelSwitch), resolutionContext)
@@ -163,7 +163,7 @@ namespace Serilog.Settings.Configuration.Tests
         public void StringValuesConvertToTypeFromShortTypeName()
         {
             var shortTypeName = "System.Version";
-            var stringArgumentValue = new StringArgumentValue(() => shortTypeName);
+            var stringArgumentValue = new StringArgumentValue(shortTypeName);
 
             var actual = (Type)stringArgumentValue.ConvertTo(typeof(Type), new ResolutionContext());
 
@@ -174,7 +174,7 @@ namespace Serilog.Settings.Configuration.Tests
         public void StringValuesConvertToTypeFromAssemblyQualifiedName()
         {
             var assemblyQualifiedName = typeof(Version).AssemblyQualifiedName;
-            var stringArgumentValue = new StringArgumentValue(() => assemblyQualifiedName);
+            var stringArgumentValue = new StringArgumentValue(assemblyQualifiedName);
 
             var actual = (Type)stringArgumentValue.ConvertTo(typeof(Type), new ResolutionContext());
 
