@@ -75,6 +75,16 @@ namespace Serilog.Settings.Configuration.Tests
         }
 
         [Theory]
+        [InlineData("Serilog.Formatting.Json.JsonFormatter", typeof(JsonFormatter))]
+        [InlineData("Serilog.Formatting.Json.JsonFormatter, Serilog", typeof(JsonFormatter))]
+        [InlineData("Serilog.ConfigurationLoggerConfigurationExtensions", typeof(ConfigurationLoggerConfigurationExtensions))]
+        public void FindTypeSupportsSimpleNamesForSerilogTypes(string input, Type targetType)
+        {
+            var type = StringArgumentValue.FindType(input);
+            Assert.Equal(targetType, type);
+        }
+
+        [Theory]
         [InlineData("Serilog.Settings.Configuration.Tests.Support.ClassWithStaticAccessors::InterfaceProperty, Serilog.Settings.Configuration.Tests", typeof(IAmAnInterface))]
         [InlineData("Serilog.Settings.Configuration.Tests.Support.ClassWithStaticAccessors::AbstractProperty, Serilog.Settings.Configuration.Tests", typeof(AnAbstractClass))]
         [InlineData("Serilog.Settings.Configuration.Tests.Support.ClassWithStaticAccessors::InterfaceField, Serilog.Settings.Configuration.Tests", typeof(IAmAnInterface))]
