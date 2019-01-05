@@ -1,48 +1,49 @@
-﻿using System;
-using System.IO;
-using System.Threading;
-
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.Configuration.Json;
-
-using Serilog.Core;
+﻿using Serilog.Core;
 using Serilog.Events;
 using Serilog.Settings.Configuration.Tests.Support;
 
 using Xunit;
+using Microsoft.Extensions.Configuration;
+
 using TestDummies.Console;
 
 namespace Serilog.Settings.Configuration.Tests
 {
-    public class DynamicLevelChangeTests : IDisposable
+    public class DynamicLevelChangeTests
     {
-        const string ConfigFilename = "dynamicLevels.json";
+        const string DefaultConfig = @"{
+            'Serilog': {
+                'Using': [ 'TestDummies' ],
+                'MinimumLevel': {
+                    'Default': 'Information',
+                    'Override': {
+                        'Root.Test': 'Information'
+                    }
+                },
+                'LevelSwitches': { '$mySwitch': 'Information' },
+                'WriteTo:Dummy': {
+                    'Name': 'DummyConsole',
+                    'Args': {
+                        'levelSwitch': '$mySwitch'
+                    }
+                }
+            }
+        }";
 
-        readonly IConfigurationRoot _config;
-
-        LogEventLevel _minimumLevel, _overrideLevel, _switchLevel;
+        readonly ReloadableConfigurationSource _configSource;
 
         public DynamicLevelChangeTests()
         {
-            UpdateConfig(LogEventLevel.Information, LogEventLevel.Information, LogEventLevel.Information);
-
-            _config = new ConfigurationBuilder()
-                .AddJsonFile(ConfigFilename, false, true)
-                .Build();
-        }
-
-        public void Dispose()
-        {
-            if (File.Exists(ConfigFilename))
-            {
-                File.Delete(ConfigFilename);
-            }
+            _configSource = new ReloadableConfigurationSource(JsonStringConfigSource.LoadData(DefaultConfig));
         }
 
         [Fact]
         public void ShouldRespectDynamicLevelChanges()
         {
-            using (var logger = new LoggerConfiguration().ReadFrom.Configuration(_config).CreateLogger())
+            using (var logger = new LoggerConfiguration()
+                .ReadFrom
+                .Configuration(new ConfigurationBuilder().Add(_configSource).Build())
+                .CreateLogger())
             {
                 DummyConsoleSink.Emitted.Clear();
                 logger.Write(Some.DebugEvent());
@@ -64,39 +65,25 @@ namespace Serilog.Settings.Configuration.Tests
                 logger.ForContext(Constants.SourceContextPropertyName, "Root.Test").Write(Some.DebugEvent());
                 Assert.Single(DummyConsoleSink.Emitted);
             }
-        }
 
-        void UpdateConfig(LogEventLevel? minimumLevel = null, LogEventLevel? overrideLevel = null, LogEventLevel? switchLevel = null)
-        {
-            File.WriteAllText(ConfigFilename, BuildConfiguration());
-            Thread.Sleep(300);
-
-            string BuildConfiguration()
+            void UpdateConfig(LogEventLevel? minimumLevel = null, LogEventLevel? switchLevel = null, LogEventLevel? overrideLevel = null)
             {
-                _minimumLevel = minimumLevel ?? _minimumLevel;
-                _overrideLevel = overrideLevel ?? _overrideLevel;
-                _switchLevel = switchLevel ?? _switchLevel;
+                if (minimumLevel.HasValue)
+                {
+                    _configSource.Set("Serilog:MinimumLevel:Default", minimumLevel.Value.ToString());
+                }
 
-                var config = @"{
-                    'Serilog': {
-                        'Using': [ 'TestDummies' ],
-                        'MinimumLevel': {
-                            'Default': '" + _minimumLevel + @"',
-                            'Override': {
-                                'Root.Test': '" + _overrideLevel + @"'
-                            }
-                        },
-                        'LevelSwitches': { '$mySwitch': '" + _switchLevel + @"' },
-                        'WriteTo:Dummy': {
-                            'Name': 'DummyConsole',
-                            'Args': {
-                                'levelSwitch': '$mySwitch'
-                            }
-                        }
-                    }
-                }";
+                if (switchLevel.HasValue)
+                {
+                    _configSource.Set("Serilog:LevelSwitches:$mySwitch", switchLevel.Value.ToString());
+                }
 
-                return config;
+                if (overrideLevel.HasValue)
+                {
+                    _configSource.Set("Serilog:MinimumLevel:Override:Root.Test", overrideLevel.Value.ToString());
+                }
+
+                _configSource.Reload();
             }
         }
     }
