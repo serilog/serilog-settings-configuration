@@ -32,7 +32,7 @@ namespace Serilog.Settings.Configuration.Tests
                 Path = ConfigFilename,
                 Optional = false,
                 ReloadOnChange = true,
-                ReloadDelay = 10
+                ReloadDelay = 100
             };
 
             jsonConfigurationSource.ResolveFileProvider();
@@ -80,7 +80,7 @@ namespace Serilog.Settings.Configuration.Tests
         void UpdateConfig(LogEventLevel? minimumLevel = null, LogEventLevel? overrideLevel = null, LogEventLevel? switchLevel = null)
         {
             File.WriteAllText(ConfigFilename, BuildConfiguration());
-            Thread.Sleep(50);
+            Thread.Sleep(250);
 
             string BuildConfiguration()
             {
