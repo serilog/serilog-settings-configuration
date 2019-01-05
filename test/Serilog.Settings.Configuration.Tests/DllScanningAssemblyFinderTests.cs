@@ -9,13 +9,17 @@ namespace Serilog.Settings.Configuration.Tests
 {
     public class DllScanningAssemblyFinderTests : IDisposable
     {
+        const string BinDir1 = "bin1";
+        const string BinDir2 = "bin2";
+        const string BinDir3 = "bin3";
+
         readonly string _privateBinPath;
 
         public DllScanningAssemblyFinderTests()
         {
-            var d1 = GetOrCreateDirectory("bin1");
-            var d2 = GetOrCreateDirectory("bin2");
-            var d3 = GetOrCreateDirectory("bin3");
+            var d1 = GetOrCreateDirectory(BinDir1);
+            var d2 = GetOrCreateDirectory(BinDir2);
+            var d3 = GetOrCreateDirectory(BinDir3);
 
             _privateBinPath = $"{d1.Name};{d2.FullName};{d3.Name}";
 
@@ -25,9 +29,9 @@ namespace Serilog.Settings.Configuration.Tests
 
         public void Dispose()
         {
-            Directory.Delete("bin1", true);
-            Directory.Delete("bin2", true);
-            Directory.Delete("bin3", true);
+            Directory.Delete(BinDir1, true);
+            Directory.Delete(BinDir2, true);
+            Directory.Delete(BinDir3, true);
         }
 
         [Fact]
@@ -41,9 +45,9 @@ namespace Serilog.Settings.Configuration.Tests
         [Fact]
         public void ShouldProbePrivateBinPath()
         {
-            File.Copy("testdummies.dll", "bin1/customSink1.dll", true);
-            File.Copy("testdummies.dll", "bin2/customSink2.dll", true);
-            File.Copy("testdummies.dll", "bin3/thirdpartydependency.dll", true);
+            File.Copy("testdummies.dll", $"{BinDir1}/customSink1.dll", true);
+            File.Copy("testdummies.dll", $"{BinDir2}/customSink2.dll", true);
+            File.Copy("testdummies.dll", $"{BinDir3}/thirdpartydependency.dll", true);
 
             var ad = AppDomain.CreateDomain("serilog", null,
                 new AppDomainSetup
