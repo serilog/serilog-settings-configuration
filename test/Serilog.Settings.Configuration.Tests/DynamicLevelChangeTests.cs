@@ -26,19 +26,8 @@ namespace Serilog.Settings.Configuration.Tests
         {
             UpdateConfig(LogEventLevel.Information, LogEventLevel.Information, LogEventLevel.Information);
 
-            var jsonConfigurationSource = new JsonConfigurationSource
-            {
-                FileProvider = null,
-                Path = ConfigFilename,
-                Optional = false,
-                ReloadOnChange = true,
-                ReloadDelay = 100
-            };
-
-            jsonConfigurationSource.ResolveFileProvider();
-
             _config = new ConfigurationBuilder()
-                .Add(jsonConfigurationSource)
+                .AddJsonFile(ConfigFilename, false, true)
                 .Build();
         }
 
@@ -80,7 +69,7 @@ namespace Serilog.Settings.Configuration.Tests
         void UpdateConfig(LogEventLevel? minimumLevel = null, LogEventLevel? overrideLevel = null, LogEventLevel? switchLevel = null)
         {
             File.WriteAllText(ConfigFilename, BuildConfiguration());
-            Thread.Sleep(250);
+            Thread.Sleep(300);
 
             string BuildConfiguration()
             {
