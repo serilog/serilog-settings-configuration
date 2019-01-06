@@ -289,7 +289,7 @@ namespace Serilog.Settings.Configuration
                 var methodInfo = SelectConfigurationMethod(configurationMethods, method.Key, method.Value.Keys);
 
                 if (methodInfo != null)
-            {
+                {
                     var call = (from p in methodInfo.GetParameters().Skip(1)
                                 let directive = method.Value.FirstOrDefault(s => ParameterNameMatches(p.Name, s.Key))
                                 select directive.Key == null
@@ -298,9 +298,9 @@ namespace Serilog.Settings.Configuration
 
                     call.Insert(0, receiver);
                     methodInfo.Invoke(null, call.ToArray());
+                }
             }
-            }
-            }
+        }
 
         static bool HasImplicitValueWhenNotSpecified(ParameterInfo paramInfo)
         {
@@ -318,19 +318,19 @@ namespace Serilog.Settings.Configuration
             }
 
             if (parameter.ParameterType == typeof(IConfiguration))
-                {
+            {
                 if (_resolutionContext.HasAppConfiguration)
-                    {
+                {
                     return _resolutionContext.AppConfiguration;
                 }
                 if (parameter.HasDefaultValue)
-                        {
+                {
                     return parameter.DefaultValue;
                 }
 
-                            throw new InvalidOperationException("Trying to invoke a configuration method accepting a `IConfiguration` argument. " +
+                throw new InvalidOperationException("Trying to invoke a configuration method accepting a `IConfiguration` argument. " +
                                                               $"This is not supported when only a `IConfigSection` has been provided. (method '{methodToInvoke}')");
-                    }
+            }
 
             return parameter.DefaultValue;
         }
