@@ -380,6 +380,11 @@ namespace Serilog.Settings.Configuration
             return selectedMethod;
         }
 
+        static bool ParameterNameMatches(string actualParameterName, string suppliedName)
+        {
+            return suppliedName.Equals(actualParameterName, StringComparison.OrdinalIgnoreCase);
+        }
+
         static bool ParameterNameMatches(string actualParameterName, IEnumerable<string> suppliedNames)
         {
             return suppliedNames.Any(s => ParameterNameMatches(actualParameterName, s));
