@@ -364,18 +364,17 @@ namespace Serilog.Settings.Configuration
                     .Where(m => m.Name == name)
                     .Select(m => $"{m.Name}({string.Join(", ", m.GetParameters().Skip(1).Select(p => p.Name))})")
                     .ToList();
-                if (!methodsByName.Any())
-                    throw new MissingMethodException($"Unable to find a method called {name}. Candidate methods are:{Environment.NewLine}{string.Join(Environment.NewLine, candidateMethods)}");
 
-                string msg = $"Unable to find a method called {name} "
-                    + (suppliedArgumentValues.Any()
-                        ? "for supplied arguments: " + string.Join(", ", suppliedArgumentValues.Keys)
+                if (!methodsByName.Any())
+                    SelfLog.WriteLine($"Unable to find a method called {name}. Candidate methods are:{Environment.NewLine}{string.Join(Environment.NewLine, candidateMethods)}");
+                else
+                    SelfLog.WriteLine($"Unable to find a method called {name} "
+                    + (suppliedArgumentNames.Any()
+                        ? "for supplied arguments: " + string.Join(", ", suppliedArgumentNames)
                         : "with no supplied arguments")
                     + ". Candidate methods are:"
                     + Environment.NewLine
-                    + string.Join(Environment.NewLine, methodsByName);
-
-                throw new MissingMethodException(msg);
+                    + string.Join(Environment.NewLine, methodsByName));
             }
 
             return selectedMethod;
