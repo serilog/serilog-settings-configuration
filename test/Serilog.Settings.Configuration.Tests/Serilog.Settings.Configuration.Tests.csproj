@@ -19,6 +19,10 @@
     <PublicSign Condition=" '$(OS)' != 'Windows_NT' ">true</PublicSign>
   </PropertyGroup>
 
+  <PropertyGroup Condition="'$(TargetFramework)' == 'net452'">
+    <DefineConstants>$(DefineConstants);PRIVATE_BIN</DefineConstants>
+  </PropertyGroup>
+
   <ItemGroup>
     <ProjectReference Include="..\..\src\Serilog.Settings.Configuration\Serilog.Settings.Configuration.csproj" />
     <ProjectReference Include="..\TestDummies\TestDummies.csproj" />
