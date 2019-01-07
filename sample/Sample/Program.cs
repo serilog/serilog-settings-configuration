@@ -7,6 +7,7 @@ using System.Linq;
 using Serilog.Core;
 using Serilog.Events;
 using System.Collections.Generic;
+using Serilog.Debugging;
 
 namespace Sample
 {
@@ -14,6 +15,8 @@ namespace Sample
     {
         public static void Main(string[] args)
         {
+            SelfLog.Enable(Console.Error);
+
             var configuration = new ConfigurationBuilder()
                 .SetBasePath(Directory.GetCurrentDirectory())
                 .AddJsonFile(path: "appsettings.json", optional: false, reloadOnChange: true)

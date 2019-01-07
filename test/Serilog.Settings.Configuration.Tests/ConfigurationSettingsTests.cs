@@ -274,6 +274,33 @@ namespace Serilog.Settings.Configuration.Tests
         }
 
         [Fact]
+        public void LoggingFilterSwitchIsConfigured()
+        {
+            var json = @"{
+                'Serilog': {
+                    'FilterSwitches': { '$mySwitch': 'Prop = \'Val\'' },
+                    'Filter:BySwitch': {
+                        'Name': 'ControlledBy',
+                        'Args': {
+                            'switch': '$mySwitch'
+                        }
+                    }
+                }
+            }";
+            LogEvent evt = null;
+
+            var log = ConfigFromJson(json)
+                .WriteTo.Sink(new DelegatingSink(e => evt = e))
+                .CreateLogger();
+
+            log.Write(Some.InformationEvent());
+            Assert.Null(evt);
+
+            log.ForContext("Prop", "Val").Write(Some.InformationEvent());
+            Assert.NotNull(evt);
+        }
+
+        [Fact]
         public void LoggingLevelSwitchIsConfigured()
         {
             var json = @"{

@@ -41,6 +41,7 @@ namespace Serilog.Settings.Configuration
         public void Configure(LoggerConfiguration loggerConfiguration)
         {
             ProcessLevelSwitchDeclarations();
+            ProcessFilterSwitchDeclarations();
 
             ApplyMinimumLevel(loggerConfiguration);
             ApplyEnrichment(loggerConfiguration);
@@ -48,6 +49,63 @@ namespace Serilog.Settings.Configuration
             ApplyDestructuring(loggerConfiguration);
             ApplySinks(loggerConfiguration);
             ApplyAuditSinks(loggerConfiguration);
+        }
+
+        void ProcessFilterSwitchDeclarations()
+        {
+            var filterSwitchesDirective = _section.GetSection("FilterSwitches");
+
+            foreach (var filterSwitchDeclaration in filterSwitchesDirective.GetChildren())
+            {
+                var filterSwitch = LoggingFilterSwitchProxy.Create();
+                if (filterSwitch == null)
+                {
+                    SelfLog.WriteLine($"FilterSwitches section found, but Serilog.Filters.Expressions isn't referenced.");
+                    break;
+                }
+
+                var switchName = filterSwitchDeclaration.Key;
+                // switchName must be something like $switch to avoid ambiguities
+                if (!IsValidSwitchName(switchName))
+                {
+                    throw new FormatException($"\"{switchName}\" is not a valid name for a Filter Switch declaration. Filter switch must be declared with a '$' sign, like \"FilterSwitches\" : {{\"$switchName\" : \"{{FilterExpression}}\"}}");
+                }
+
+                SetFilterSwitch(throwOnError: true);
+                SubscribeToFilterExpressionChanges();
+
+                _resolutionContext.AddFilterSwitch(switchName, filterSwitch);
+
+                void SubscribeToFilterExpressionChanges()
+                {
+                    ChangeToken.OnChange(filterSwitchDeclaration.GetReloadToken, () => SetFilterSwitch(throwOnError: false));
+                }
+
+                void SetFilterSwitch(bool throwOnError)
+                {
+                    var filterExpr = filterSwitchDeclaration.Value;
+                    if (string.IsNullOrWhiteSpace(filterExpr))
+                    {
+                        filterSwitch.Expression = null;
+                        return;
+                    }
+
+                    try
+                    {
+                        filterSwitch.Expression = filterExpr;
+                    }
+                    catch (Exception e)
+                    {
+                        var errMsg = $"The expression '{filterExpr}' is invalid filter expression: {e.Message}.";
+                        if (throwOnError)
+                        {
+                            throw new InvalidOperationException(errMsg, e);
+                        }
+
+                        SelfLog.WriteLine(errMsg);
+                    }
+                }
+            }
         }
 
         void ProcessLevelSwitchDeclarations()
@@ -94,7 +152,7 @@ namespace Serilog.Settings.Configuration
             var minLevelControlledByDirective = minimumLevelDirective.GetSection("ControlledBy");
             if (minLevelControlledByDirective.Value != null)
             {
-                var globalMinimumLevelSwitch = _resolutionContext.LookUpSwitchByName(minLevelControlledByDirective.Value);
+                var globalMinimumLevelSwitch = _resolutionContext.LookUpLevelSwitchByName(minLevelControlledByDirective.Value);
                 // not calling ApplyMinimumLevel local function because here we have a reference to a LogLevelSwitch already
                 loggerConfiguration.MinimumLevel.ControlledBy(globalMinimumLevelSwitch);
             }
@@ -109,7 +167,7 @@ namespace Serilog.Settings.Configuration
                 }
                 else
                 {
-                    var overrideSwitch = _resolutionContext.LookUpSwitchByName(overridenLevelOrSwitch);
+                    var overrideSwitch = _resolutionContext.LookUpLevelSwitchByName(overridenLevelOrSwitch);
                     // not calling ApplyMinimumLevel local function because here we have a reference to a LogLevelSwitch already
                     loggerConfiguration.MinimumLevel.Override(overridePrefix, overrideSwitch);
                 }
