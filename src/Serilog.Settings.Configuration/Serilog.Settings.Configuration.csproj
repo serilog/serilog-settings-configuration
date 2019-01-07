@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <Description>Microsoft.Extensions.Configuration (appsettings.json) support for Serilog.</Description>
@@ -15,7 +15,7 @@
     <PackageTags>serilog;json</PackageTags>
     <PackageIconUrl>https://serilog.net/images/serilog-configuration-nuget.png</PackageIconUrl>
     <PackageProjectUrl>https://github.com/serilog/serilog-settings-configuration</PackageProjectUrl>
-    <PackageLicenseUrl>https://www.apache.org/licenses/LICENSE-2.0</PackageLicenseUrl>
+    <PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
     <RepositoryUrl>https://github.com/serilog/serilog-settings-configuration</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
     <RootNamespace>Serilog</RootNamespace>
