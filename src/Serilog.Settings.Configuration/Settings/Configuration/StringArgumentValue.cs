@@ -97,7 +97,7 @@ namespace Serilog.Settings.Configuration
 
                 // maybe it's the assembly-qualified type name of a concrete implementation
                 // with a default constructor
-                var type = Type.GetType(argumentValue.Trim());
+                var type = FindType(argumentValue.Trim());
                 if (type != null)
                 {
                     var ctor = type.GetTypeInfo().DeclaredConstructors.FirstOrDefault(ci =>
@@ -140,6 +140,20 @@ namespace Serilog.Settings.Configuration
             }
 
             return Convert.ChangeType(argumentValue, toType);
+        }
+
+        internal static Type FindType(string typeName)
+        {
+            var type = Type.GetType(typeName);
+            if (type == null)
+            {
+                if (!typeName.Contains(','))
+                {
+                    type = Type.GetType($"{typeName}, Serilog");
+                }
+            }
+
+            return type;
         }
 
         internal static bool TryParseStaticMemberAccessor(string input, out string accessorTypeName, out string memberName)
