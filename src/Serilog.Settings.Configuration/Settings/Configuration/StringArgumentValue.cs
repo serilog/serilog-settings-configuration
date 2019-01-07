@@ -3,25 +3,20 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using System.Text.RegularExpressions;
-using Microsoft.Extensions.Primitives;
 
 using Serilog.Core;
-using Serilog.Debugging;
-using Serilog.Events;
 
 namespace Serilog.Settings.Configuration
 {
     class StringArgumentValue : IConfigurationArgumentValue
     {
-        readonly Func<string> _valueProducer;
-        readonly Func<IChangeToken> _changeTokenProducer;
+        readonly string _providedValue;
 
         static readonly Regex StaticMemberAccessorRegex = new Regex("^(?<shortTypeName>[^:]+)::(?<memberName>[A-Za-z][A-Za-z0-9]*)(?<typeNameExtraQualifiers>[^:]*)$");
 
-        public StringArgumentValue(Func<string> valueProducer, Func<IChangeToken> changeTokenProducer = null)
+        public StringArgumentValue(string providedValue)
         {
-            _valueProducer = valueProducer ?? throw new ArgumentNullException(nameof(valueProducer));
-            _changeTokenProducer = changeTokenProducer;
+            _providedValue = providedValue ?? throw new ArgumentNullException(nameof(providedValue));
         }
 
         static readonly Dictionary<Type, Func<string, object>> ExtendedTypeConversions = new Dictionary<Type, Func<string, object>>
@@ -33,7 +28,7 @@ namespace Serilog.Settings.Configuration
 
         public object ConvertTo(Type toType, ResolutionContext resolutionContext)
         {
-            var argumentValue = Environment.ExpandEnvironmentVariables(_valueProducer());
+            var argumentValue = Environment.ExpandEnvironmentVariables(_providedValue);
 
             if (toType == typeof(LoggingLevelSwitch))
             {
@@ -112,31 +107,6 @@ namespace Serilog.Settings.Configuration
                     var call = ctor.GetParameters().Select(pi => pi.DefaultValue).ToArray();
                     return ctor.Invoke(call);
                 }
-            }
-
-            if (toType == typeof(LoggingLevelSwitch))
-            {
-                if (!Enum.TryParse(argumentValue, out LogEventLevel minimumLevel))
-                    throw new InvalidOperationException($"The value `{argumentValue}` is not a valid Serilog level.");
-
-                var levelSwitch = new LoggingLevelSwitch(minimumLevel);
-
-                if (_changeTokenProducer != null)
-                {
-                    ChangeToken.OnChange(
-                        _changeTokenProducer,
-                        () =>
-                        {
-                            var newArgumentValue = _valueProducer();
-
-                            if (Enum.TryParse(newArgumentValue, out minimumLevel))
-                                levelSwitch.MinimumLevel = minimumLevel;
-                            else
-                                SelfLog.WriteLine($"The value `{newArgumentValue}` is not a valid Serilog level.");
-                        });
-                }
-
-                return levelSwitch;
             }
 
             return Convert.ChangeType(argumentValue, toType);

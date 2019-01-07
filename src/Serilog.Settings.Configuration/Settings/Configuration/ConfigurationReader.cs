@@ -62,6 +62,7 @@ namespace Serilog.Settings.Configuration
                 {
                     throw new FormatException($"\"{switchName}\" is not a valid name for a Level Switch declaration. Level switch must be declared with a '$' sign, like \"LevelSwitches\" : {{\"$switchName\" : \"InitialLevel\"}}");
                 }
+
                 LoggingLevelSwitch newSwitch;
                 if (string.IsNullOrEmpty(switchInitialLevel))
                 {
@@ -72,6 +73,9 @@ namespace Serilog.Settings.Configuration
                     var initialLevel = ParseLogEventLevel(switchInitialLevel);
                     newSwitch = new LoggingLevelSwitch(initialLevel);
                 }
+
+                SubscribeToLoggingLevelChanges(levelSwitchDeclaration, newSwitch);
+
                 // make them available later on when resolving argument values
                 _resolutionContext.AddLevelSwitch(switchName, newSwitch);
             }
@@ -118,16 +122,21 @@ namespace Serilog.Settings.Configuration
                 var levelSwitch = new LoggingLevelSwitch(minimumLevel);
                 applyConfigAction(loggerConfiguration.MinimumLevel, levelSwitch);
 
-                ChangeToken.OnChange(
-                    directive.GetReloadToken,
-                    () =>
-                    {
-                        if (Enum.TryParse(directive.Value, out minimumLevel))
-                            levelSwitch.MinimumLevel = minimumLevel;
-                        else
-                            SelfLog.WriteLine($"The value {directive.Value} is not a valid Serilog level.");
-                    });
+                SubscribeToLoggingLevelChanges(directive, levelSwitch);
             }
+        }
+
+        void SubscribeToLoggingLevelChanges(IConfigurationSection levelSection, LoggingLevelSwitch levelSwitch)
+        {
+            ChangeToken.OnChange(
+                levelSection.GetReloadToken,
+                () =>
+                {
+                    if (Enum.TryParse(levelSection.Value, out LogEventLevel minimumLevel))
+                        levelSwitch.MinimumLevel = minimumLevel;
+                    else
+                        SelfLog.WriteLine($"The value {levelSection.Value} is not a valid Serilog level.");
+                });
         }
 
         void ApplyFilters(LoggerConfiguration loggerConfiguration)
@@ -233,7 +242,7 @@ namespace Serilog.Settings.Configuration
 
                 if (argumentSection.Value != null)
                 {
-                    argumentValue = new StringArgumentValue(() => argumentSection.Value, argumentSection.GetReloadToken);
+                    argumentValue = new StringArgumentValue(argumentSection.Value);
                 }
                 else
                 {
