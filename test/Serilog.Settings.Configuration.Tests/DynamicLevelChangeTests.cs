@@ -65,26 +65,26 @@ namespace Serilog.Settings.Configuration.Tests
                 logger.ForContext(Constants.SourceContextPropertyName, "Root.Test").Write(Some.DebugEvent());
                 Assert.Single(DummyConsoleSink.Emitted);
             }
+        }
 
-            void UpdateConfig(LogEventLevel? minimumLevel = null, LogEventLevel? switchLevel = null, LogEventLevel? overrideLevel = null)
+        void UpdateConfig(LogEventLevel? minimumLevel = null, LogEventLevel? switchLevel = null, LogEventLevel? overrideLevel = null)
+        {
+            if (minimumLevel.HasValue)
             {
-                if (minimumLevel.HasValue)
-                {
-                    _configSource.Set("Serilog:MinimumLevel:Default", minimumLevel.Value.ToString());
-                }
-
-                if (switchLevel.HasValue)
-                {
-                    _configSource.Set("Serilog:LevelSwitches:$mySwitch", switchLevel.Value.ToString());
-                }
-
-                if (overrideLevel.HasValue)
-                {
-                    _configSource.Set("Serilog:MinimumLevel:Override:Root.Test", overrideLevel.Value.ToString());
-                }
-
-                _configSource.Reload();
+                _configSource.Set("Serilog:MinimumLevel:Default", minimumLevel.Value.ToString());
             }
+
+            if (switchLevel.HasValue)
+            {
+                _configSource.Set("Serilog:LevelSwitches:$mySwitch", switchLevel.Value.ToString());
+            }
+
+            if (overrideLevel.HasValue)
+            {
+                _configSource.Set("Serilog:MinimumLevel:Override:Root.Test", overrideLevel.Value.ToString());
+            }
+
+            _configSource.Reload();
         }
     }
 }
