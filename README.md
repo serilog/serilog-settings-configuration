@@ -37,6 +37,7 @@ public class Program
     public static void Main(string[] args)
     {
         var configuration = new ConfigurationBuilder()
+	    .SetBasePath(AppContext.BaseDirectory.Substring(0, AppContext.BaseDirectory.IndexOf("bin")))
             .AddJsonFile("appsettings.json")
             .Build();
 
