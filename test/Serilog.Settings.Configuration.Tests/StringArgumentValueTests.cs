@@ -80,7 +80,7 @@ namespace Serilog.Settings.Configuration.Tests
         [InlineData("Serilog.ConfigurationLoggerConfigurationExtensions", typeof(ConfigurationLoggerConfigurationExtensions))]
         public void FindTypeSupportsSimpleNamesForSerilogTypes(string input, Type targetType)
         {
-            var type = StringArgumentValue.FindType(input);
+            var type = TypeHelper.FindType(input);
             Assert.Equal(targetType, type);
         }
 

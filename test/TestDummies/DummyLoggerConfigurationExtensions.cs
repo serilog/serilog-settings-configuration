@@ -133,5 +133,12 @@ namespace TestDummies
             return loggerDestructuringConfiguration.With(new DummyHardCodedStringDestructuringPolicy(hardCodedString));
         }
 
+        public static LoggerConfiguration DummyWithFormatterSink(
+            this LoggerSinkConfiguration loggerSinkConfiguration,
+            ITextFormatter formatter)
+        {
+            return loggerSinkConfiguration.Sink(new DummyWithFormatterSink(formatter));
+        }
+
     }
 }

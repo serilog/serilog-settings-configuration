@@ -1107,5 +1107,33 @@ namespace Serilog.Settings.Configuration.Tests
             log.ForContext("User", "the user").Write(Some.InformationEvent());
             Assert.NotNull(evt);
         }
+
+        [Fact]
+        public void SinkWithFormatterArgumentWithConstructorArguments()
+        {
+            var json = @"{
+                ""Serilog"": {
+                    ""Using"": [""TestDummies""],
+                    ""WriteTo"": [{
+                        ""Name"": ""DummyWithFormatterSink"",
+                        ""Args"": {
+                            ""formatter"" : {
+                                ""@type"": ""Serilog.Formatting.Json.JsonFormatter"",
+                                ""renderMessage"": true
+                            }
+                        }
+                    }]
+                }
+            }";
+
+            var log = ConfigFromJson(json)
+                .CreateLogger();
+
+            DummyWithFormatterSink.Reset();
+
+            log.Write(Some.InformationEvent());
+
+            Assert.Equal(1, DummyWithFormatterSink.Emitted.Count);
+        }
     }
 }

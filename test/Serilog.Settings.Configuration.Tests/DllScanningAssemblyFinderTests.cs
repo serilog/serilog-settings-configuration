@@ -13,15 +13,19 @@ namespace Serilog.Settings.Configuration.Tests
         const string BinDir2 = "bin2";
         const string BinDir3 = "bin3";
 
+#if PRIVATE_BIN
         readonly string _privateBinPath;
+#endif
 
         public DllScanningAssemblyFinderTests()
         {
+#if PRIVATE_BIN
             var d1 = GetOrCreateDirectory(BinDir1);
             var d2 = GetOrCreateDirectory(BinDir2);
             var d3 = GetOrCreateDirectory(BinDir3);
 
             _privateBinPath = $"{d1.Name};{d2.FullName};{d3.Name}";
+#endif
 
             DirectoryInfo GetOrCreateDirectory(string name)
                 => Directory.Exists(name) ? new DirectoryInfo(name) : Directory.CreateDirectory(name);
