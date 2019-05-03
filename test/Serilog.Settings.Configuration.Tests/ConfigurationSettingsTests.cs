@@ -218,7 +218,7 @@ namespace Serilog.Settings.Configuration.Tests
             log.Write(Some.DebugEvent());
             Assert.Null(evt);
 
-            var custom = log.ForContext("SourceContext", "System.Threading.Tasks.Task<42>");
+            var custom = log.ForContext(Constants.SourceContextPropertyName, typeof(System.Threading.Tasks.Task).FullName + "<42>");
             custom.Write(Some.DebugEvent());
             Assert.NotNull(evt);
             
