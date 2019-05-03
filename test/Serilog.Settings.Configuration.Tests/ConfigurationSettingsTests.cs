@@ -221,7 +221,8 @@ namespace Serilog.Settings.Configuration.Tests
             var custom = log.ForContext("SourceContext", "System.Threading.Tasks.Task<42>");
             custom.Write(Some.DebugEvent());
             Assert.NotNull(evt);
-
+            
+            evt = null;
             var systemThreadingLogger = log.ForContext<System.Threading.Tasks.Task>();
             systemThreadingLogger.Write(Some.DebugEvent());
             Assert.NotNull(evt);              
