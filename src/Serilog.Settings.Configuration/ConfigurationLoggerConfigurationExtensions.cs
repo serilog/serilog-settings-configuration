@@ -46,6 +46,7 @@ namespace Serilog
             IConfiguration configuration,
             DependencyContext dependencyContext = null)
         {
+            if (settingConfiguration == null) throw new ArgumentNullException(nameof(settingConfiguration));
             if (configuration == null) throw new ArgumentNullException(nameof(configuration));
 
             var assemblyFinder = dependencyContext == null
@@ -101,6 +102,7 @@ namespace Serilog
             IConfiguration configuration,
             ConfigurationAssemblySource configurationAssemblySource)
         {
+            if (settingConfiguration == null) throw new ArgumentNullException(nameof(settingConfiguration));
             if (configuration == null) throw new ArgumentNullException(nameof(configuration));
 
             var assemblyFinder = AssemblyFinder.ForSource(configurationAssemblySource);
