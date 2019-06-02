@@ -109,9 +109,10 @@ namespace TestDummies
         public static LoggerConfiguration DummyConsole(
             this LoggerSinkConfiguration loggerSinkConfiguration,
             LogEventLevel restrictedToMinimumLevel = LevelAlias.Minimum,
+            LoggingLevelSwitch levelSwitch = null,
             ConsoleTheme theme = null)
         {
-            return loggerSinkConfiguration.Sink(new DummyConsoleSink(theme), restrictedToMinimumLevel);
+            return loggerSinkConfiguration.Sink(new DummyConsoleSink(theme), restrictedToMinimumLevel, levelSwitch);
         }
 
         public static LoggerConfiguration Dummy(

@@ -1,9 +1,8 @@
-﻿using System.Collections.Generic;
-using Serilog.Formatting;
-using Xunit;
+﻿using Xunit;
 using System.Reflection;
 using System.Linq;
-using Serilog.Core;
+using Serilog.Formatting;
+using Serilog.Settings.Configuration.Assemblies;
 using Serilog.Settings.Configuration.Tests.Support;
 
 namespace Serilog.Settings.Configuration.Tests
@@ -14,7 +13,9 @@ namespace Serilog.Settings.Configuration.Tests
 
         public ConfigurationReaderTests()
         {
-            _configurationReader = new ConfigurationReader(JsonStringConfigSource.LoadSection(@"{ 'Serilog': {  } }", "Serilog"), null);
+            _configurationReader = new ConfigurationReader(
+                JsonStringConfigSource.LoadSection(@"{ 'Serilog': {  } }", "Serilog"),
+                AssemblyFinder.ForSource(ConfigurationAssemblySource.UseLoadedAssemblies));
         }
 
         [Fact]
@@ -75,7 +76,7 @@ namespace Serilog.Settings.Configuration.Tests
 
             Assert.Equal(1, args.Length);
             Assert.Equal("outputTemplate", args[0].Key);
-            Assert.Equal("{Message}", args[0].Value.ConvertTo(typeof(string), new Dictionary<string, LoggingLevelSwitch>()));
+            Assert.Equal("{Message}", args[0].Value.ConvertTo(typeof(string), new ResolutionContext()));
         }
 
         [Fact]
@@ -142,12 +143,9 @@ namespace Serilog.Settings.Configuration.Tests
         {
             var options = typeof(DummyLoggerConfigurationExtensions).GetTypeInfo().DeclaredMethods.ToList();
             Assert.Equal(2, options.Count(mi => mi.Name == "DummyRollingFile"));
-            var suppliedArguments = new Dictionary<string, IConfigurationArgumentValue>
-            {
-                {"pathFormat", new StringArgumentValue(() => "C:\\") }
-            };
+            var suppliedArgumentNames = new[] { "pathFormat" };
 
-            var selected = ConfigurationReader.SelectConfigurationMethod(options, "DummyRollingFile", suppliedArguments);
+            var selected = ConfigurationReader.SelectConfigurationMethod(options, "DummyRollingFile", suppliedArgumentNames);
             Assert.Equal(typeof(string), selected.GetParameters()[1].ParameterType);
         }
 
@@ -156,13 +154,10 @@ namespace Serilog.Settings.Configuration.Tests
         {
             var options = typeof(DummyLoggerConfigurationExtensions).GetTypeInfo().DeclaredMethods.ToList();
             Assert.Equal(2, options.Count(mi => mi.Name == "DummyRollingFile"));
-            var suppliedArguments = new Dictionary<string, IConfigurationArgumentValue>()
-            {
-                { "pathFormat", new StringArgumentValue(() => "C:\\") },
-                { "formatter", new StringArgumentValue(() => "SomeFormatter, SomeAssembly") }
-            };
 
-            var selected = ConfigurationReader.SelectConfigurationMethod(options, "DummyRollingFile", suppliedArguments);
+            var suppliedArgumentNames = new[] { "pathFormat", "formatter" };
+
+            var selected = ConfigurationReader.SelectConfigurationMethod(options, "DummyRollingFile", suppliedArgumentNames);
             Assert.Equal(typeof(ITextFormatter), selected.GetParameters()[1].ParameterType);
         }
 
@@ -171,13 +166,10 @@ namespace Serilog.Settings.Configuration.Tests
         {
             var options = typeof(DummyLoggerConfigurationWithMultipleMethodsExtensions).GetTypeInfo().DeclaredMethods.ToList();
             Assert.Equal(3, options.Count(mi => mi.Name == "DummyRollingFile"));
-            var suppliedArguments = new Dictionary<string, IConfigurationArgumentValue>()
-            {
-                { "pathFormat", new StringArgumentValue(() => "C:\\") },
-                { "formatter", new StringArgumentValue(() => "SomeFormatter, SomeAssembly") }
-            };
 
-            var selected = ConfigurationReader.SelectConfigurationMethod(options, "DummyRollingFile", suppliedArguments);
+            var suppliedArgumentNames = new[] { "pathFormat", "formatter" };
+
+            var selected = ConfigurationReader.SelectConfigurationMethod(options, "DummyRollingFile", suppliedArgumentNames);
             Assert.Equal(typeof(string), selected.GetParameters()[2].ParameterType);
         }
     }

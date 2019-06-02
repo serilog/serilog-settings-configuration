@@ -17,9 +17,9 @@ namespace TestDummies.Console
         public static ConsoleTheme Theme;
 
         [ThreadStatic]
-        // ReSharper disable ThreadStaticFieldHasInitializer
-        public static List<LogEvent> Emitted = new List<LogEvent>();
-        // ReSharper restore ThreadStaticFieldHasInitializer
+        static List<LogEvent> EmittedList = new List<LogEvent>();
+
+        public static List<LogEvent> Emitted => EmittedList ?? (EmittedList = new List<LogEvent>());
 
         public void Emit(LogEvent logEvent)
         {

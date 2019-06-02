@@ -35,8 +35,10 @@ namespace Serilog.Settings.Configuration.Tests
                 .AddJsonString(json)
                 .Build();
 
+#pragma warning disable CS0618 // Type or member is obsolete
             var log = new LoggerConfiguration()
                 .ReadFrom.ConfigurationSection(config.GetSection("NotSerilog"))
+#pragma warning restore CS0618 // Type or member is obsolete
                 .WriteTo.Sink(new DelegatingSink(e => evt = e))
                 .CreateLogger();
 
@@ -46,7 +48,7 @@ namespace Serilog.Settings.Configuration.Tests
             Assert.Equal("Test", evt.Properties["App"].LiteralValue());
         }
 
-        [Fact(Skip = "Passes when run alone, but fails when the whole suite is run - to fix")]
+        [Fact]
         [Trait("BugFix", "https://github.com/serilog/serilog-settings-configuration/issues/143")]
         public void ReadFromConfigurationSectionThrowsWhenTryingToCallConfigurationMethodWithIConfigurationParam()
         {
@@ -65,14 +67,39 @@ namespace Serilog.Settings.Configuration.Tests
                 .Build();
 
             var exception = Assert.Throws<InvalidOperationException>(() =>
+#pragma warning disable CS0618 // Type or member is obsolete
                new LoggerConfiguration()
                    .ReadFrom.ConfigurationSection(config.GetSection("NotSerilog"))
+#pragma warning restore CS0618 // Type or member is obsolete
                    .CreateLogger());
 
             Assert.Equal("Trying to invoke a configuration method accepting a `IConfiguration` argument. " +
                          "This is not supported when only a `IConfigSection` has been provided. " +
-                         "(method 'Serilog.LoggerConfiguration DummyWithConfiguration(Serilog.Configuration.LoggerSinkConfiguration, Microsoft.Extensions.Configuration.IConfiguration, Microsoft.Extensions.Configuration.IConfigurationSection, System.String, Serilog.Events.LogEventLevel)')",
+                         "(method 'Serilog.LoggerConfiguration DummyWithConfiguration(Serilog.Configuration.LoggerSinkConfiguration, Microsoft.Extensions.Configuration.IConfiguration, Serilog.Events.LogEventLevel)')",
                 exception.Message);
+
+        }
+
+        [Fact]
+        public void ReadFromConfigurationDoesNotThrowWhenTryingToCallConfigurationMethodWithIConfigurationParam()
+        {
+            var json = @"{
+                ""NotSerilog"": {            
+                    ""Using"": [""TestDummies""],
+                    ""WriteTo"": [{
+                        ""Name"": ""DummyWithConfiguration"",
+                        ""Args"": {}
+                    }]        
+                }
+            }";
+
+            var config = new ConfigurationBuilder()
+                .AddJsonString(json)
+                .Build();
+
+            var exception = new LoggerConfiguration()
+                   .ReadFrom.Configuration(config, "NotSerilog")
+                   .CreateLogger();
 
         }
 
@@ -95,8 +122,10 @@ namespace Serilog.Settings.Configuration.Tests
                 .Build();
 
             // this should not throw because DummyWithOptionalConfiguration accepts an optional config
+#pragma warning disable CS0618 // Type or member is obsolete
             new LoggerConfiguration()
                 .ReadFrom.ConfigurationSection(config.GetSection("NotSerilog"))
+#pragma warning restore CS0618 // Type or member is obsolete
                 .CreateLogger();
 
         }

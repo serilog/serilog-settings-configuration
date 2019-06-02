@@ -1,7 +1,8 @@
-﻿using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.Configuration.Json;
-
+﻿using System.Collections.Generic;
 using System.IO;
+
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Configuration.Json;
 
 namespace Serilog.Settings.Configuration.Tests.Support
 {
@@ -24,6 +25,13 @@ namespace Serilog.Settings.Configuration.Tests.Support
             return new ConfigurationBuilder().Add(new JsonStringConfigSource(json)).Build().GetSection(section);
         }
 
+        public static IDictionary<string, string> LoadData(string json)
+        {
+            var provider = new JsonStringConfigProvider(json);
+            provider.Load();
+            return provider.Data;
+        }
+
         class JsonStringConfigProvider : JsonConfigurationProvider
         {
             readonly string _json;
@@ -32,6 +40,8 @@ namespace Serilog.Settings.Configuration.Tests.Support
             {
                 _json = json;
             }
+
+            public new IDictionary<string, string> Data => base.Data;
 
             public override void Load()
             {
