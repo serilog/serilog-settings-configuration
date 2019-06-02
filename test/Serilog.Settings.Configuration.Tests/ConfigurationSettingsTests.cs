@@ -195,6 +195,40 @@ namespace Serilog.Settings.Configuration.Tests
         }
 
         [Fact]
+        public void TestMinimumLevelOverridesForChildContext()
+        {
+            var json = @"{
+                ""Serilog"": {
+                    ""MinimumLevel"" : {
+                        ""Default"" : ""Warning"",
+                        ""Override"" : {
+                            ""System"" : ""Warning"",
+                            ""System.Threading"": ""Debug""
+                        }
+                    }        
+                }
+            }";
+
+            LogEvent evt = null;
+
+            var log = ConfigFromJson(json)
+                .WriteTo.Sink(new DelegatingSink(e => evt = e))
+                .CreateLogger();
+
+            log.Write(Some.DebugEvent());
+            Assert.Null(evt);
+
+            var custom = log.ForContext(Constants.SourceContextPropertyName, typeof(System.Threading.Tasks.Task).FullName + "<42>");
+            custom.Write(Some.DebugEvent());
+            Assert.NotNull(evt);
+            
+            evt = null;
+            var systemThreadingLogger = log.ForContext<System.Threading.Tasks.Task>();
+            systemThreadingLogger.Write(Some.DebugEvent());
+            Assert.NotNull(evt);              
+        }
+
+        [Fact]
         public void SinksWithAbstractParamsAreConfiguredWithTypeName()
         {
             var json = @"{
