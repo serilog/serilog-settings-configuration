@@ -1,6 +1,6 @@
 # Serilog.Settings.Configuration [![Build status](https://ci.appveyor.com/api/projects/status/r2bgfimd9ocr61px/branch/master?svg=true)](https://ci.appveyor.com/project/serilog/serilog-settings-configuration/branch/master) [![NuGet Version](http://img.shields.io/nuget/v/Serilog.Settings.Configuration.svg?style=flat)](https://www.nuget.org/packages/Serilog.Settings.Configuration/)
 
-A Serilog settings provider that reads from _Microsoft.Extensions.Configuration_, .NET Core's `appsettings.json` file.
+A Serilog settings provider that reads from _Microsoft.Extensions.Configuration_ sources, including .NET Core's `appsettings.json` file.
 
 Configuration is read from the `Serilog` section.
 
@@ -21,13 +21,13 @@ Configuration is read from the `Serilog` section.
       { "Name": "ToMaximumCollectionCount", "Args": { "maximumCollectionCount": 10 } }
     ],
     "Properties": {
-		"Application": "Sample"
+        "Application": "Sample"
     }
   }
 }
 ```
 
-This example relies on the _Serilog.Sinks.Console_, _Serilog.Sinks.File_, _Serilog.Enrichers.Environment_, _Serilog.Settings.Configuration_ and _Serilog.Enrichers.Thread_ packages also being installed.
+This example relies on the _Microsoft.Extensions.Configuration.Json_, _Serilog.Sinks.Console_, _Serilog.Sinks.File_, _Serilog.Enrichers.Environment_, _Serilog.Settings.Configuration_ and _Serilog.Enrichers.Thread_ packages also being installed.
 
 After installing this package, use `ReadFrom.Configuration()` and pass an `IConfiguration` object.
 
