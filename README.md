@@ -111,7 +111,8 @@ Some Serilog packages require a reference to a logger configuration object. The 
         "Name": "File",
         "Args": {
           "path": "%TEMP%\\Logs\\serilog-configuration-sample.txt",
-          "outputTemplate": "{Timestamp:o} [{Level:u3}] ({Application}/{MachineName}/{ThreadId}) {Message}{NewLine}{Exception}"
+          "outputTemplate":
+              "{Timestamp:o} [{Level:u3}] ({Application}/{MachineName}/{ThreadId}) {Message}{NewLine}{Exception}"
         }
       }
     ]
