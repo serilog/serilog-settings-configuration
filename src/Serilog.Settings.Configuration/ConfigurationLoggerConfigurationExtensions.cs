@@ -13,6 +13,7 @@
 // limitations under the License.
 
 using System;
+using System.Reflection;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyModel;
 using Serilog.Configuration;
@@ -78,6 +79,28 @@ namespace Serilog
             IConfiguration configuration,
             DependencyContext dependencyContext = null)
             => Configuration(settingConfiguration, configuration, DefaultSectionName, dependencyContext);
+
+        /// <summary>
+        /// Reads logger settings from the provided configuration object using the default section name. Then it will resolve the
+        /// dependencies from the Dll's generated ".deps.json" file.
+        /// </summary>
+        /// <param name="settingConfiguration">Logger setting configuration.</param>
+        /// <param name="configuration">A configuration object which contains a Serilog section.</param>
+        /// <param name="assembly">The root assembly that is requesting the creation of the logger configuration.</param>
+        /// <returns>An object allowing configuration to continue.</returns>
+        public static LoggerConfiguration Configuration(
+            this LoggerSettingsConfiguration settingConfiguration,
+            IConfiguration configuration,
+            Assembly assembly) {
+
+            var assemblyFinder = AssemblyFinder.ForAssembly(assembly);
+
+            return settingConfiguration.Settings(
+                new ConfigurationReader(
+                    configuration.GetSection(DefaultSectionName),
+                    assemblyFinder,
+                    configuration: null));
+        }
 
         /// <summary>
         /// Reads logger settings from the provided configuration section. Generally it is preferable to use the other

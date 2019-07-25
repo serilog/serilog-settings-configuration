@@ -97,7 +97,7 @@ namespace Serilog.Settings.Configuration.Tests
                 .AddJsonString(json)
                 .Build();
 
-            var exception = new LoggerConfiguration()
+            _ = new LoggerConfiguration()
                    .ReadFrom.Configuration(config, "NotSerilog")
                    .CreateLogger();
 

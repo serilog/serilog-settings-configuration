@@ -25,6 +25,16 @@ namespace Serilog.Settings.Configuration.Assemblies
             return new DllScanningAssemblyFinder();
         }
 
+        /// <summary>
+        /// Attempts to resolve the Assembly finder by using the <see cref="Assembly"/> information.
+        /// </summary>
+        /// <param name="assembly">The <see cref="Assembly"/> to resolve the <see cref="DependencyContext"/>.</param>
+        /// <returns>AssemblyFinder.</returns>
+        public static AssemblyFinder ForAssembly(Assembly assembly)
+        {
+            return new MetaDataAssemblyFinder(assembly);
+        }
+
         public static AssemblyFinder ForSource(ConfigurationAssemblySource configurationAssemblySource)
         {
             switch (configurationAssemblySource)
