@@ -126,7 +126,7 @@ If a Serilog package requires additional external configuration information (for
 
 ### Complex parameter value binding
 
-When the configuration specifies a discrete value for a parameter (such as a string literal), the package will attempt to convert that value to the target method's declared CLR type of the parameter. Additional explicit handling is provided for parsing strings to `Uri` and `TimeSpan` objects and `enum` elements.
+When the configuration specifies a discrete value for a parameter (such as a string literal), the package will attempt to convert that value to the target method's declared CLR type of the parameter. Additional explicit handling is provided for parsing strings to `Uri`, `TimeSpan`, `enum` and arrays.
 
 If the parameter value is not a discrete value, the package will use the configuration binding system provided by _Microsoft.Extensions.Options.ConfigurationExtensions_ to attempt to populate the parameter. Almost anything that can be bound by `IConfiguration.Get<T>` should work with this package. An example of this is the optional `List<Column>` parameter used to configure the .NET Standard version of the _Serilog.Sinks.MSSqlServer_ package.
 
