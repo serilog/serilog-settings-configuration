@@ -163,6 +163,37 @@ namespace Serilog.Settings.Configuration.Tests
         }
 
         [Fact]
+        public void AuditToSubLoggersAreConfigured()
+        {
+            var json = @"{
+            ""Serilog"": {            
+                ""Using"": [""TestDummies""],       
+                ""AuditTo"": [{
+                    ""Name"": ""Logger"",
+                    ""Args"": {
+                        ""configureLogger"" : {
+                            ""AuditTo"": [{
+                                ""Name"": ""DummyRollingFile"",
+                                ""Args"": {""pathFormat"" : ""C:\\""}
+                            }]}
+                    }
+                }]        
+            }
+            }";
+
+            var log = ConfigFromJson(json)
+                .CreateLogger();
+
+            DummyRollingFileSink.Reset();
+            DummyRollingFileAuditSink.Reset();
+
+            log.Write(Some.InformationEvent());
+
+            Assert.Equal(0, DummyRollingFileSink.Emitted.Count);
+            Assert.Equal(1, DummyRollingFileAuditSink.Emitted.Count);
+        }
+
+        [Fact]
         public void TestMinimumLevelOverrides()
         {
             var json = @"{
