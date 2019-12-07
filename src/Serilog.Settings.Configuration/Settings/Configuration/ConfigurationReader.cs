@@ -220,39 +220,14 @@ namespace Serilog.Settings.Configuration
                                  select new
                                  {
                                      Name = argument.Key,
-                                     Value = GetArgumentValue(argument)
+                                     Value = GetArgumentValue(argument, _configurationAssemblies)
                                  }).ToDictionary(p => p.Name, p => p.Value)
                  select new { Name = name, Args = callArgs }))
                      .ToLookup(p => p.Name, p => p.Args);
 
             return result;
 
-            IConfigurationArgumentValue GetArgumentValue(IConfigurationSection argumentSection)
-            {
-                IConfigurationArgumentValue argumentValue;
-
-                // Reject configurations where an element has both scalar and complex
-                // values as a result of reading multiple configuration sources.
-                if (argumentSection.Value != null && argumentSection.GetChildren().Any())
-                    throw new InvalidOperationException(
-                        $"The value for the argument '{argumentSection.Path}' is assigned different value " +
-                        "types in more than one configuration source. Ensure all configurations consistently " +
-                        "use either a scalar (int, string, boolean) or a complex (array, section, list, " +
-                        "POCO, etc.) type for this argument value.");
-
-                if (argumentSection.Value != null)
-                {
-                    argumentValue = new StringArgumentValue(argumentSection.Value);
-                }
-                else
-                {
-                    argumentValue = new ObjectArgumentValue(argumentSection, _configurationAssemblies);
-                }
-
-                return argumentValue;
-            }
-
-            string GetSectionName(IConfigurationSection s)
+            static string GetSectionName(IConfigurationSection s)
             {
                 var name = s.GetSection("Name");
                 if (name.Value == null)
@@ -260,6 +235,31 @@ namespace Serilog.Settings.Configuration
 
                 return name.Value;
             }
+        }
+
+        internal static IConfigurationArgumentValue GetArgumentValue(IConfigurationSection argumentSection, IReadOnlyCollection<Assembly> configurationAssemblies)
+        {
+            IConfigurationArgumentValue argumentValue;
+
+            // Reject configurations where an element has both scalar and complex
+            // values as a result of reading multiple configuration sources.
+            if (argumentSection.Value != null && argumentSection.GetChildren().Any())
+                throw new InvalidOperationException(
+                    $"The value for the argument '{argumentSection.Path}' is assigned different value " +
+                    "types in more than one configuration source. Ensure all configurations consistently " +
+                    "use either a scalar (int, string, boolean) or a complex (array, section, list, " +
+                    "POCO, etc.) type for this argument value.");
+
+            if (argumentSection.Value != null)
+            {
+                argumentValue = new StringArgumentValue(argumentSection.Value);
+            }
+            else
+            {
+                argumentValue = new ObjectArgumentValue(argumentSection, configurationAssemblies);
+            }
+
+            return argumentValue;
         }
 
         static IReadOnlyCollection<Assembly> LoadConfigurationAssemblies(IConfigurationSection section, AssemblyFinder assemblyFinder)

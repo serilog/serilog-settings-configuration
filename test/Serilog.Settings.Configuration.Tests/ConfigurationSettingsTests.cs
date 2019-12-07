@@ -616,6 +616,46 @@ namespace Serilog.Settings.Configuration.Tests
         }
 
         [Fact]
+        public void DestructureWithCollectionsOfTypeArgument()
+        {
+            var json = @"{
+                ""Serilog"": {
+                    ""Using"": [ ""TestDummies"" ],
+                    ""Destructure"": [{
+                        ""Name"": ""DummyArrayOfType"",
+                        ""Args"": {
+                            ""list"": [
+                                ""System.Byte"",
+                                ""System.Int16""
+                            ],
+                            ""array"" : [
+                                ""System.Int32"",
+                                ""System.String""
+                            ],
+                            ""type"" : ""System.TimeSpan"",
+                            ""custom"" : [
+                                ""System.Int64""
+                            ],
+                            ""customString"" : [
+                                ""System.UInt32""
+                            ]
+                        }
+                    }]        
+                }
+            }";
+
+            DummyPolicy.Current = null;
+
+            ConfigFromJson(json);
+
+            Assert.Equal(typeof(TimeSpan), DummyPolicy.Current.Type);
+            Assert.Equal(new[] { typeof(int), typeof(string) }, DummyPolicy.Current.Array);
+            Assert.Equal(new[] { typeof(byte), typeof(short) }, DummyPolicy.Current.List);
+            Assert.Equal(typeof(long), DummyPolicy.Current.Custom.First);
+            Assert.Equal("System.UInt32", DummyPolicy.Current.CustomStrings.First);
+        }
+
+        [Fact]
         public void SinkWithIntArrayArgument()
         {
             var json = @"{

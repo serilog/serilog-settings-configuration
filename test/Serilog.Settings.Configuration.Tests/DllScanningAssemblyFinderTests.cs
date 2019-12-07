@@ -65,7 +65,7 @@ namespace Serilog.Settings.Configuration.Tests
                 AppDomain.Unload(ad);
             }
 
-            void DoTestInner()
+            static void DoTestInner()
             {
                 var assemblyNames = new DllScanningAssemblyFinder().FindAssembliesContainingName("customSink");
                 Assert.Equal(2, assemblyNames.Count);
