@@ -14,7 +14,7 @@ namespace Serilog.Settings.Configuration.Tests
         public ConfigurationReaderTests()
         {
             _configurationReader = new ConfigurationReader(
-                JsonStringConfigSource.LoadSection(@"{ 'Serilog': {  } }", "Serilog"),
+                JsonStringConfigSource.LoadSection(@"{ ""Serilog"": {  } }", "Serilog"),
                 AssemblyFinder.ForSource(ConfigurationAssemblySource.UseLoadedAssemblies));
         }
 
@@ -23,7 +23,7 @@ namespace Serilog.Settings.Configuration.Tests
         {
             var json = @"
 {
-    'WriteTo': [ 'LiterateConsole', 'DiagnosticTrace' ]
+    ""WriteTo"": [ ""LiterateConsole"", ""DiagnosticTrace"" ]
 }";
 
             var result = _configurationReader.GetMethodCalls(JsonStringConfigSource.LoadSection(json, "WriteTo"));
@@ -40,8 +40,8 @@ namespace Serilog.Settings.Configuration.Tests
         {
             var json = @"
 {
-    'WriteTo': [ {
-        'Name': 'LiterateConsole'
+    ""WriteTo"": [ {
+        ""Name"": ""LiterateConsole""
     }]
 }";
 
@@ -57,10 +57,10 @@ namespace Serilog.Settings.Configuration.Tests
         {
             var json = @"
 {
-    'WriteTo': [ {
-        'Name': 'LiterateConsole',
-        'Args': {
-            'outputTemplate': '{Message}'
+    ""WriteTo"": [ {
+        ""Name"": ""LiterateConsole"",
+        ""Args"": {
+            ""outputTemplate"": ""{Message}""
         },
     }]
 }";
@@ -84,25 +84,25 @@ namespace Serilog.Settings.Configuration.Tests
         {
             var json = @"
 {
-    'WriteTo': [
+    ""WriteTo"": [
       {
-        'Name': 'LiterateConsole',
-        'Args': {
-            'outputTemplate': '{Message}'
+        ""Name"": ""LiterateConsole"",
+        ""Args"": {
+            ""outputTemplate"": ""{Message}""
           },
       },
-      'DiagnosticTrace'
+      ""DiagnosticTrace""
     ],
-    'WriteTo:File1': {
-        'Name': 'File',
-        'Args': {
-            'outputTemplate': '{Message}'
+    ""WriteTo:File1"": {
+        ""Name"": ""File"",
+        ""Args"": {
+            ""outputTemplate"": ""{Message}""
         },
     },
-    'WriteTo:File2': {
-        'Name': 'File',
-        'Args': {
-            'outputTemplate': '{Message}'
+    ""WriteTo:File2"": {
+        ""Name"": ""File"",
+        ""Args"": {
+            ""outputTemplate"": ""{Message}""
         },
     }
 }";
@@ -124,7 +124,7 @@ namespace Serilog.Settings.Configuration.Tests
         {
             var json = @"
 {
-    'Enrich': [ 'FromLogContext', 'WithMachineName', 'WithThreadId' ]
+    ""Enrich"": [ ""FromLogContext"", ""WithMachineName"", ""WithThreadId"" ]
 }";
 
             var result = _configurationReader.GetMethodCalls(JsonStringConfigSource.LoadSection(json, "Enrich"));
