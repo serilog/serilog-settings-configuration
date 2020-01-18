@@ -83,8 +83,8 @@ namespace Serilog.Settings.Configuration.Tests
 
             log.Write(Some.InformationEvent());
 
-            Assert.Equal(1, DummyConsoleSink.Emitted.Count);
-            Assert.Equal(1, DummyWithLevelSwitchSink.Emitted.Count);
+            Assert.Single(DummyConsoleSink.Emitted);
+            Assert.Single(DummyWithLevelSwitchSink.Emitted);
         }
 
         [Fact]
@@ -109,7 +109,7 @@ namespace Serilog.Settings.Configuration.Tests
 
             log.Write(Some.InformationEvent());
 
-            Assert.Equal(1, DummyConsoleSink.Emitted.Count);
+            Assert.Single(DummyConsoleSink.Emitted);
         }
 
         [Fact]
@@ -133,8 +133,8 @@ namespace Serilog.Settings.Configuration.Tests
 
             log.Write(Some.InformationEvent());
 
-            Assert.Equal(1, DummyRollingFileSink.Emitted.Count);
-            Assert.Equal(0, DummyRollingFileAuditSink.Emitted.Count);
+            Assert.Single(DummyRollingFileSink.Emitted);
+            Assert.Empty(DummyRollingFileAuditSink.Emitted);
         }
 
         [Fact]
@@ -158,8 +158,8 @@ namespace Serilog.Settings.Configuration.Tests
 
             log.Write(Some.InformationEvent());
 
-            Assert.Equal(0, DummyRollingFileSink.Emitted.Count);
-            Assert.Equal(1, DummyRollingFileAuditSink.Emitted.Count);
+            Assert.Empty(DummyRollingFileSink.Emitted);
+            Assert.Single(DummyRollingFileAuditSink.Emitted);
         }
 
         [Fact]
@@ -189,8 +189,8 @@ namespace Serilog.Settings.Configuration.Tests
 
             log.Write(Some.InformationEvent());
 
-            Assert.Equal(0, DummyRollingFileSink.Emitted.Count);
-            Assert.Equal(1, DummyRollingFileAuditSink.Emitted.Count);
+            Assert.Empty(DummyRollingFileSink.Emitted);
+            Assert.Single(DummyRollingFileAuditSink.Emitted);
         }
 
         [Fact]
@@ -588,7 +588,7 @@ namespace Serilog.Settings.Configuration.Tests
 
             log.Write(Some.InformationEvent());
 
-            Assert.Equal(1, DummyRollingFileSink.Emitted.Count);
+            Assert.Single(DummyRollingFileSink.Emitted);
         }
 
         [Fact]
@@ -612,7 +612,7 @@ namespace Serilog.Settings.Configuration.Tests
 
             log.Write(Some.InformationEvent());
 
-            Assert.Equal(1, DummyRollingFileSink.Emitted.Count);
+            Assert.Single(DummyRollingFileSink.Emitted);
         }
 
         [Fact]
@@ -636,7 +636,7 @@ namespace Serilog.Settings.Configuration.Tests
 
             log.Write(Some.InformationEvent());
 
-            Assert.Equal(1, DummyRollingFileSink.Emitted.Count);
+            Assert.Single(DummyRollingFileSink.Emitted);
         }
 
         [Trait("Bugfix", "#111")]
@@ -660,7 +660,7 @@ namespace Serilog.Settings.Configuration.Tests
 
             log.Write(Some.InformationEvent());
 
-            Assert.Equal(1, DummyRollingFileSink.Emitted.Count);
+            Assert.Single(DummyRollingFileSink.Emitted);
         }
 
         [Trait("Bugfix", "#91")]
@@ -692,7 +692,7 @@ namespace Serilog.Settings.Configuration.Tests
             log.Write(Some.InformationEvent());
             log.Write(Some.WarningEvent());
 
-            Assert.Equal(1, DummyRollingFileSink.Emitted.Count);
+            Assert.Single(DummyRollingFileSink.Emitted);
         }
 
         [Trait("Bugfix", "#91")]
@@ -727,7 +727,7 @@ namespace Serilog.Settings.Configuration.Tests
             log.Write(Some.InformationEvent());
             log.Write(Some.WarningEvent());
 
-            Assert.Equal(1, DummyRollingFileSink.Emitted.Count);
+            Assert.Single(DummyRollingFileSink.Emitted);
         }
 
         [Trait("Bugfix", "#103")]
