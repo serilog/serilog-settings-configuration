@@ -13,6 +13,7 @@
     <PublicSign Condition=" '$(OS)' != 'Windows_NT' ">true</PublicSign>
     <PackageId>Serilog.Settings.Configuration</PackageId>
     <PackageTags>serilog;json</PackageTags>
+    <PackageIcon>serilog-extension-nuget.png</PackageIcon>
     <PackageIconUrl>https://serilog.net/images/serilog-configuration-nuget.png</PackageIconUrl>
     <PackageProjectUrl>https://github.com/serilog/serilog-settings-configuration</PackageProjectUrl>
     <PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
@@ -20,6 +21,10 @@
     <RepositoryType>git</RepositoryType>
     <RootNamespace>Serilog</RootNamespace>
   </PropertyGroup>
+
+  <ItemGroup>
+    <None Include="images/serilog-extension-nuget.png" Pack="true" PackagePath="/" />
+  </ItemGroup>
 
   <PropertyGroup Condition="('$(TargetFramework)' == 'net451') Or ('$(TargetFramework)' == 'net461')">
     <DefineConstants>$(DefineConstants);PRIVATE_BIN</DefineConstants>
