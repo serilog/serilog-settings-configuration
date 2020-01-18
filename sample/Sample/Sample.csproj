@@ -5,6 +5,11 @@
     <OutputType>Exe</OutputType>
   </PropertyGroup>
 
+  <PropertyGroup>
+    <LatestVersion>[*, 9999.0)</LatestVersion>
+  </PropertyGroup>
+
+
   <PropertyGroup Condition=" '$(TargetFramework)' == 'net46' ">
     <PreserveCompilationContext>false</PreserveCompilationContext>
   </PropertyGroup>
@@ -22,12 +27,12 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Serilog.Sinks.Async" Version="1.0.1" />
-    <PackageReference Include="Serilog.Sinks.Console" Version="3.1.1" />
-    <PackageReference Include="Serilog.Sinks.RollingFile" Version="3.0.0" />
-    <PackageReference Include="Serilog.Enrichers.Environment" Version="2.0.0" />
-    <PackageReference Include="Serilog.Enrichers.Thread" Version="2.0.0" />
-    <PackageReference Include="Serilog.Filters.Expressions" Version="1.0.0" />
+    <PackageReference Include="Serilog.Sinks.Async" Version="$(LatestVersion)" />
+    <PackageReference Include="Serilog.Sinks.Console" Version="$(LatestVersion)" />
+    <PackageReference Include="Serilog.Sinks.RollingFile" Version="$(LatestVersion)" />
+    <PackageReference Include="Serilog.Enrichers.Environment" Version="$(LatestVersion)" />
+    <PackageReference Include="Serilog.Enrichers.Thread" Version="$(LatestVersion)" />
+    <PackageReference Include="Serilog.Filters.Expressions" Version="$(LatestVersion)" />
   </ItemGroup>
 
   <ItemGroup>
