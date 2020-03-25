@@ -1,13 +1,13 @@
-﻿using System;
+﻿using Microsoft.Extensions.Configuration;
 using Serilog;
-using Serilog.Events;
-using Serilog.Formatting;
 using Serilog.Configuration;
 using Serilog.Core;
+using Serilog.Events;
+using Serilog.Formatting;
+using System;
+using System.Collections.Generic;
 using TestDummies.Console;
 using TestDummies.Console.Themes;
-using Microsoft.Extensions.Configuration;
-using System.Collections.Generic;
 
 namespace TestDummies
 {
@@ -63,11 +63,18 @@ namespace TestDummies
 
         public static LoggerConfiguration DummyRollingFile(
             this LoggerSinkConfiguration loggerSinkConfiguration,
-            List<string> objectBinding,
+            List<Binding> objectBinding,
             string pathFormat,
             LogEventLevel restrictedToMinimumLevel = LevelAlias.Minimum)
         {
             return loggerSinkConfiguration.Sink(new DummyRollingFileSink(), restrictedToMinimumLevel);
+        }
+
+        public class Binding
+        {
+            public string Foo { get; set; }
+
+            public string Abc { get; set; }
         }
 
         public static LoggerConfiguration DummyRollingFile(
@@ -133,5 +140,21 @@ namespace TestDummies
             return loggerDestructuringConfiguration.With(new DummyHardCodedStringDestructuringPolicy(hardCodedString));
         }
 
+        public static LoggerConfiguration DummyArrayOfType(this LoggerDestructuringConfiguration loggerSinkConfiguration,
+            List<Type> list,
+            Type[] array = null,
+            Type type = null,
+            CustomCollection<Type> custom = null,
+            CustomCollection<string> customString = null)
+        {
+            return loggerSinkConfiguration.With(DummyPolicy.Current = new DummyPolicy
+            {
+                List = list,
+                Array = array,
+                Type = type,
+                Custom = custom,
+                CustomStrings = customString,
+            });
+        }
     }
 }

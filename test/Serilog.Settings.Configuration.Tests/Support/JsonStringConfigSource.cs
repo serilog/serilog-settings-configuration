@@ -45,7 +45,7 @@ namespace Serilog.Settings.Configuration.Tests.Support
 
             public override void Load()
             {
-                Load(StringToStream(_json));
+                Load(StringToStream(_json.ToValidJson()));
             }
 
             static Stream StringToStream(string str)

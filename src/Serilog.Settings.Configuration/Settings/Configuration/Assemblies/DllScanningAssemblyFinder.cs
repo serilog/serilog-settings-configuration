@@ -50,7 +50,7 @@ namespace Serilog.Settings.Configuration.Assemblies
 
             return query.ToList().AsReadOnly();
 
-            AssemblyName TryGetAssemblyNameFrom(string path)
+            static AssemblyName TryGetAssemblyNameFrom(string path)
             {
                 try
                 {
