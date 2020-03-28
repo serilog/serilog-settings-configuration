@@ -87,6 +87,24 @@ This is useful in ASP.NET Core applications, which will often specify minimum le
     }
 ```
 
+Also you can use different format (with fixed key names) for level overrides. It may be useful if you have special restrictions on config keys length:
+
+```json
+    "MinimumLevel": {
+        "Default": "Information",
+        "Override": [
+        {
+            "SourceContext": "Microsoft.AspNetCore.Mvc.Infrastructure",
+            "Level": "Warning"
+        },
+        {
+            "SourceContext": "Microsoft.Hosting.Lifetime",
+            "Level": "Debug"
+        }
+        ]
+    }
+```
+
 ### Environment variables
 
 If your application enables the environment variable configuration source (`AddEnvironmentVariables()`) you can add or override Serilog configuration through the environment.

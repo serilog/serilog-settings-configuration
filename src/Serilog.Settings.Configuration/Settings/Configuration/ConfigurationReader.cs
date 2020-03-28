@@ -101,17 +101,39 @@ namespace Serilog.Settings.Configuration
 
             foreach (var overrideDirective in minimumLevelDirective.GetSection("Override").GetChildren())
             {
-                var overridePrefix = overrideDirective.Key;
-                var overridenLevelOrSwitch = overrideDirective.Value;
-                if (Enum.TryParse(overridenLevelOrSwitch, out LogEventLevel _))
+                if (overrideDirective.Value != null) // { "prefix1": "level1", "prefix2": "level2" } 
                 {
-                    ApplyMinimumLevel(overrideDirective, (configuration, levelSwitch) => configuration.Override(overridePrefix, levelSwitch));
+                    var overridePrefix = overrideDirective.Key;
+                    var overridenLevelOrSwitch = overrideDirective.Value;
+                    if (Enum.TryParse(overridenLevelOrSwitch, out LogEventLevel _))
+                    {
+                        ApplyMinimumLevel(overrideDirective, (configuration, levelSwitch) => configuration.Override(overridePrefix, levelSwitch));
+                    }
+                    else
+                    {
+                        var overrideSwitch = _resolutionContext.LookUpSwitchByName(overridenLevelOrSwitch);
+                        // not calling ApplyMinimumLevel local function because here we have a reference to a LogLevelSwitch already
+                        loggerConfiguration.MinimumLevel.Override(overridePrefix, overrideSwitch);
+                    }
                 }
-                else
+                else // [ { "SourceContext": "prefix1", "Level": "level1" }, { "SourceContext": "prefix2", "Level": "level2" } ]
                 {
-                    var overrideSwitch = _resolutionContext.LookUpSwitchByName(overridenLevelOrSwitch);
-                    // not calling ApplyMinimumLevel local function because here we have a reference to a LogLevelSwitch already
-                    loggerConfiguration.MinimumLevel.Override(overridePrefix, overrideSwitch);
+                    var children = overrideDirective.GetChildren().ToArray();
+                    var overridePrefix = children.FirstOrDefault(c => c.Key == "SourceContext")?.Value;
+                    var overridenLevelOrSwitch = children.FirstOrDefault(c => c.Key == "Level")?.Value;
+                    if (children.Length != 2 || overridePrefix == null || overridenLevelOrSwitch == null)
+                        throw new InvalidOperationException($"The 'Override' configuration section should be either in {{ \"<prefix>\": \"<level>\", ... , \"<prefix>\": \"<level>\" }} or [ {{ \"SourceContext\": \"<prefix>\", \"Level\": \"<level>\" }}, ... , {{ \"SourceContext\": \"<prefix>\", \"Level\": \"<level>\" }} ] format.");
+
+                    if (Enum.TryParse(overridenLevelOrSwitch, out LogEventLevel _))
+                    {
+                        ApplyMinimumLevel(children.First(c => c.Key == "Level"), (configuration, levelSwitch) => configuration.Override(overridePrefix, levelSwitch));
+                    }
+                    else
+                    {
+                        var overrideSwitch = _resolutionContext.LookUpSwitchByName(overridenLevelOrSwitch);
+                        // not calling ApplyMinimumLevel local function because here we have a reference to a LogLevelSwitch already
+                        loggerConfiguration.MinimumLevel.Override(overridePrefix, overrideSwitch);
+                    }
                 }
             }
 
@@ -466,6 +488,5 @@ namespace Serilog.Settings.Configuration
                 throw new InvalidOperationException($"The value {value} is not a valid Serilog level.");
             return parsedLevel;
         }
-
     }
 }

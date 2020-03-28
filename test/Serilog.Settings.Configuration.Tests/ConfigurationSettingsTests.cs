@@ -260,6 +260,85 @@ namespace Serilog.Settings.Configuration.Tests
         }
 
         [Fact]
+        public void TestMinimumLevelOverridesAsArrayForChildContext()
+        {
+            var json = @"{
+                ""Serilog"": {
+                    ""MinimumLevel"" : {
+                        ""Default"" : ""Warning"",
+                        ""Override"" : [
+                            {
+                                ""SourceContext"": ""System"",
+                                ""Level"": ""Warning""
+                            },
+                            {
+                                ""SourceContext"": ""System.Threading"",
+                                ""Level"": ""Debug""
+                            }
+                        ]
+                    }        
+                }
+            }";
+
+            LogEvent evt = null;
+
+            var log = ConfigFromJson(json)
+                .WriteTo.Sink(new DelegatingSink(e => evt = e))
+                .CreateLogger();
+
+            log.Write(Some.DebugEvent());
+            Assert.Null(evt);
+
+            var custom = log.ForContext(Constants.SourceContextPropertyName, typeof(System.Threading.Tasks.Task).FullName + "<42>");
+            custom.Write(Some.DebugEvent());
+            Assert.NotNull(evt);
+
+            evt = null;
+            var systemThreadingLogger = log.ForContext<System.Threading.Tasks.Task>();
+            systemThreadingLogger.Write(Some.DebugEvent());
+            Assert.NotNull(evt);
+        }
+
+        [Fact]
+        public void TestMinimumLevelOverridesAsArrayForChildContext_when_malformed1()
+        {
+            var json = @"{
+                ""Serilog"": {
+                    ""MinimumLevel"" : {
+                        ""Default"" : ""Warning"",
+                        ""Override"" : [
+                            {
+                                ""AAA"": ""System"",
+                                ""Level"": ""Warning""
+                            },
+                        ]
+                    }        
+                }
+            }";
+
+            Assert.Throws<InvalidOperationException>(() => ConfigFromJson(json));
+        }
+
+        [Fact]
+        public void TestMinimumLevelOverridesAsArrayForChildContext_when_malformed2()
+        {
+            var json = @"{
+                ""Serilog"": {
+                    ""MinimumLevel"" : {
+                        ""Default"" : ""Warning"",
+                        ""Override"" : [
+                            {
+                                ""SourceContext"": ""System""
+                            },
+                        ]
+                    }        
+                }
+            }";
+
+            Assert.Throws<InvalidOperationException>(() => ConfigFromJson(json));
+        }
+
+        [Fact]
         public void SinksWithAbstractParamsAreConfiguredWithTypeName()
         {
             var json = @"{

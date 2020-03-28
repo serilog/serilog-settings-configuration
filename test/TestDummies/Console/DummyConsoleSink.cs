@@ -26,6 +26,5 @@ namespace TestDummies.Console
             Emitted.Add(logEvent);
         }
     }
-
 }
 

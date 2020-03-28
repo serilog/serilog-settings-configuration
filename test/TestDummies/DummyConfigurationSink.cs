@@ -23,7 +23,6 @@ namespace TestDummies
 
         public static IConfigurationSection ConfigSection => _configSection;
 
-
         public DummyConfigurationSink(IConfiguration configuration, IConfigurationSection configSection)
         {
             _configuration = configuration;
@@ -41,6 +40,5 @@ namespace TestDummies
             _configuration = null;
             _configSection = null;
         }
-
     }
 }

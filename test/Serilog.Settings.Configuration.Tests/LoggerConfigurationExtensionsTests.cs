@@ -100,7 +100,6 @@ namespace Serilog.Settings.Configuration.Tests
             var exception = new LoggerConfiguration()
                    .ReadFrom.Configuration(config, "NotSerilog")
                    .CreateLogger();
-
         }
 
         [Fact]
@@ -127,7 +126,6 @@ namespace Serilog.Settings.Configuration.Tests
                 .ReadFrom.ConfigurationSection(config.GetSection("NotSerilog"))
 #pragma warning restore CS0618 // Type or member is obsolete
                 .CreateLogger();
-
         }
     }
 }
