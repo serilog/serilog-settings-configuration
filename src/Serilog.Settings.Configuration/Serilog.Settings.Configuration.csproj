@@ -15,11 +15,13 @@
     <PackageId>Serilog.Settings.Configuration</PackageId>
     <PackageTags>serilog;json</PackageTags>
     <PackageIcon>icon.png</PackageIcon>
-    <PackageProjectUrl>https://github.com/serilog/serilog-settings-configuration</PackageProjectUrl>
+    <PackageProjectUrl>https://serilog.net/</PackageProjectUrl>
     <PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
-    <RepositoryUrl>https://github.com/serilog/serilog-settings-configuration</RepositoryUrl>
-    <RepositoryType>git</RepositoryType>
     <RootNamespace>Serilog</RootNamespace>
+    <PublishRepositoryUrl>true</PublishRepositoryUrl>
+    <EmbedUntrackedSources>true</EmbedUntrackedSources>
+    <IncludeSymbols>true</IncludeSymbols>
+    <SymbolPackageFormat>snupkg</SymbolPackageFormat>
   </PropertyGroup>
 
   <PropertyGroup Condition="('$(TargetFramework)' == 'net451') Or ('$(TargetFramework)' == 'net461')">
@@ -27,9 +29,14 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.0.0" PrivateAssets="All"/>
     <PackageReference Include="Microsoft.Extensions.DependencyModel" Version="2.0.4" />
     <PackageReference Include="Serilog" Version="2.6.0" />
     <None Include="..\..\assets\icon.png" Pack="true" PackagePath=""/>
+  </ItemGroup>
+
+  <ItemGroup Condition="$(TargetFramework) == 'netstandard2.0'">
+    <PackageReference Include="Microsoft.NETCore.Targets" Version="3.0.0" />
   </ItemGroup>
 
   <ItemGroup Condition="'$(TargetFramework)' == 'net451'">

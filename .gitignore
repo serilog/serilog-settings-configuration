@@ -202,3 +202,5 @@ project.lock.json
 
 #Test files
 *.txt
+
+artifacts/

@@ -15,18 +15,18 @@ $suffix = @{ $true = ""; $false = "$($branch.Substring(0, [math]::Min(10,$branch
 
 echo "build: Version suffix is $suffix"
 
-foreach ($src in ls src/*) {
+foreach ($src in dir src/*) {
     Push-Location $src
 
 	echo "build: Packaging project in $src"
 
-    & dotnet pack -c Release -o ..\..\artifacts --version-suffix=$suffix --include-source
-    if ($LASTEXITCODE -ne 0) { exit 1 }    
+    & dotnet pack -c Release -o ..\..\artifacts --version-suffix=$suffix
+    if ($LASTEXITCODE -ne 0) { exit 1 }
 
     Pop-Location
 }
 
-foreach ($test in ls test/*.PerformanceTests) {
+foreach ($test in dir test/*.PerformanceTests) {
     Push-Location $test
 
 	echo "build: Building performance test project in $test"
@@ -37,7 +37,7 @@ foreach ($test in ls test/*.PerformanceTests) {
     Pop-Location
 }
 
-foreach ($test in ls test/*.Tests) {
+foreach ($test in dir test/*.Tests) {
     Push-Location $test
 
 	echo "build: Testing project in $test"
