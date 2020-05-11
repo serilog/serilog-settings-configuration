@@ -13,7 +13,6 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "assets", "assets", "{62D0B9
 		Build.ps1 = Build.ps1
 		CHANGES.md = CHANGES.md
 		Directory.Build.props = Directory.Build.props
-		global.json = global.json
 		assets\icon.png = assets\icon.png
 		LICENSE = LICENSE
 		README.md = README.md
