@@ -264,7 +264,8 @@ namespace Serilog.Settings.Configuration
 
         static IReadOnlyCollection<Assembly> LoadConfigurationAssemblies(IConfigurationSection section, AssemblyFinder assemblyFinder)
         {
-            var assemblies = new Dictionary<string, Assembly>();
+            var serilogAssembly = typeof(ILogger).Assembly;
+            var assemblies = new Dictionary<string, Assembly> { [serilogAssembly.FullName] = serilogAssembly };
 
             var usingSection = section.GetSection("Using");
             if (usingSection.GetChildren().Any())
