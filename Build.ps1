@@ -20,7 +20,7 @@ foreach ($src in dir src/*) {
 
 	echo "build: Packaging project in $src"
 
-    & dotnet pack -c Release -o ..\..\artifacts --version-suffix=$suffix
+    & dotnet pack -c Release -o ..\..\artifacts --version-suffix=$suffix -p:ContinuousIntegrationBuild=true
     if ($LASTEXITCODE -ne 0) { exit 1 }
 
     Pop-Location
@@ -42,8 +42,23 @@ foreach ($test in dir test/*.Tests) {
 
 	echo "build: Testing project in $test"
 
-    & dotnet test -c Release
+    if ($PSVersionTable.Platform -eq "Unix") {
+        & dotnet test -c Release -f netcoreapp2.0
+        & dotnet test -c Release -f netcoreapp3.1
+    } else {
+        & dotnet test -c Release
+    }
+
     if ($LASTEXITCODE -ne 0) { exit 3 }
+
+    Pop-Location
+}
+
+if ($PSVersionTable.Platform -eq "Unix") {
+    Push-Location sample/Sample
+
+    & dotnet run -f netcoreapp2.0 -c Release --run-once
+    if ($LASTEXITCODE -ne 0) { exit 4 }
 
     Pop-Location
 }
