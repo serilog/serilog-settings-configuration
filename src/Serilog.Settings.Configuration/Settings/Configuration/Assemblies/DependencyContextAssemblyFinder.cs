@@ -27,7 +27,7 @@ namespace Serilog.Settings.Configuration.Assemblies
             
             static bool IsReferencingSerilog(Library library)
             {
-                return library.Dependencies.Any(dependency => dependency.Name.ToLowerInvariant() == "serilog");
+                return library.Dependencies.Any(dependency => dependency.Name.Equals("serilog", StringComparison.OrdinalIgnoreCase));
             }
         }
     }
