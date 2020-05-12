@@ -18,11 +18,17 @@ namespace Serilog.Settings.Configuration.Assemblies
         public override IReadOnlyList<AssemblyName> FindAssembliesContainingName(string nameToFind)
         {
             var query = from library in _dependencyContext.RuntimeLibraries
+                        where IsReferencingSerilog(library)
                         from assemblyName in library.GetDefaultAssemblyNames(_dependencyContext)
                         where IsCaseInsensitiveMatch(assemblyName.Name, nameToFind)
                         select assemblyName;
 
             return query.ToList().AsReadOnly();
+            
+            static bool IsReferencingSerilog(Library library)
+            {
+                return library.Dependencies.Any(dependency => dependency.Name.Equals("serilog", StringComparison.OrdinalIgnoreCase));
+            }
         }
     }
 }

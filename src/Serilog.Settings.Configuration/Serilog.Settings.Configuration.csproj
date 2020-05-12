@@ -15,7 +15,7 @@
     <PackageId>Serilog.Settings.Configuration</PackageId>
     <PackageTags>serilog;json</PackageTags>
     <PackageIcon>icon.png</PackageIcon>
-    <PackageProjectUrl>https://serilog.net/</PackageProjectUrl>
+    <PackageProjectUrl>https://github.com/serilog/serilog-settings-configuration/</PackageProjectUrl>
     <PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
     <RootNamespace>Serilog</RootNamespace>
     <PublishRepositoryUrl>true</PublishRepositoryUrl>

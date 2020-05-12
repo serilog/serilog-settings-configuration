@@ -1,9 +1,18 @@
 version: '{build}'
 skip_tags: true
-image: Visual Studio 2019
+image:
+  - Visual Studio 2019
+  - Ubuntu1604
 configuration: Release
 build_script:
 - ps: ./Build.ps1
+for:
+-
+  matrix:
+    only:
+      - image: Ubuntu1604
+  build_script:
+  - pwsh ./Build.ps1
 test: off
 artifacts:
 - path: artifacts/Serilog.*.nupkg
@@ -12,7 +21,6 @@ deploy:
 - provider: NuGet
   api_key:
     secure: b7jxRe5kR3kuxMrmdDuN0jvaaWWHwtFRnAwFZZV6MdaorwUhASR/Ey1gPn6vXwND
-  skip_symbols: true
   on:
     branch: /^(master|dev)$/
 - provider: GitHub
