@@ -1,9 +1,11 @@
-﻿using Microsoft.Extensions.Configuration;
-using Serilog.Configuration;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+
+using Microsoft.Extensions.Configuration;
+
+using Serilog.Configuration;
 
 namespace Serilog.Settings.Configuration
 {
@@ -31,20 +33,15 @@ namespace Serilog.Settings.Configuration
                 typeInfo.GetGenericTypeDefinition() is Type genericType && genericType == typeof(Action<>))
             {
                 var configType = typeInfo.GenericTypeArguments[0];
-                if (configType != typeof(LoggerConfiguration) && configType != typeof(LoggerSinkConfiguration))
-                    throw new ArgumentException($"Configuration for Action<{configType}> is not implemented.");
-
                 IConfigurationReader configReader = new ConfigurationReader(_section, _configurationAssemblies, resolutionContext);
 
-                if (configType == typeof(LoggerConfiguration))
+                return configType switch
                 {
-                    return new Action<LoggerConfiguration>(configReader.Configure);
-                }
-
-                if (configType == typeof(LoggerSinkConfiguration))
-                {
-                    return new Action<LoggerSinkConfiguration>(loggerSinkConfig => configReader.ApplySinks(loggerSinkConfig));
-                }
+                    _ when configType == typeof(LoggerConfiguration) => new Action<LoggerConfiguration>(configReader.Configure),
+                    _ when configType == typeof(LoggerSinkConfiguration) => new Action<LoggerSinkConfiguration>(configReader.ApplySinks),
+                    _ when configType == typeof(LoggerEnrichmentConfiguration) => new Action<LoggerEnrichmentConfiguration>(configReader.ApplyEnrichment),
+                    _ => throw new ArgumentException($"Configuration resolution for Action<{configType.Name}> parameter type at the path {_section.Path} is not implemented.")
+                };
             }
 
             if (toType.IsArray)
@@ -97,7 +94,7 @@ namespace Serilog.Settings.Configuration
             }
         }
 
-        private static bool IsContainer(Type type, out Type elementType)
+        static bool IsContainer(Type type, out Type elementType)
         {
             elementType = null;
             foreach (var iface in type.GetInterfaces())

@@ -185,6 +185,12 @@ namespace Serilog.Settings.Configuration
             CallConfigurationMethods(methodCalls, FindSinkConfigurationMethods(_configurationAssemblies), loggerSinkConfiguration);
         }
 
+        void IConfigurationReader.ApplyEnrichment(LoggerEnrichmentConfiguration loggerEnrichmentConfiguration)
+        {
+            var methodCalls = GetMethodCalls(_section);
+            CallConfigurationMethods(methodCalls, FindEventEnricherConfigurationMethods(_configurationAssemblies), loggerEnrichmentConfiguration);
+        }
+
         void ApplyEnrichment(LoggerConfiguration loggerConfiguration)
         {
             var enrichDirective = _section.GetSection("Enrich");
