@@ -30,15 +30,11 @@
 
   <ItemGroup>
     <PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.0.0" PrivateAssets="All"/>
-    <PackageReference Include="Microsoft.Extensions.DependencyModel" Version="2.0.4" />
+    <PackageReference Include="Microsoft.Extensions.DependencyModel" Version="3.0.0" />
     <PackageReference Include="Serilog" Version="2.9.0" />
     <None Include="..\..\assets\icon.png" Pack="true" PackagePath=""/>
   </ItemGroup>
-
-  <ItemGroup Condition="$(TargetFramework) == 'netstandard2.0'">
-    <PackageReference Include="Microsoft.NETCore.Targets" Version="3.0.0" />
-  </ItemGroup>
-
+  
   <ItemGroup Condition="'$(TargetFramework)' == 'net451'">
     <PackageReference Include="Microsoft.Extensions.Options.ConfigurationExtensions" Version="1.1.2" />
   </ItemGroup>
