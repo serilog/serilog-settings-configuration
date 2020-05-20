@@ -3,7 +3,7 @@
     <LangVersion>latest</LangVersion>
   </PropertyGroup>
 
-  <ItemGroup Condition="'$(TargetFramework)' == 'net451' Or '$(TargetFramework)' == 'net452' Or '$(TargetFramework)' == 'net46' Or '$(TargetFramework)' == 'net461'">
-    <PackageReference Include="Microsoft.NETFramework.ReferenceAssemblies.$(TargetFramework)" Version="1.0.0" PrivateAssets="all" />
+  <ItemGroup Condition="'$(TargetFrameworkIdentifier)' == '.NETFramework'">
+    <PackageReference Include="Microsoft.NETFramework.ReferenceAssemblies" Version="1.0.0" PrivateAssets="all" />
   </ItemGroup>
 </Project>
