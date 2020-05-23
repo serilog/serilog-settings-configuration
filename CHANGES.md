@@ -24,7 +24,7 @@
 3.0.1
 
 * #142 - Fix IConfiguration parameters not being populated
-* #143 - Fix ReadFrom.ConfigurationSection() looking for sections below a root Serilogsection
+* #143 - Fix ReadFrom.ConfigurationSection() looking for sections below a root Serilog section
 
 3.0.0
 
