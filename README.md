@@ -69,7 +69,7 @@ var logger = new LoggerConfiguration()
     .CreateLogger();
 ```
 
-### `Using` section and auto-discovery of configuration assemblies
+### Using section and auto-discovery of configuration assemblies
 
 `Using` section contains list of **assemblies** in wich configuration methods (`WriteTo.File()`, `Enrich.WithThreadId()`) resides.
 
@@ -107,7 +107,7 @@ For legacy .NET Framework projects it also scans default probing path(s).
 
 For all other cases, as well as in the case of non-conventional configuration assembly names **DO** use `Using` section.
 
-### `MinimumLevel`, `LevelSwitches`, overrides and dynamic reload
+### MinimumLevel, LevelSwitches, overrides and dynamic reload
 
 The `MinimumLevel` configuration property can be set to a single value as in the sample above, or, levels can be overridden per logging source.
 
@@ -158,7 +158,7 @@ You can also declare `LoggingLevelSwitch`-es in custom section and reference the
 
 Level updates to switches are also respected for a dynamic update.
 
-### `WriteTo`, `Enrich`, `AuditTo`, `Destructure` sections
+### WriteTo, Enrich, AuditTo, Destructure sections
 
 These sections support simplified syntax, for example the following is valid if no arguments are needed by the sinks:
 
@@ -195,11 +195,11 @@ When overriding settings with [environment variables](https://docs.microsoft.com
 }
 ```
 
-### `Properties` section
+### Properties section
 
 This section defines a static list of key-value pairs that will enrich log events.
 
-### `Filter` section
+### Filter section
 
 This section defines filters that will be applied to log events. It is especially usefull in combination with _[Serilog.Filters.Expression](https://github.com/serilog/serilog-filters-expressions)_ package so you can write expression in text form:
 
