@@ -34,7 +34,6 @@ namespace Serilog.Settings.Configuration
 #if NETSTANDARD || NET461
             _configurationRoot = configuration as IConfigurationRoot;
 #endif
-
         }
 
         // Used internally for processing nested configuration sections -- see GetMethodCalls below.
@@ -43,6 +42,9 @@ namespace Serilog.Settings.Configuration
             _section = configSection ?? throw new ArgumentNullException(nameof(configSection));
             _configurationAssemblies = configurationAssemblies ?? throw new ArgumentNullException(nameof(configurationAssemblies));
             _resolutionContext = resolutionContext ?? throw new ArgumentNullException(nameof(resolutionContext));
+            #if NETSTANDARD || NET461
+            _configurationRoot = resolutionContext.HasAppConfiguration ? resolutionContext.AppConfiguration as IConfigurationRoot : null;
+            #endif
         }
 
         public void Configure(LoggerConfiguration loggerConfiguration)
@@ -158,7 +160,6 @@ namespace Serilog.Settings.Configuration
                 #endif //NET451 or fallback
 
                 return minimumLevelDirective.Value != null ? minimumLevelDirective : minimumLevelDirective.GetSection("Default");
-
             }
         }
 

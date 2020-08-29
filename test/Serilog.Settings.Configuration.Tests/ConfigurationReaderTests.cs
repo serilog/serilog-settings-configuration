@@ -1,9 +1,13 @@
 ﻿using Xunit;
+using System.Collections.Generic;
 using System.Reflection;
 using System.Linq;
+using Microsoft.Extensions.Configuration;
+using Serilog.Events;
 using Serilog.Formatting;
 using Serilog.Settings.Configuration.Assemblies;
 using Serilog.Settings.Configuration.Tests.Support;
+using static Serilog.Settings.Configuration.Tests.Support.ConfigurationReaderTestHelpers;
 
 namespace Serilog.Settings.Configuration.Tests
 {
@@ -171,6 +175,111 @@ namespace Serilog.Settings.Configuration.Tests
 
             var selected = ConfigurationReader.SelectConfigurationMethod(options, "DummyRollingFile", suppliedArgumentNames);
             Assert.Equal(typeof(string), selected.GetParameters()[2].ParameterType);
+        }
+
+        public static IEnumerable<object[]> FlatMinimumLevel => new List<object[]>
+        {
+            new object[] { GetConfigRoot(appsettingsJsonLevel: minimumLevelFlatTemplate.Format(LogEventLevel.Error)), LogEventLevel.Error },
+            new object[] { GetConfigRoot(appsettingsDevelopmentJsonLevel: minimumLevelFlatTemplate.Format(LogEventLevel.Error)), LogEventLevel.Error },
+            new object[] { GetConfigRoot(envVariables: new Dictionary<string, string>() {{minimumLevelFlatKey, LogEventLevel.Error.ToString()}}), LogEventLevel.Error},
+            new object[] { GetConfigRoot(
+                    appsettingsJsonLevel: minimumLevelFlatTemplate.Format(LogEventLevel.Debug),
+                    envVariables: new Dictionary<string, string>() {{minimumLevelFlatKey, LogEventLevel.Error.ToString()}}),
+                LogEventLevel.Error
+            }
+        };
+
+        [Theory]
+        [MemberData(nameof(FlatMinimumLevel))]
+        public void FlatMinimumLevelCorrectOneIsEnabledOnLogger(IConfigurationRoot root, LogEventLevel expectedMinimumLevel)
+        {
+            var reader = new ConfigurationReader(root.GetSection("Serilog"), AssemblyFinder.ForSource(ConfigurationAssemblySource.UseLoadedAssemblies), root);
+            var loggerConfig = new LoggerConfiguration();
+
+            reader.Configure(loggerConfig);
+
+            AssertLogEventLevels(loggerConfig, expectedMinimumLevel);
+        }
+
+        public static IEnumerable<object[]> ObjectMinimumLevel => new List<object[]>
+        {
+            new object[] { GetConfigRoot(appsettingsJsonLevel: minimumLevelObjectTemplate.Format(LogEventLevel.Error)), LogEventLevel.Error },
+            new object[] { GetConfigRoot(appsettingsDevelopmentJsonLevel: minimumLevelObjectTemplate.Format(LogEventLevel.Error)), LogEventLevel.Error },
+            new object[] { GetConfigRoot(envVariables: new Dictionary<string, string>(){{minimumLevelObjectKey, LogEventLevel.Error.ToString() } }), LogEventLevel.Error },
+            new object[] { GetConfigRoot(
+                appsettingsJsonLevel: minimumLevelObjectTemplate.Format(LogEventLevel.Error),
+                appsettingsDevelopmentJsonLevel: minimumLevelObjectTemplate.Format(LogEventLevel.Debug)),
+                LogEventLevel.Debug }
+        };
+
+        [Theory]
+        [MemberData(nameof(ObjectMinimumLevel))]
+        public void ObjectMinimumLevelCorrectOneIsEnabledOnLogger(IConfigurationRoot root, LogEventLevel expectedMinimumLevel)
+        {
+            var reader = new ConfigurationReader(root.GetSection("Serilog"), AssemblyFinder.ForSource(ConfigurationAssemblySource.UseLoadedAssemblies), root);
+            var loggerConfig = new LoggerConfiguration();
+
+            reader.Configure(loggerConfig);
+
+            AssertLogEventLevels(loggerConfig, expectedMinimumLevel);
+        }
+
+        #if !(NET452)
+
+        // currently only works in the .NET 4.6.1 and .NET Standard builds of Serilog.Settings.Configuration
+        public static IEnumerable<object[]> MixedMinimumLevel => new List<object[]>
+        {
+            new object[]
+            {
+                GetConfigRoot(
+                    appsettingsJsonLevel: minimumLevelObjectTemplate.Format(LogEventLevel.Error),
+                    appsettingsDevelopmentJsonLevel: minimumLevelFlatTemplate.Format(LogEventLevel.Debug)),
+                LogEventLevel.Debug
+            },
+            new object[]
+            {
+                GetConfigRoot(
+                    appsettingsJsonLevel: minimumLevelFlatTemplate.Format(LogEventLevel.Error),
+                    appsettingsDevelopmentJsonLevel: minimumLevelObjectTemplate.Format(LogEventLevel.Debug)),
+                LogEventLevel.Debug
+            },
+            // precedence should be flat > object if from the same source
+            new object[]
+            {
+                GetConfigRoot(
+                    envVariables: new Dictionary<string, string>()
+                    {
+                        {minimumLevelObjectKey, LogEventLevel.Error.ToString()},
+                        {minimumLevelFlatKey, LogEventLevel.Debug.ToString()}
+                    }),
+                LogEventLevel.Debug
+            }
+        };
+
+        [Theory]
+        [MemberData(nameof(MixedMinimumLevel))]
+        public void MixedMinimumLevelCorrectOneIsEnabledOnLogger(IConfigurationRoot root, LogEventLevel expectedMinimumLevel)
+        {
+            var reader = new ConfigurationReader(root.GetSection("Serilog"), AssemblyFinder.ForSource(ConfigurationAssemblySource.UseLoadedAssemblies), root);
+            var loggerConfig = new LoggerConfiguration();
+
+            reader.Configure(loggerConfig);
+
+            AssertLogEventLevels(loggerConfig, expectedMinimumLevel);
+        }
+
+        #endif
+
+        [Fact]
+        public void NoConfigurationRootUsedStillValid()
+        {
+            var section = JsonStringConfigSource.LoadSection(@"{ 'Nest': { 'Serilog': { 'MinimumLevel': 'Error' } } }", "Nest");
+            var reader = new ConfigurationReader(section.GetSection("Serilog"), AssemblyFinder.ForSource(ConfigurationAssemblySource.UseLoadedAssemblies), section);
+            var loggerConfig = new LoggerConfiguration();
+
+            reader.Configure(loggerConfig);
+
+            AssertLogEventLevels(loggerConfig, LogEventLevel.Error);
         }
     }
 }
