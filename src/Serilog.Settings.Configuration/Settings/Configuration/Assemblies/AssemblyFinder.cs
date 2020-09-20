@@ -16,12 +16,19 @@ namespace Serilog.Settings.Configuration.Assemblies
 
         public static AssemblyFinder Auto()
         {
-            // Need to check `Assembly.GetEntryAssembly()` first because 
-            // `DependencyContext.Default` throws an exception when `Assembly.GetEntryAssembly()` returns null
-            if (Assembly.GetEntryAssembly() != null && DependencyContext.Default != null)
+            try
             {
-                return new DependencyContextAssemblyFinder(DependencyContext.Default);
+                // Need to check `Assembly.GetEntryAssembly()` first because 
+                // `DependencyContext.Default` throws an exception when `Assembly.GetEntryAssembly()` returns null
+                if (Assembly.GetEntryAssembly() != null && DependencyContext.Default != null)
+                {
+                    return new DependencyContextAssemblyFinder(DependencyContext.Default);
+                }
             }
+            catch (NotSupportedException) when (typeof(object).Assembly.Location is "") // bundled mode detection
+            {
+            }
+            
             return new DllScanningAssemblyFinder();
         }
 
