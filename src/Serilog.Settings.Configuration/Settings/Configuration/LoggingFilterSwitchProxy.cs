@@ -34,8 +34,11 @@ namespace Serilog.Settings.Configuration
 
         public static LoggingFilterSwitchProxy Create(string expression = null)
         {
-            var filterSwitchType = Type.GetType("Serilog.Filters.Expressions.LoggingFilterSwitch, Serilog.Filters.Expressions");
-            if (filterSwitchType == null)
+            var filterSwitchType =
+                Type.GetType("Serilog.Expressions.LoggingFilterSwitch, Serilog.Expressions") ??
+                Type.GetType("Serilog.Filters.Expressions.LoggingFilterSwitch, Serilog.Filters.Expressions");
+
+            if (filterSwitchType is null)
             {
                 return null;
             }

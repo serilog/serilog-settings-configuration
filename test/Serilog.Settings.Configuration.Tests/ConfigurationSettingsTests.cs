@@ -343,7 +343,7 @@ namespace Serilog.Settings.Configuration.Tests
         {
             var json = @"{
                 'Serilog': {
-                    'FilterSwitches': { '$mySwitch': 'Prop = \'Val\'' },
+                    'FilterSwitches': { '$mySwitch': 'Prop = 42' },
                     'Filter:BySwitch': {
                         'Name': 'ControlledBy',
                         'Args': {
@@ -361,7 +361,7 @@ namespace Serilog.Settings.Configuration.Tests
             log.Write(Some.InformationEvent());
             Assert.Null(evt);
 
-            log.ForContext("Prop", "Val").Write(Some.InformationEvent());
+            log.ForContext("Prop", 42).Write(Some.InformationEvent());
             Assert.NotNull(evt);
         }
 
