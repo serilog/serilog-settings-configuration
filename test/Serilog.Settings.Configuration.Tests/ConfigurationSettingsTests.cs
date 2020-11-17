@@ -163,6 +163,37 @@ namespace Serilog.Settings.Configuration.Tests
         }
 
         [Fact]
+        public void AuditToSubLoggersAreConfigured()
+        {
+            var json = @"{
+            ""Serilog"": {            
+                ""Using"": [""TestDummies""],       
+                ""AuditTo"": [{
+                    ""Name"": ""Logger"",
+                    ""Args"": {
+                        ""configureLogger"" : {
+                            ""AuditTo"": [{
+                                ""Name"": ""DummyRollingFile"",
+                                ""Args"": {""pathFormat"" : ""C:\\""}
+                            }]}
+                    }
+                }]        
+            }
+            }";
+
+            var log = ConfigFromJson(json)
+                .CreateLogger();
+
+            DummyRollingFileSink.Reset();
+            DummyRollingFileAuditSink.Reset();
+
+            log.Write(Some.InformationEvent());
+
+            Assert.Equal(0, DummyRollingFileSink.Emitted.Count);
+            Assert.Equal(1, DummyRollingFileAuditSink.Emitted.Count);
+        }
+
+        [Fact]
         public void TestMinimumLevelOverrides()
         {
             var json = @"{
@@ -192,6 +223,40 @@ namespace Serilog.Settings.Configuration.Tests
             evt = null;
             log.Write(Some.InformationEvent());
             Assert.NotNull(evt);
+        }
+
+        [Fact]
+        public void TestMinimumLevelOverridesForChildContext()
+        {
+            var json = @"{
+                ""Serilog"": {
+                    ""MinimumLevel"" : {
+                        ""Default"" : ""Warning"",
+                        ""Override"" : {
+                            ""System"" : ""Warning"",
+                            ""System.Threading"": ""Debug""
+                        }
+                    }        
+                }
+            }";
+
+            LogEvent evt = null;
+
+            var log = ConfigFromJson(json)
+                .WriteTo.Sink(new DelegatingSink(e => evt = e))
+                .CreateLogger();
+
+            log.Write(Some.DebugEvent());
+            Assert.Null(evt);
+
+            var custom = log.ForContext(Constants.SourceContextPropertyName, typeof(System.Threading.Tasks.Task).FullName + "<42>");
+            custom.Write(Some.DebugEvent());
+            Assert.NotNull(evt);
+            
+            evt = null;
+            var systemThreadingLogger = log.ForContext<System.Threading.Tasks.Task>();
+            systemThreadingLogger.Write(Some.DebugEvent());
+            Assert.NotNull(evt);              
         }
 
         [Fact]
@@ -575,6 +640,46 @@ namespace Serilog.Settings.Configuration.Tests
             log.Write(Some.InformationEvent());
 
             Assert.Equal(1, DummyRollingFileSink.Emitted.Count);
+        }
+
+        [Fact]
+        public void DestructureWithCollectionsOfTypeArgument()
+        {
+            var json = @"{
+                ""Serilog"": {
+                    ""Using"": [ ""TestDummies"" ],
+                    ""Destructure"": [{
+                        ""Name"": ""DummyArrayOfType"",
+                        ""Args"": {
+                            ""list"": [
+                                ""System.Byte"",
+                                ""System.Int16""
+                            ],
+                            ""array"" : [
+                                ""System.Int32"",
+                                ""System.String""
+                            ],
+                            ""type"" : ""System.TimeSpan"",
+                            ""custom"" : [
+                                ""System.Int64""
+                            ],
+                            ""customString"" : [
+                                ""System.UInt32""
+                            ]
+                        }
+                    }]        
+                }
+            }";
+
+            DummyPolicy.Current = null;
+
+            ConfigFromJson(json);
+
+            Assert.Equal(typeof(TimeSpan), DummyPolicy.Current.Type);
+            Assert.Equal(new[] { typeof(int), typeof(string) }, DummyPolicy.Current.Array);
+            Assert.Equal(new[] { typeof(byte), typeof(short) }, DummyPolicy.Current.List);
+            Assert.Equal(typeof(long), DummyPolicy.Current.Custom.First);
+            Assert.Equal("System.UInt32", DummyPolicy.Current.CustomStrings.First);
         }
 
         [Fact]

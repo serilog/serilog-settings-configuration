@@ -2,7 +2,7 @@ echo "build: Build started"
 
 Push-Location $PSScriptRoot
 
-if(Test-Path .\artifacts) {
+if (Test-Path .\artifacts) {
 	echo "build: Cleaning .\artifacts"
 	Remove-Item .\artifacts -Force -Recurse
 }
@@ -15,35 +15,50 @@ $suffix = @{ $true = ""; $false = "$($branch.Substring(0, [math]::Min(10,$branch
 
 echo "build: Version suffix is $suffix"
 
-foreach ($src in ls src/*) {
+foreach ($src in dir src/*) {
     Push-Location $src
 
 	echo "build: Packaging project in $src"
 
-    & dotnet pack -c Release -o ..\..\artifacts --version-suffix=$suffix --include-source
-    if($LASTEXITCODE -ne 0) { exit 1 }    
+    & dotnet pack -c Release -o ..\..\artifacts --version-suffix=$suffix -p:ContinuousIntegrationBuild=true
+    if ($LASTEXITCODE -ne 0) { exit 1 }
 
     Pop-Location
 }
 
-foreach ($test in ls test/*.PerformanceTests) {
+foreach ($test in dir test/*.PerformanceTests) {
     Push-Location $test
 
 	echo "build: Building performance test project in $test"
 
     & dotnet build -c Release
-    if($LASTEXITCODE -ne 0) { exit 2 }
+    if ($LASTEXITCODE -ne 0) { exit 2 }
 
     Pop-Location
 }
 
-foreach ($test in ls test/*.Tests) {
+foreach ($test in dir test/*.Tests) {
     Push-Location $test
 
 	echo "build: Testing project in $test"
 
-    & dotnet test -c Release
-    if($LASTEXITCODE -ne 0) { exit 3 }
+    if ($PSVersionTable.Platform -eq "Unix") {
+        & dotnet test -c Release -f netcoreapp2.0
+        & dotnet test -c Release -f netcoreapp3.1
+    } else {
+        & dotnet test -c Release
+    }
+
+    if ($LASTEXITCODE -ne 0) { exit 3 }
+
+    Pop-Location
+}
+
+if ($PSVersionTable.Platform -eq "Unix") {
+    Push-Location sample/Sample
+
+    & dotnet run -f netcoreapp2.0 -c Release --run-once
+    if ($LASTEXITCODE -ne 0) { exit 4 }
 
     Pop-Location
 }

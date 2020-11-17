@@ -67,6 +67,13 @@ namespace Serilog.Settings.Configuration
             LoggingLevelSwitch levelSwitch = null)
             => auditSinkConfiguration.Sink(sink, restrictedToMinimumLevel, levelSwitch);
 
+        static LoggerConfiguration Logger(
+            LoggerAuditSinkConfiguration auditSinkConfiguration,
+            Action<LoggerConfiguration> configureLogger,
+            LogEventLevel restrictedToMinimumLevel = LevelAlias.Minimum,
+            LoggingLevelSwitch levelSwitch = null)
+            => auditSinkConfiguration.Logger(configureLogger, restrictedToMinimumLevel, levelSwitch);
+
         // .Filter...
         // =======
         // TODO: add overload for array argument (ILogEventEnricher[])
@@ -100,6 +107,14 @@ namespace Serilog.Settings.Configuration
             LoggerEnrichmentConfiguration loggerEnrichmentConfiguration,
             ILogEventEnricher enricher)
             => loggerEnrichmentConfiguration.With(enricher);
+
+        static LoggerConfiguration AtLevel(
+            LoggerEnrichmentConfiguration loggerEnrichmentConfiguration,
+            Action<LoggerEnrichmentConfiguration> configureEnricher,
+            LogEventLevel enrichFromLevel = LevelAlias.Minimum,
+            LoggingLevelSwitch levelSwitch = null)
+            => levelSwitch != null ? loggerEnrichmentConfiguration.AtLevel(levelSwitch, configureEnricher)
+                                   : loggerEnrichmentConfiguration.AtLevel(enrichFromLevel, configureEnricher);
 
         static LoggerConfiguration FromLogContext(LoggerEnrichmentConfiguration loggerEnrichmentConfiguration)
             => loggerEnrichmentConfiguration.FromLogContext();

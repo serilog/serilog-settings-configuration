@@ -27,15 +27,12 @@ namespace Serilog.Settings.Configuration.Assemblies
 
         public static AssemblyFinder ForSource(ConfigurationAssemblySource configurationAssemblySource)
         {
-            switch (configurationAssemblySource)
+            return configurationAssemblySource switch
             {
-                case ConfigurationAssemblySource.UseLoadedAssemblies:
-                    return Auto();
-                case ConfigurationAssemblySource.AlwaysScanDllFiles:
-                    return new DllScanningAssemblyFinder();
-                default:
-                    throw new ArgumentOutOfRangeException(nameof(configurationAssemblySource), configurationAssemblySource, null);
-            }
+                ConfigurationAssemblySource.UseLoadedAssemblies => Auto(),
+                ConfigurationAssemblySource.AlwaysScanDllFiles => new DllScanningAssemblyFinder(),
+                _ => throw new ArgumentOutOfRangeException(nameof(configurationAssemblySource), configurationAssemblySource, null),
+            };
         }
 
         public static AssemblyFinder ForDependencyContext(DependencyContext dependencyContext)

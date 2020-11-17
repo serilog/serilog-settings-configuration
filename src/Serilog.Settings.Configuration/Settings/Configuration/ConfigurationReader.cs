@@ -243,6 +243,12 @@ namespace Serilog.Settings.Configuration
             CallConfigurationMethods(methodCalls, FindSinkConfigurationMethods(_configurationAssemblies), loggerSinkConfiguration);
         }
 
+        void IConfigurationReader.ApplyEnrichment(LoggerEnrichmentConfiguration loggerEnrichmentConfiguration)
+        {
+            var methodCalls = GetMethodCalls(_section);
+            CallConfigurationMethods(methodCalls, FindEventEnricherConfigurationMethods(_configurationAssemblies), loggerEnrichmentConfiguration);
+        }
+
         void ApplyEnrichment(LoggerConfiguration loggerConfiguration)
         {
             var enrichDirective = _section.GetSection("Enrich");
@@ -278,39 +284,14 @@ namespace Serilog.Settings.Configuration
                                  select new
                                  {
                                      Name = argument.Key,
-                                     Value = GetArgumentValue(argument)
+                                     Value = GetArgumentValue(argument, _configurationAssemblies)
                                  }).ToDictionary(p => p.Name, p => p.Value)
                  select new { Name = name, Args = callArgs }))
                      .ToLookup(p => p.Name, p => p.Args);
 
             return result;
 
-            IConfigurationArgumentValue GetArgumentValue(IConfigurationSection argumentSection)
-            {
-                IConfigurationArgumentValue argumentValue;
-
-                // Reject configurations where an element has both scalar and complex
-                // values as a result of reading multiple configuration sources.
-                if (argumentSection.Value != null && argumentSection.GetChildren().Any())
-                    throw new InvalidOperationException(
-                        $"The value for the argument '{argumentSection.Path}' is assigned different value " +
-                        "types in more than one configuration source. Ensure all configurations consistently " +
-                        "use either a scalar (int, string, boolean) or a complex (array, section, list, " +
-                        "POCO, etc.) type for this argument value.");
-
-                if (argumentSection.Value != null)
-                {
-                    argumentValue = new StringArgumentValue(argumentSection.Value);
-                }
-                else
-                {
-                    argumentValue = new ObjectArgumentValue(argumentSection, _configurationAssemblies);
-                }
-
-                return argumentValue;
-            }
-
-            string GetSectionName(IConfigurationSection s)
+            static string GetSectionName(IConfigurationSection s)
             {
                 var name = s.GetSection("Name");
                 if (name.Value == null)
@@ -320,9 +301,35 @@ namespace Serilog.Settings.Configuration
             }
         }
 
+        internal static IConfigurationArgumentValue GetArgumentValue(IConfigurationSection argumentSection, IReadOnlyCollection<Assembly> configurationAssemblies)
+        {
+            IConfigurationArgumentValue argumentValue;
+
+            // Reject configurations where an element has both scalar and complex
+            // values as a result of reading multiple configuration sources.
+            if (argumentSection.Value != null && argumentSection.GetChildren().Any())
+                throw new InvalidOperationException(
+                    $"The value for the argument '{argumentSection.Path}' is assigned different value " +
+                    "types in more than one configuration source. Ensure all configurations consistently " +
+                    "use either a scalar (int, string, boolean) or a complex (array, section, list, " +
+                    "POCO, etc.) type for this argument value.");
+
+            if (argumentSection.Value != null)
+            {
+                argumentValue = new StringArgumentValue(argumentSection.Value);
+            }
+            else
+            {
+                argumentValue = new ObjectArgumentValue(argumentSection, configurationAssemblies);
+            }
+
+            return argumentValue;
+        }
+
         static IReadOnlyCollection<Assembly> LoadConfigurationAssemblies(IConfigurationSection section, AssemblyFinder assemblyFinder)
         {
-            var assemblies = new Dictionary<string, Assembly>();
+            var serilogAssembly = typeof(ILogger).Assembly;
+            var assemblies = new Dictionary<string, Assembly> { [serilogAssembly.FullName] = serilogAssembly };
 
             var usingSection = section.GetSection("Using");
             if (usingSection.GetChildren().Any())
@@ -407,7 +414,7 @@ namespace Serilog.Settings.Configuration
             // Per issue #111, it is safe to use case-insensitive matching on argument names. The CLR doesn't permit this type
             // of overloading, and the Microsoft.Extensions.Configuration keys are case-insensitive (case is preserved with some
             // config sources, but key-matching is case-insensitive and case-preservation does not appear to be guaranteed).
-            return candidateMethods
+            var selectedMethod = candidateMethods
                 .Where(m => m.Name == name)
                 .Where(m => m.GetParameters()
                             .Skip(1)
@@ -424,6 +431,27 @@ namespace Serilog.Settings.Configuration
                         matchingArgs.Count(p => p.ParameterType == typeof(string)));
                 })
                 .FirstOrDefault();
+
+            if (selectedMethod == null)
+            {
+                var methodsByName = candidateMethods
+                    .Where(m => m.Name == name)
+                    .Select(m => $"{m.Name}({string.Join(", ", m.GetParameters().Skip(1).Select(p => p.Name))})")
+                    .ToList();
+
+                if (!methodsByName.Any())
+                    SelfLog.WriteLine($"Unable to find a method called {name}. Candidate methods are:{Environment.NewLine}{string.Join(Environment.NewLine, candidateMethods)}");
+                else
+                    SelfLog.WriteLine($"Unable to find a method called {name} "
+                    + (suppliedArgumentNames.Any()
+                        ? "for supplied arguments: " + string.Join(", ", suppliedArgumentNames)
+                        : "with no supplied arguments")
+                    + ". Candidate methods are:"
+                    + Environment.NewLine
+                    + string.Join(Environment.NewLine, methodsByName));
+            }
+
+            return selectedMethod;
         }
 
         static bool ParameterNameMatches(string actualParameterName, string suppliedName)
