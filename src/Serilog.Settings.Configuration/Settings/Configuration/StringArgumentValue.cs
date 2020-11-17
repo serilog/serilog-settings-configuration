@@ -35,8 +35,8 @@ namespace Serilog.Settings.Configuration
                 return resolutionContext.LookUpLevelSwitchByName(argumentValue);
             }
 
-            if (toType.FullName is ("Serilog.Expressions.LoggingFilterSwitch" or
-                                    "Serilog.Filters.Expressions.LoggingFilterSwitch"))
+            if (toType.FullName == "Serilog.Expressions.LoggingFilterSwitch" ||
+                toType.FullName == "Serilog.Filters.Expressions.LoggingFilterSwitch")
             {
                 return resolutionContext.LookUpFilterSwitchByName(argumentValue).RealSwitch;
             }
