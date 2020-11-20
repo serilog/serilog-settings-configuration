@@ -2,7 +2,7 @@ version: '{build}'
 skip_tags: true
 image:
   - Visual Studio 2019
-  - Ubuntu1604
+  - Ubuntu
 configuration: Release
 build_script:
 - ps: ./Build.ps1
@@ -10,7 +10,7 @@ for:
 -
   matrix:
     only:
-      - image: Ubuntu1604
+      - image: Ubuntu
   build_script:
   - pwsh ./Build.ps1
 test: off

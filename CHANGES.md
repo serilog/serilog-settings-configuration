@@ -8,6 +8,8 @@
 * #219 - reduced search graph for configuration dlls to avoid native assets
 * #221 - added support for conditional/leveled enrichers from Serilog 2.9+
 * #222 - updated Microsoft.Extensions.DependencyModel
+* #237 - DependencyContextAssemblyFinder fix: check `serilog` at the start of the name for any dependent package
+* #239 - handle NotSupportedException for .net 5.0 single file applications
 
 3.1.0
 

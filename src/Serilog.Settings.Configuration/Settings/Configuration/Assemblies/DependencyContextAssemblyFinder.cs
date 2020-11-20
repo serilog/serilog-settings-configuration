@@ -27,7 +27,10 @@ namespace Serilog.Settings.Configuration.Assemblies
             
             static bool IsReferencingSerilog(Library library)
             {
-                return library.Dependencies.Any(dependency => dependency.Name.Equals("serilog", StringComparison.OrdinalIgnoreCase));
+                const string Serilog = "serilog";
+                return library.Dependencies.Any(dependency =>
+                    dependency.Name.StartsWith(Serilog, StringComparison.OrdinalIgnoreCase) &&
+                   (dependency.Name.Length == Serilog.Length || dependency.Name[Serilog.Length] == '.'));
             }
         }
     }
