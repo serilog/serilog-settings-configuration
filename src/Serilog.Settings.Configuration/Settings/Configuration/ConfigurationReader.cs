@@ -60,7 +60,7 @@ namespace Serilog.Settings.Configuration
                 var filterSwitch = LoggingFilterSwitchProxy.Create();
                 if (filterSwitch == null)
                 {
-                    SelfLog.WriteLine($"FilterSwitches section found, but Serilog.Filters.Expressions isn't referenced.");
+                    SelfLog.WriteLine($"FilterSwitches section found, but neither Serilog.Expressions nor Serilog.Filters.Expressions is referenced.");
                     break;
                 }
 
