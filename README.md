@@ -107,6 +107,10 @@ For legacy .NET Framework projects it also scans default probing path(s).
 
 For all other cases, as well as in the case of non-conventional configuration assembly names **DO** use `Using` section.
 
+#### .NET 5.0 Single File Applications
+
+Currently, auto-discovery of configuration assemblies is not supported in bundled mode. Use `Using` section for workaround.
+
 ### MinimumLevel, LevelSwitches, overrides and dynamic reload
 
 The `MinimumLevel` configuration property can be set to a single value as in the sample above, or, levels can be overridden per logging source.
