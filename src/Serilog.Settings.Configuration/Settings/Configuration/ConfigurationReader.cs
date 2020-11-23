@@ -3,9 +3,10 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using System.Runtime.CompilerServices;
+using System.Text.RegularExpressions;
+
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Primitives;
-using System.Text.RegularExpressions;
 
 using Serilog.Configuration;
 using Serilog.Core;
@@ -17,7 +18,7 @@ namespace Serilog.Settings.Configuration
 {
     class ConfigurationReader : IConfigurationReader
     {
-        const string LevelSwitchNameRegex = @"^\$[A-Za-z]+[A-Za-z0-9]*$";
+        const string LevelSwitchNameRegex = @"^\${0,1}[A-Za-z]+[A-Za-z0-9]*$";
 
         readonly IConfigurationSection _section;
         readonly IReadOnlyCollection<Assembly> _configurationAssemblies;
@@ -68,7 +69,7 @@ namespace Serilog.Settings.Configuration
                 // switchName must be something like $switch to avoid ambiguities
                 if (!IsValidSwitchName(switchName))
                 {
-                    throw new FormatException($"\"{switchName}\" is not a valid name for a Filter Switch declaration. Filter switch must be declared with a '$' sign, like \"FilterSwitches\" : {{\"$switchName\" : \"{{FilterExpression}}\"}}");
+                    throw new FormatException($"\"{switchName}\" is not a valid name for a Filter Switch declaration. The first character of the name must be a letter or '$' sign, like \"FilterSwitches\" : {{\"$switchName\" : \"{{FilterExpression}}\"}}");
                 }
 
                 SetFilterSwitch(throwOnError: true);
@@ -118,7 +119,7 @@ namespace Serilog.Settings.Configuration
                 // switchName must be something like $switch to avoid ambiguities
                 if (!IsValidSwitchName(switchName))
                 {
-                    throw new FormatException($"\"{switchName}\" is not a valid name for a Level Switch declaration. Level switch must be declared with a '$' sign, like \"LevelSwitches\" : {{\"$switchName\" : \"InitialLevel\"}}");
+                    throw new FormatException($"\"{switchName}\" is not a valid name for a Level Switch declaration. The first character of the name must be a letter or '$' sign, like \"LevelSwitches\" : {{\"$switchName\" : \"InitialLevel\"}}");
                 }
 
                 LoggingLevelSwitch newSwitch;

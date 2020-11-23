@@ -10,7 +10,6 @@ using Microsoft.Extensions.Configuration;
 using Serilog;
 using Serilog.Core;
 using Serilog.Events;
-using System.Collections.Generic;
 using Serilog.Debugging;
 
 namespace Sample
@@ -19,6 +18,8 @@ namespace Sample
     {
         public static void Main(string[] args)
         {
+            SelfLog.Enable(Console.Error);
+
             Thread.CurrentThread.Name = "Main thread";
 
             var configuration = new ConfigurationBuilder()

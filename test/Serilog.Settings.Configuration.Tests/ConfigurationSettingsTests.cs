@@ -305,8 +305,10 @@ namespace Serilog.Settings.Configuration.Tests
         [Theory]
         [InlineData("$switchName", true)]
         [InlineData("$SwitchName", true)]
+        [InlineData("SwitchName", true)]
         [InlineData("$switch1", true)]
         [InlineData("$sw1tch0", true)]
+        [InlineData("sw1tch0", true)]
         [InlineData("$SWITCHNAME", true)]
         [InlineData("$$switchname", false)]
         [InlineData("$switchname$", false)]
@@ -326,32 +328,34 @@ namespace Serilog.Settings.Configuration.Tests
         public void LoggingLevelSwitchWithInvalidNameThrowsFormatException()
         {
             var json = @"{
-                ""Serilog"": {            
-                    ""LevelSwitches"": {""switchNameNotStartingWithDollar"" : ""Warning"" }
+                ""Serilog"": {
+                    ""LevelSwitches"": {""1InvalidSwitchName"" : ""Warning"" }
                 }
             }";
 
             var ex = Assert.Throws<FormatException>(() => ConfigFromJson(json));
 
-            Assert.Contains("\"switchNameNotStartingWithDollar\"", ex.Message);
+            Assert.Contains("\"1InvalidSwitchName\"", ex.Message);
             Assert.Contains("'$' sign", ex.Message);
             Assert.Contains("\"LevelSwitches\" : {\"$switchName\" :", ex.Message);
         }
 
-        [Fact]
-        public void LoggingFilterSwitchIsConfigured()
+        [Theory]
+        [InlineData("$mySwitch")]
+        [InlineData("mySwitch")]
+        public void LoggingFilterSwitchIsConfigured(string switchName)
         {
-            var json = @"{
-                'Serilog': {
-                    'FilterSwitches': { '$mySwitch': 'Prop = 42' },
-                    'Filter:BySwitch': {
+            var json = $@"{{
+                'Serilog': {{
+                    'FilterSwitches': {{ '{switchName}': 'Prop = 42' }},
+                    'Filter:BySwitch': {{
                         'Name': 'ControlledBy',
-                        'Args': {
+                        'Args': {{
                             'switch': '$mySwitch'
-                        }
-                    }
-                }
-            }";
+                        }}
+                    }}
+                }}
+            }}";
             LogEvent evt = null;
 
             var log = ConfigFromJson(json)
@@ -365,17 +369,19 @@ namespace Serilog.Settings.Configuration.Tests
             Assert.NotNull(evt);
         }
 
-        [Fact]
-        public void LoggingLevelSwitchIsConfigured()
+        [Theory]
+        [InlineData("$switch1")]
+        [InlineData("switch1")]
+        public void LoggingLevelSwitchIsConfigured(string switchName)
         {
-            var json = @"{
-                ""Serilog"": {            
-                    ""LevelSwitches"": {""$switch1"" : ""Warning"" },
-                    ""MinimumLevel"" : {
-                        ""ControlledBy"" : ""$switch1""
-                    }
-                }
-            }";
+            var json = $@"{{
+                'Serilog': {{
+                    'LevelSwitches': {{ '{switchName}' : 'Warning' }},
+                    'MinimumLevel' : {{
+                        'ControlledBy' : '$switch1'
+                    }}
+                }}
+            }}";
             LogEvent evt = null;
 
             var log = ConfigFromJson(json)

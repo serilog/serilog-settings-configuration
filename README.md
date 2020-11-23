@@ -140,12 +140,12 @@ Any changes for `Default`, `Microsoft`, `System` sources will be applied at runt
 
 (Note: only existing sources are respected for a dynamic update. Inserting new records in `Override` section is **not** supported.)
 
-You can also declare `LoggingLevelSwitch`-es in custom section and reference them for Sink parameters:
+You can also declare `LoggingLevelSwitch`-es in custom section and reference them for sink parameters:
 
 ```json
 {
     "Serilog": {
-        "LevelSwitches": { "$controlSwitch": "Verbose" },
+        "LevelSwitches": { "controlSwitch": "Verbose" },
         "WriteTo": [
             {
                 "Name": "Seq",
@@ -205,7 +205,7 @@ This section defines a static list of key-value pairs that will enrich log event
 
 ### Filter section
 
-This section defines filters that will be applied to log events. It is especially usefull in combination with _[Serilog.Filters.Expression](https://github.com/serilog/serilog-filters-expressions)_ package so you can write expression in text form:
+This section defines filters that will be applied to log events. It is especially usefull in combination with _[Serilog.Filters.Expression](https://github.com/serilog/serilog-expressions)_ (or legacy _[Serilog.Filters.Expression](https://github.com/serilog/serilog-filters-expressions)_) package so you can write expression in text form:
 
 ```json
 "Filter": [{
@@ -215,6 +215,25 @@ This section defines filters that will be applied to log events. It is especiall
   }
 }]
 ```
+
+Using this package you can also declare `LoggingFilterSwitch`-es in custom section and reference them for filter parameters:
+
+```json
+{
+    "Serilog": {
+        "FilterSwitches": { "filterSwitch": "Application = 'Sample'" },
+        "Filter": [
+            {
+                "Name": "ControlledBy",
+                "Args": {
+                    "switch": "$filterSwitch"
+                }
+            }
+        ]
+}
+```
+
+Level updates to switches are also respected for a dynamic update.
 
 ### Nested configuration sections
 
