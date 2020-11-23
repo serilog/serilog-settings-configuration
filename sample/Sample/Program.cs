@@ -10,6 +10,8 @@ using Microsoft.Extensions.Configuration;
 using Serilog;
 using Serilog.Core;
 using Serilog.Events;
+using System.Collections.Generic;
+using Serilog.Debugging;
 
 namespace Sample
 {

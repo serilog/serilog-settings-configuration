@@ -32,7 +32,13 @@ namespace Serilog.Settings.Configuration
 
             if (toType == typeof(LoggingLevelSwitch))
             {
-                return resolutionContext.LookUpSwitchByName(argumentValue);
+                return resolutionContext.LookUpLevelSwitchByName(argumentValue);
+            }
+
+            if (toType.FullName == "Serilog.Expressions.LoggingFilterSwitch" ||
+                toType.FullName == "Serilog.Filters.Expressions.LoggingFilterSwitch")
+            {
+                return resolutionContext.LookUpFilterSwitchByName(argumentValue).RealSwitch;
             }
 
             var toTypeInfo = toType.GetTypeInfo();
