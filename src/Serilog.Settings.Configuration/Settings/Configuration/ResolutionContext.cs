@@ -67,14 +67,19 @@ namespace Serilog.Settings.Configuration
         {
             if (levelSwitchName == null) throw new ArgumentNullException(nameof(levelSwitchName));
             if (levelSwitch == null) throw new ArgumentNullException(nameof(levelSwitch));
-            _declaredLevelSwitches[levelSwitchName] = levelSwitch;
+            _declaredLevelSwitches[ToSwitchReference(levelSwitchName)] = levelSwitch;
         }
 
         public void AddFilterSwitch(string filterSwitchName, LoggingFilterSwitchProxy filterSwitch)
         {
             if (filterSwitchName == null) throw new ArgumentNullException(nameof(filterSwitchName));
             if (filterSwitch == null) throw new ArgumentNullException(nameof(filterSwitch));
-            _declaredFilterSwitches[filterSwitchName] = filterSwitch;
+            _declaredFilterSwitches[ToSwitchReference(filterSwitchName)] = filterSwitch;
+        }
+
+        string ToSwitchReference(string switchName)
+        {
+            return switchName.StartsWith("$") ? switchName : $"${switchName}";
         }
     }
 }
