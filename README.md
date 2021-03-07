@@ -127,7 +127,7 @@ This is useful in ASP.NET Core applications, which will often specify minimum le
 }
 ```
 
-`MinimumLevel` section also respect dynamic reload if the underlying provider supports it.
+`MinimumLevel` section also respects dynamic reload if the underlying provider supports it.
 
 ```csharp
 var configuration = new ConfigurationBuilder()
