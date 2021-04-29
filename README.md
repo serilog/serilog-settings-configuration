@@ -35,7 +35,7 @@ static void Main(string[] args)
     var configuration = new ConfigurationBuilder()
         .SetBasePath(Directory.GetCurrentDirectory())
         .AddJsonFile("appsettings.json")
-        .AddJsonFile($"appsettings.{Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT")}.json", true)
+        .AddJsonFile($"appsettings.{Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") ?? "Production"}.json", true)
         .Build();
 
     var logger = new LoggerConfiguration()
@@ -74,6 +74,13 @@ var logger = new LoggerConfiguration()
 
 `Using` section contains list of **assemblies** in wich configuration methods (`WriteTo.File()`, `Enrich.WithThreadId()`) resides.
 
+```json
+"Serilog": {
+    "Using":  [ "Serilog.Sinks.Console", "Serilog.Enrichers.Thread", /* ... */ ],
+    // ...
+}
+```
+
 For .NET Core projects build tools produce `.deps.json` files and this package implements a convention using `Microsoft.Extensions.DependencyModel` to find any package among dependencies with `Serilog` anywhere in the name and pulls configuration methods from it, so the `Using` section in example above can be ommitted:
 
 ```json
@@ -106,11 +113,11 @@ var logger = new LoggerConfiguration()
 
 For legacy .NET Framework projects it also scans default probing path(s).
 
-For all other cases, as well as in the case of non-conventional configuration assembly names **DO** use `Using` section.
+For all other cases, as well as in the case of non-conventional configuration assembly names **DO** use [Using](#using-section-and-auto-discovery-of-configuration-assemblies) section.
 
 #### .NET 5.0 Single File Applications
 
-Currently, auto-discovery of configuration assemblies is not supported in bundled mode. Use `Using` section for workaround.
+Currently, auto-discovery of configuration assemblies is not supported in bundled mode. **DO** use [Using](#using-section-and-auto-discovery-of-configuration-assemblies) section for workaround.
 
 ### MinimumLevel, LevelSwitches, overrides and dynamic reload
 

@@ -104,7 +104,7 @@ namespace Serilog.Settings.Configuration
                     throw new InvalidOperationException($"Type {argumentValue} was not found.");
                 }
 
-                var ctor = type.GetTypeInfo().DeclaredConstructors.FirstOrDefault(ci =>
+                var ctor = type.GetTypeInfo().DeclaredConstructors.Where(ci => !ci.IsStatic).FirstOrDefault(ci =>
                 {
                     var parameters = ci.GetParameters();
                     return parameters.Length == 0 || parameters.All(pi => pi.HasDefaultValue);
