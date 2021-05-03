@@ -12,6 +12,7 @@
 * #231 - make '$' sign optional for minimum level / filter switch declarations
 * #237 - DependencyContextAssemblyFinder fix: check `serilog` at the start of the name for any dependent package
 * #239 - handle NotSupportedException for .net 5.0 single file applications
+* #260 - skip static constructor on binding for complex parameters types
 
 3.1.0
 
