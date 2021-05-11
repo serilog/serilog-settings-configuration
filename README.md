@@ -213,7 +213,7 @@ This section defines a static list of key-value pairs that will enrich log event
 
 ### Filter section
 
-This section defines filters that will be applied to log events. It is especially usefull in combination with _[Serilog.Filters.Expression](https://github.com/serilog/serilog-expressions)_ (or legacy _[Serilog.Filters.Expression](https://github.com/serilog/serilog-filters-expressions)_) package so you can write expression in text form:
+This section defines filters that will be applied to log events. It is especially usefull in combination with _[Serilog.Expressions](https://github.com/serilog/serilog-expressions)_ (or legacy _[Serilog.Filters.Expressions](https://github.com/serilog/serilog-filters-expressions)_) package so you can write expression in text form:
 
 ```json
 "Filter": [{
