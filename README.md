@@ -72,7 +72,7 @@ var logger = new LoggerConfiguration()
 
 ### Using section and auto-discovery of configuration assemblies
 
-`Using` section contains list of **assemblies** in wich configuration methods (`WriteTo.File()`, `Enrich.WithThreadId()`) resides.
+`Using` section contains list of **assemblies** in which configuration methods (`WriteTo.File()`, `Enrich.WithThreadId()`) reside.
 
 ```json
 "Serilog": {
