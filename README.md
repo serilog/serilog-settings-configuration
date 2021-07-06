@@ -365,3 +365,63 @@ In order to make auto-discovery of configuration assemblies work, modify Functio
 
 </Project>
 ```
+
+### Different log files for different levels and days
+```json
+"WriteTo:Sublogger": {
+  "Name": "Logger",
+    "Args": {
+      "configureLogger": {
+        "MinimumLevel": "Verbose",
+        "WriteTo": [
+          {
+            "Name": "File",
+            "Args": {
+              "outputTemplate": "[{Timestamp:HH:mm:ss} {SourceContext} [{Level}] {Message}{NewLine}{Exception}",
+              "theme": "Serilog.Sinks.SystemConsole.Themes.SystemConsoleTheme::Grayscale, Serilog.Sinks.Console",
+              "path": "/logfiles/verbose-.log",
+              "rollingInterval": "Day"
+            }
+          }
+        ]
+      }
+    }
+},
+"WriteTo:Sublogger": {
+  "Name": "Logger",
+    "Args": {
+      "configureLogger": {
+        "MinimumLevel": "Error",
+        "WriteTo": [
+          {
+            "Name": "File",
+            "Args": {
+              "outputTemplate": "[{Timestamp:HH:mm:ss} {SourceContext} [{Level}] {Message}{NewLine}{Exception}",
+              "theme": "Serilog.Sinks.SystemConsole.Themes.SystemConsoleTheme::Grayscale, Serilog.Sinks.Console",
+              "path": "/logfiles/error-.log",
+              "rollingInterval": "Day"
+            }
+          }
+        ]
+      }
+    }
+}
+```
+
+### Conditional Log
+```json
+"WriteTo:ConditionalSink": {
+  "Name": "Conditional",
+  "Args": {
+    "expression": "@Level in ['Error', 'Fatal']",
+    "configureSink": [
+      {
+        "Name": "File",
+        "Args": {
+          "path": "/logfiles/error-fatal-.log"
+        }
+      }
+    ]
+  }
+}
+```
