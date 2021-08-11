@@ -16,26 +16,30 @@ namespace Serilog.Settings.Configuration.Assemblies
 
         public static AssemblyFinder Auto()
         {
-            // Need to check `Assembly.GetEntryAssembly()` first because 
-            // `DependencyContext.Default` throws an exception when `Assembly.GetEntryAssembly()` returns null
-            if (Assembly.GetEntryAssembly() != null && DependencyContext.Default != null)
+            try
             {
-                return new DependencyContextAssemblyFinder(DependencyContext.Default);
+                // Need to check `Assembly.GetEntryAssembly()` first because 
+                // `DependencyContext.Default` throws an exception when `Assembly.GetEntryAssembly()` returns null
+                if (Assembly.GetEntryAssembly() != null && DependencyContext.Default != null)
+                {
+                    return new DependencyContextAssemblyFinder(DependencyContext.Default);
+                }
             }
+            catch (NotSupportedException) when (typeof(object).Assembly.Location is "") // bundled mode detection
+            {
+            }
+            
             return new DllScanningAssemblyFinder();
         }
 
         public static AssemblyFinder ForSource(ConfigurationAssemblySource configurationAssemblySource)
         {
-            switch (configurationAssemblySource)
+            return configurationAssemblySource switch
             {
-                case ConfigurationAssemblySource.UseLoadedAssemblies:
-                    return Auto();
-                case ConfigurationAssemblySource.AlwaysScanDllFiles:
-                    return new DllScanningAssemblyFinder();
-                default:
-                    throw new ArgumentOutOfRangeException(nameof(configurationAssemblySource), configurationAssemblySource, null);
-            }
+                ConfigurationAssemblySource.UseLoadedAssemblies => Auto(),
+                ConfigurationAssemblySource.AlwaysScanDllFiles => new DllScanningAssemblyFinder(),
+                _ => throw new ArgumentOutOfRangeException(nameof(configurationAssemblySource), configurationAssemblySource, null),
+            };
         }
 
         public static AssemblyFinder ForDependencyContext(DependencyContext dependencyContext)

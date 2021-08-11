@@ -21,6 +21,13 @@ namespace Serilog.Settings.Configuration.Tests
                     }
                 },
                 'LevelSwitches': { '$mySwitch': 'Information' },
+                'FilterSwitches': { '$myFilter': null },
+                'Filter:Dummy': {
+                    'Name': 'ControlledBy',
+                    'Args': {
+                        'switch': '$myFilter'
+                    }
+                },
                 'WriteTo:Dummy': {
                     'Name': 'DummyConsole',
                     'Args': {
@@ -64,10 +71,22 @@ namespace Serilog.Settings.Configuration.Tests
                 UpdateConfig(overrideLevel: LogEventLevel.Debug);
                 logger.ForContext(Constants.SourceContextPropertyName, "Root.Test").Write(Some.DebugEvent());
                 Assert.Single(DummyConsoleSink.Emitted);
+
+                DummyConsoleSink.Emitted.Clear();
+                UpdateConfig(filterExpression: "Prop = 'Val_1'");
+                logger.Write(Some.DebugEvent());
+                logger.ForContext("Prop", "Val_1").Write(Some.DebugEvent());
+                Assert.Single(DummyConsoleSink.Emitted);
+
+                DummyConsoleSink.Emitted.Clear();
+                UpdateConfig(filterExpression: "Prop = 'Val_2'");
+                logger.Write(Some.DebugEvent());
+                logger.ForContext("Prop", "Val_1").Write(Some.DebugEvent());
+                Assert.Empty(DummyConsoleSink.Emitted);
             }
         }
 
-        void UpdateConfig(LogEventLevel? minimumLevel = null, LogEventLevel? switchLevel = null, LogEventLevel? overrideLevel = null)
+        void UpdateConfig(LogEventLevel? minimumLevel = null, LogEventLevel? switchLevel = null, LogEventLevel? overrideLevel = null, string filterExpression = null)
         {
             if (minimumLevel.HasValue)
             {
@@ -82,6 +101,11 @@ namespace Serilog.Settings.Configuration.Tests
             if (overrideLevel.HasValue)
             {
                 _configSource.Set("Serilog:MinimumLevel:Override:Root.Test", overrideLevel.Value.ToString());
+            }
+
+            if (filterExpression != null)
+            {
+                _configSource.Set("Serilog:FilterSwitches:$myFilter", filterExpression);
             }
 
             _configSource.Reload();

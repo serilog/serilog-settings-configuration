@@ -3,9 +3,10 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using System.Runtime.CompilerServices;
+using System.Text.RegularExpressions;
+
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Primitives;
-using System.Text.RegularExpressions;
 
 using Serilog.Configuration;
 using Serilog.Core;
@@ -17,7 +18,7 @@ namespace Serilog.Settings.Configuration
 {
     class ConfigurationReader : IConfigurationReader
     {
-        const string LevelSwitchNameRegex = @"^\$[A-Za-z]+[A-Za-z0-9]*$";
+        const string LevelSwitchNameRegex = @"^\${0,1}[A-Za-z]+[A-Za-z0-9]*$";
 
         readonly IConfigurationSection _section;
         readonly IReadOnlyCollection<Assembly> _configurationAssemblies;
@@ -41,6 +42,7 @@ namespace Serilog.Settings.Configuration
         public void Configure(LoggerConfiguration loggerConfiguration)
         {
             ProcessLevelSwitchDeclarations();
+            ProcessFilterSwitchDeclarations();
 
             ApplyMinimumLevel(loggerConfiguration);
             ApplyEnrichment(loggerConfiguration);
@@ -48,6 +50,63 @@ namespace Serilog.Settings.Configuration
             ApplyDestructuring(loggerConfiguration);
             ApplySinks(loggerConfiguration);
             ApplyAuditSinks(loggerConfiguration);
+        }
+
+        void ProcessFilterSwitchDeclarations()
+        {
+            var filterSwitchesDirective = _section.GetSection("FilterSwitches");
+
+            foreach (var filterSwitchDeclaration in filterSwitchesDirective.GetChildren())
+            {
+                var filterSwitch = LoggingFilterSwitchProxy.Create();
+                if (filterSwitch == null)
+                {
+                    SelfLog.WriteLine($"FilterSwitches section found, but neither Serilog.Expressions nor Serilog.Filters.Expressions is referenced.");
+                    break;
+                }
+
+                var switchName = filterSwitchDeclaration.Key;
+                // switchName must be something like $switch to avoid ambiguities
+                if (!IsValidSwitchName(switchName))
+                {
+                    throw new FormatException($"\"{switchName}\" is not a valid name for a Filter Switch declaration. The first character of the name must be a letter or '$' sign, like \"FilterSwitches\" : {{\"$switchName\" : \"{{FilterExpression}}\"}}");
+                }
+
+                SetFilterSwitch(throwOnError: true);
+                SubscribeToFilterExpressionChanges();
+
+                _resolutionContext.AddFilterSwitch(switchName, filterSwitch);
+
+                void SubscribeToFilterExpressionChanges()
+                {
+                    ChangeToken.OnChange(filterSwitchDeclaration.GetReloadToken, () => SetFilterSwitch(throwOnError: false));
+                }
+
+                void SetFilterSwitch(bool throwOnError)
+                {
+                    var filterExpr = filterSwitchDeclaration.Value;
+                    if (string.IsNullOrWhiteSpace(filterExpr))
+                    {
+                        filterSwitch.Expression = null;
+                        return;
+                    }
+
+                    try
+                    {
+                        filterSwitch.Expression = filterExpr;
+                    }
+                    catch (Exception e)
+                    {
+                        var errMsg = $"The expression '{filterExpr}' is invalid filter expression: {e.Message}.";
+                        if (throwOnError)
+                        {
+                            throw new InvalidOperationException(errMsg, e);
+                        }
+
+                        SelfLog.WriteLine(errMsg);
+                    }
+                }
+            }
         }
 
         void ProcessLevelSwitchDeclarations()
@@ -60,7 +119,7 @@ namespace Serilog.Settings.Configuration
                 // switchName must be something like $switch to avoid ambiguities
                 if (!IsValidSwitchName(switchName))
                 {
-                    throw new FormatException($"\"{switchName}\" is not a valid name for a Level Switch declaration. Level switch must be declared with a '$' sign, like \"LevelSwitches\" : {{\"$switchName\" : \"InitialLevel\"}}");
+                    throw new FormatException($"\"{switchName}\" is not a valid name for a Level Switch declaration. The first character of the name must be a letter or '$' sign, like \"LevelSwitches\" : {{\"$switchName\" : \"InitialLevel\"}}");
                 }
 
                 LoggingLevelSwitch newSwitch;
@@ -94,7 +153,7 @@ namespace Serilog.Settings.Configuration
             var minLevelControlledByDirective = minimumLevelDirective.GetSection("ControlledBy");
             if (minLevelControlledByDirective.Value != null)
             {
-                var globalMinimumLevelSwitch = _resolutionContext.LookUpSwitchByName(minLevelControlledByDirective.Value);
+                var globalMinimumLevelSwitch = _resolutionContext.LookUpLevelSwitchByName(minLevelControlledByDirective.Value);
                 // not calling ApplyMinimumLevel local function because here we have a reference to a LogLevelSwitch already
                 loggerConfiguration.MinimumLevel.ControlledBy(globalMinimumLevelSwitch);
             }
@@ -109,7 +168,7 @@ namespace Serilog.Settings.Configuration
                 }
                 else
                 {
-                    var overrideSwitch = _resolutionContext.LookUpSwitchByName(overridenLevelOrSwitch);
+                    var overrideSwitch = _resolutionContext.LookUpLevelSwitchByName(overridenLevelOrSwitch);
                     // not calling ApplyMinimumLevel local function because here we have a reference to a LogLevelSwitch already
                     loggerConfiguration.MinimumLevel.Override(overridePrefix, overrideSwitch);
                 }
@@ -185,6 +244,12 @@ namespace Serilog.Settings.Configuration
             CallConfigurationMethods(methodCalls, FindSinkConfigurationMethods(_configurationAssemblies), loggerSinkConfiguration);
         }
 
+        void IConfigurationReader.ApplyEnrichment(LoggerEnrichmentConfiguration loggerEnrichmentConfiguration)
+        {
+            var methodCalls = GetMethodCalls(_section);
+            CallConfigurationMethods(methodCalls, FindEventEnricherConfigurationMethods(_configurationAssemblies), loggerEnrichmentConfiguration);
+        }
+
         void ApplyEnrichment(LoggerConfiguration loggerConfiguration)
         {
             var enrichDirective = _section.GetSection("Enrich");
@@ -220,39 +285,14 @@ namespace Serilog.Settings.Configuration
                                  select new
                                  {
                                      Name = argument.Key,
-                                     Value = GetArgumentValue(argument)
+                                     Value = GetArgumentValue(argument, _configurationAssemblies)
                                  }).ToDictionary(p => p.Name, p => p.Value)
                  select new { Name = name, Args = callArgs }))
                      .ToLookup(p => p.Name, p => p.Args);
 
             return result;
 
-            IConfigurationArgumentValue GetArgumentValue(IConfigurationSection argumentSection)
-            {
-                IConfigurationArgumentValue argumentValue;
-
-                // Reject configurations where an element has both scalar and complex
-                // values as a result of reading multiple configuration sources.
-                if (argumentSection.Value != null && argumentSection.GetChildren().Any())
-                    throw new InvalidOperationException(
-                        $"The value for the argument '{argumentSection.Path}' is assigned different value " +
-                        "types in more than one configuration source. Ensure all configurations consistently " +
-                        "use either a scalar (int, string, boolean) or a complex (array, section, list, " +
-                        "POCO, etc.) type for this argument value.");
-
-                if (argumentSection.Value != null)
-                {
-                    argumentValue = new StringArgumentValue(argumentSection.Value);
-                }
-                else
-                {
-                    argumentValue = new ObjectArgumentValue(argumentSection, _configurationAssemblies);
-                }
-
-                return argumentValue;
-            }
-
-            string GetSectionName(IConfigurationSection s)
+            static string GetSectionName(IConfigurationSection s)
             {
                 var name = s.GetSection("Name");
                 if (name.Value == null)
@@ -262,9 +302,35 @@ namespace Serilog.Settings.Configuration
             }
         }
 
+        internal static IConfigurationArgumentValue GetArgumentValue(IConfigurationSection argumentSection, IReadOnlyCollection<Assembly> configurationAssemblies)
+        {
+            IConfigurationArgumentValue argumentValue;
+
+            // Reject configurations where an element has both scalar and complex
+            // values as a result of reading multiple configuration sources.
+            if (argumentSection.Value != null && argumentSection.GetChildren().Any())
+                throw new InvalidOperationException(
+                    $"The value for the argument '{argumentSection.Path}' is assigned different value " +
+                    "types in more than one configuration source. Ensure all configurations consistently " +
+                    "use either a scalar (int, string, boolean) or a complex (array, section, list, " +
+                    "POCO, etc.) type for this argument value.");
+
+            if (argumentSection.Value != null)
+            {
+                argumentValue = new StringArgumentValue(argumentSection.Value);
+            }
+            else
+            {
+                argumentValue = new ObjectArgumentValue(argumentSection, configurationAssemblies);
+            }
+
+            return argumentValue;
+        }
+
         static IReadOnlyCollection<Assembly> LoadConfigurationAssemblies(IConfigurationSection section, AssemblyFinder assemblyFinder)
         {
-            var assemblies = new Dictionary<string, Assembly>();
+            var serilogAssembly = typeof(ILogger).Assembly;
+            var assemblies = new Dictionary<string, Assembly> { [serilogAssembly.FullName] = serilogAssembly };
 
             var usingSection = section.GetSection("Using");
             if (usingSection.GetChildren().Any())

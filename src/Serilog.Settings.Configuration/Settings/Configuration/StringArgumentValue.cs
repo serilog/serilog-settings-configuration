@@ -32,7 +32,13 @@ namespace Serilog.Settings.Configuration
 
             if (toType == typeof(LoggingLevelSwitch))
             {
-                return resolutionContext.LookUpSwitchByName(argumentValue);
+                return resolutionContext.LookUpLevelSwitchByName(argumentValue);
+            }
+
+            if (toType.FullName == "Serilog.Expressions.LoggingFilterSwitch" ||
+                toType.FullName == "Serilog.Filters.Expressions.LoggingFilterSwitch")
+            {
+                return resolutionContext.LookUpFilterSwitchByName(argumentValue).RealSwitch;
             }
 
             var toTypeInfo = toType.GetTypeInfo();
@@ -93,20 +99,22 @@ namespace Serilog.Settings.Configuration
                 // maybe it's the assembly-qualified type name of a concrete implementation
                 // with a default constructor
                 var type = FindType(argumentValue.Trim());
-                if (type != null)
+                if (type == null)
                 {
-                    var ctor = type.GetTypeInfo().DeclaredConstructors.FirstOrDefault(ci =>
-                    {
-                        var parameters = ci.GetParameters();
-                        return parameters.Length == 0 || parameters.All(pi => pi.HasDefaultValue);
-                    });
-
-                    if (ctor == null)
-                        throw new InvalidOperationException($"A default constructor was not found on {type.FullName}.");
-
-                    var call = ctor.GetParameters().Select(pi => pi.DefaultValue).ToArray();
-                    return ctor.Invoke(call);
+                    throw new InvalidOperationException($"Type {argumentValue} was not found.");
                 }
+
+                var ctor = type.GetTypeInfo().DeclaredConstructors.Where(ci => !ci.IsStatic).FirstOrDefault(ci =>
+                {
+                    var parameters = ci.GetParameters();
+                    return parameters.Length == 0 || parameters.All(pi => pi.HasDefaultValue);
+                });
+
+                if (ctor == null)
+                    throw new InvalidOperationException($"A default constructor was not found on {type.FullName}.");
+
+                var call = ctor.GetParameters().Select(pi => pi.DefaultValue).ToArray();
+                return ctor.Invoke(call);
             }
 
             return Convert.ChangeType(argumentValue, toType);

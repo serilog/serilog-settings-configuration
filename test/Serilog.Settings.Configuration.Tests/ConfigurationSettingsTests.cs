@@ -163,6 +163,37 @@ namespace Serilog.Settings.Configuration.Tests
         }
 
         [Fact]
+        public void AuditToSubLoggersAreConfigured()
+        {
+            var json = @"{
+            ""Serilog"": {            
+                ""Using"": [""TestDummies""],       
+                ""AuditTo"": [{
+                    ""Name"": ""Logger"",
+                    ""Args"": {
+                        ""configureLogger"" : {
+                            ""AuditTo"": [{
+                                ""Name"": ""DummyRollingFile"",
+                                ""Args"": {""pathFormat"" : ""C:\\""}
+                            }]}
+                    }
+                }]        
+            }
+            }";
+
+            var log = ConfigFromJson(json)
+                .CreateLogger();
+
+            DummyRollingFileSink.Reset();
+            DummyRollingFileAuditSink.Reset();
+
+            log.Write(Some.InformationEvent());
+
+            Assert.Equal(0, DummyRollingFileSink.Emitted.Count);
+            Assert.Equal(1, DummyRollingFileAuditSink.Emitted.Count);
+        }
+
+        [Fact]
         public void TestMinimumLevelOverrides()
         {
             var json = @"{
@@ -274,8 +305,10 @@ namespace Serilog.Settings.Configuration.Tests
         [Theory]
         [InlineData("$switchName", true)]
         [InlineData("$SwitchName", true)]
+        [InlineData("SwitchName", true)]
         [InlineData("$switch1", true)]
         [InlineData("$sw1tch0", true)]
+        [InlineData("sw1tch0", true)]
         [InlineData("$SWITCHNAME", true)]
         [InlineData("$$switchname", false)]
         [InlineData("$switchname$", false)]
@@ -295,29 +328,60 @@ namespace Serilog.Settings.Configuration.Tests
         public void LoggingLevelSwitchWithInvalidNameThrowsFormatException()
         {
             var json = @"{
-                ""Serilog"": {            
-                    ""LevelSwitches"": {""switchNameNotStartingWithDollar"" : ""Warning"" }
+                ""Serilog"": {
+                    ""LevelSwitches"": {""1InvalidSwitchName"" : ""Warning"" }
                 }
             }";
 
             var ex = Assert.Throws<FormatException>(() => ConfigFromJson(json));
 
-            Assert.Contains("\"switchNameNotStartingWithDollar\"", ex.Message);
+            Assert.Contains("\"1InvalidSwitchName\"", ex.Message);
             Assert.Contains("'$' sign", ex.Message);
             Assert.Contains("\"LevelSwitches\" : {\"$switchName\" :", ex.Message);
         }
 
-        [Fact]
-        public void LoggingLevelSwitchIsConfigured()
+        [Theory]
+        [InlineData("$mySwitch")]
+        [InlineData("mySwitch")]
+        public void LoggingFilterSwitchIsConfigured(string switchName)
         {
-            var json = @"{
-                ""Serilog"": {            
-                    ""LevelSwitches"": {""$switch1"" : ""Warning"" },
-                    ""MinimumLevel"" : {
-                        ""ControlledBy"" : ""$switch1""
-                    }
-                }
-            }";
+            var json = $@"{{
+                'Serilog': {{
+                    'FilterSwitches': {{ '{switchName}': 'Prop = 42' }},
+                    'Filter:BySwitch': {{
+                        'Name': 'ControlledBy',
+                        'Args': {{
+                            'switch': '$mySwitch'
+                        }}
+                    }}
+                }}
+            }}";
+            LogEvent evt = null;
+
+            var log = ConfigFromJson(json)
+                .WriteTo.Sink(new DelegatingSink(e => evt = e))
+                .CreateLogger();
+
+            log.Write(Some.InformationEvent());
+            Assert.Null(evt);
+
+            log.ForContext("Prop", 42).Write(Some.InformationEvent());
+            Assert.NotNull(evt);
+        }
+
+        [Theory]
+        [InlineData("$switch1")]
+        [InlineData("switch1")]
+        public void LoggingLevelSwitchIsConfigured(string switchName)
+        {
+            var json = $@"{{
+                'Serilog': {{
+                    'LevelSwitches': {{ '{switchName}' : 'Warning' }},
+                    'MinimumLevel' : {{
+                        'ControlledBy' : '$switch1'
+                    }}
+                }}
+            }}";
             LogEvent evt = null;
 
             var log = ConfigFromJson(json)
@@ -582,6 +646,46 @@ namespace Serilog.Settings.Configuration.Tests
             log.Write(Some.InformationEvent());
 
             Assert.Equal(1, DummyRollingFileSink.Emitted.Count);
+        }
+
+        [Fact]
+        public void DestructureWithCollectionsOfTypeArgument()
+        {
+            var json = @"{
+                ""Serilog"": {
+                    ""Using"": [ ""TestDummies"" ],
+                    ""Destructure"": [{
+                        ""Name"": ""DummyArrayOfType"",
+                        ""Args"": {
+                            ""list"": [
+                                ""System.Byte"",
+                                ""System.Int16""
+                            ],
+                            ""array"" : [
+                                ""System.Int32"",
+                                ""System.String""
+                            ],
+                            ""type"" : ""System.TimeSpan"",
+                            ""custom"" : [
+                                ""System.Int64""
+                            ],
+                            ""customString"" : [
+                                ""System.UInt32""
+                            ]
+                        }
+                    }]        
+                }
+            }";
+
+            DummyPolicy.Current = null;
+
+            ConfigFromJson(json);
+
+            Assert.Equal(typeof(TimeSpan), DummyPolicy.Current.Type);
+            Assert.Equal(new[] { typeof(int), typeof(string) }, DummyPolicy.Current.Array);
+            Assert.Equal(new[] { typeof(byte), typeof(short) }, DummyPolicy.Current.List);
+            Assert.Equal(typeof(long), DummyPolicy.Current.Custom.First);
+            Assert.Equal("System.UInt32", DummyPolicy.Current.CustomStrings.First);
         }
 
         [Fact]

@@ -8,5 +8,11 @@ namespace Serilog.Settings.Configuration.Tests.Support
         {
             return ((ScalarValue)@this).Value;
         }
+
+        public static string ToValidJson(this string str)
+        {
+            str = str.Replace('\'', '"');
+            return str;
+        }
     }
 }

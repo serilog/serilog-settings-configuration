@@ -1,12 +1,16 @@
 ﻿using System;
 
-using Microsoft.Extensions.Configuration;
-using Serilog;
 using System.IO;
 using System.Linq;
+using System.Collections.Generic;
+using System.Threading;
+
+using Microsoft.Extensions.Configuration;
+
+using Serilog;
 using Serilog.Core;
 using Serilog.Events;
-using System.Collections.Generic;
+using Serilog.Debugging;
 
 namespace Sample
 {
@@ -14,6 +18,10 @@ namespace Sample
     {
         public static void Main(string[] args)
         {
+            SelfLog.Enable(Console.Error);
+
+            Thread.CurrentThread.Name = "Main thread";
+
             var configuration = new ConfigurationBuilder()
                 .SetBasePath(Directory.GetCurrentDirectory())
                 .AddJsonFile(path: "appsettings.json", optional: false, reloadOnChange: true)
@@ -47,7 +55,7 @@ namespace Sample
 
                 Console.WriteLine("\nPress \"q\" to quit, or any other key to run again.\n");
             }
-            while(!args.Contains("--run-once") && (Console.ReadKey().KeyChar != 'q'));
+            while (!args.Contains("--run-once") && (Console.ReadKey().KeyChar != 'q'));
         }
     }
 
@@ -73,7 +81,7 @@ namespace Sample
         {
             result = null;
 
-            if(value is LoginData)
+            if (value is LoginData)
             {
                 result = new StructureValue(
                     new List<LogEventProperty>

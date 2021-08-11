@@ -1,16 +1,19 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 15
-VisualStudioVersion = 15.0.27130.0
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.29709.97
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{4E41FD57-5FAB-4E3C-B16E-463DE98338BC}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "assets", "assets", "{62D0B904-1D11-4962-A4A8-DE28672AA28B}"
 	ProjectSection(SolutionItems) = preProject
 		.editorconfig = .editorconfig
+		.gitignore = .gitignore
 		appveyor.yml = appveyor.yml
 		Build.ps1 = Build.ps1
 		CHANGES.md = CHANGES.md
+		Directory.Build.props = Directory.Build.props
+		assets\icon.png = assets\icon.png
 		LICENSE = LICENSE
 		README.md = README.md
 		serilog-settings-configuration.sln.DotSettings = serilog-settings-configuration.sln.DotSettings
