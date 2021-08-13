@@ -1,6 +1,6 @@
 # Changelog
 
-3.2.0 (pre-release)
+3.2.0
 
 * #162 - LoggingFilterSwitch support
 * #202 - added support to AuditTo.Logger
