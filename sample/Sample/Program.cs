@@ -63,9 +63,16 @@ namespace Sample
     // processed by the Serilog.Filters.Expressions package.
     public class CustomFilter : ILogEventFilter
     {
+        readonly LogEventLevel _levelFilter;
+
+        public CustomFilter(LogEventLevel levelFilter = LogEventLevel.Information)
+        {
+            _levelFilter = levelFilter;
+        }
+
         public bool IsEnabled(LogEvent logEvent)
         {
-            return true;
+            return logEvent.Level >= _levelFilter;
         }
     }
 
