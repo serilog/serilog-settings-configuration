@@ -284,7 +284,21 @@ Static member access can be used for passing to the configuration argument via [
 
 ### Complex parameter value binding
 
-If the parameter value is not a discrete value, the package will use the configuration binding system provided by _[Microsoft.Extensions.Options.ConfigurationExtensions](https://www.nuget.org/packages/Microsoft.Extensions.Options.ConfigurationExtensions/)_ to attempt to populate the parameter. Almost anything that can be bound by `IConfiguration.Get<T>` should work with this package. An example of this is the optional `List<Column>` parameter used to configure the .NET Standard version of the _[Serilog.Sinks.MSSqlServer](https://github.com/serilog/serilog-sinks-mssqlserver)_ package.
+If the parameter value is not a discrete value, it will try to find a best matching public constructor for the argument:
+
+```json
+{
+  "Name": "Console",
+  "Args": {
+    "formatter": {
+      // `type` (or $type) is optional, must be specified for abstract declared parameter types
+      "type": "Serilog.Templates.ExpressionTemplate, Serilog.Expressions",
+      "template": "[{@t:HH:mm:ss} {@l:u3} {Coalesce(SourceContext, '<none>')}] {@m}\n{@x}"
+  }
+}
+```
+
+For other cases the package will use the configuration binding system provided by _[Microsoft.Extensions.Options.ConfigurationExtensions](https://www.nuget.org/packages/Microsoft.Extensions.Options.ConfigurationExtensions/)_ to attempt to populate the parameter. Almost anything that can be bound by `IConfiguration.Get<T>` should work with this package. An example of this is the optional `List<Column>` parameter used to configure the .NET Standard version of the _[Serilog.Sinks.MSSqlServer](https://github.com/serilog/serilog-sinks-mssqlserver)_ package.
 
 ### Abstract parameter types
 
