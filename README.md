@@ -269,9 +269,36 @@ Some Serilog packages require a reference to a logger configuration object. The 
 
 When the configuration specifies a discrete value for a parameter (such as a string literal), the package will attempt to convert that value to the target method's declared CLR type of the parameter. Additional explicit handling is provided for parsing strings to `Uri`, `TimeSpan`, `enum`, arrays and custom collections.
 
+### Static member support
+
+Static member access can be used for passing to the configuration argument via [special](https://github.com/serilog/serilog-settings-configuration/blob/dev/test/Serilog.Settings.Configuration.Tests/StringArgumentValueTests.cs#L35) syntax:
+
+```json
+{
+  "Args": {
+     "encoding": "System.Text.Encoding::UTF8",
+     "theme": "Serilog.Sinks.SystemConsole.Themes.AnsiConsoleTheme::Code, Serilog.Sinks.Console"
+  }
+}
+```
+
 ### Complex parameter value binding
 
-If the parameter value is not a discrete value, the package will use the configuration binding system provided by _[Microsoft.Extensions.Options.ConfigurationExtensions](https://www.nuget.org/packages/Microsoft.Extensions.Options.ConfigurationExtensions/)_ to attempt to populate the parameter. Almost anything that can be bound by `IConfiguration.Get<T>` should work with this package. An example of this is the optional `List<Column>` parameter used to configure the .NET Standard version of the _[Serilog.Sinks.MSSqlServer](https://github.com/serilog/serilog-sinks-mssqlserver)_ package.
+If the parameter value is not a discrete value, it will try to find a best matching public constructor for the argument:
+
+```json
+{
+  "Name": "Console",
+  "Args": {
+    "formatter": {
+      // `type` (or $type) is optional, must be specified for abstract declared parameter types
+      "type": "Serilog.Templates.ExpressionTemplate, Serilog.Expressions",
+      "template": "[{@t:HH:mm:ss} {@l:u3} {Coalesce(SourceContext, '<none>')}] {@m}\n{@x}"
+  }
+}
+```
+
+For other cases the package will use the configuration binding system provided by _[Microsoft.Extensions.Options.ConfigurationExtensions](https://www.nuget.org/packages/Microsoft.Extensions.Options.ConfigurationExtensions/)_ to attempt to populate the parameter. Almost anything that can be bound by `IConfiguration.Get<T>` should work with this package. An example of this is the optional `List<Column>` parameter used to configure the .NET Standard version of the _[Serilog.Sinks.MSSqlServer](https://github.com/serilog/serilog-sinks-mssqlserver)_ package.
 
 ### Abstract parameter types
 
@@ -360,7 +387,7 @@ In order to make auto-discovery of configuration assemblies work, modify Functio
   </Target>
 
   <Target Name="FunctionsPublishDepsCopy" AfterTargets="Publish">
-    <Copy SourceFiles="$(PublishDir)$(AssemblyName).deps.json" DestinationFiles="$(PublishDir)bin\$(AssemblyName).deps.json" />
+    <Copy SourceFiles="$(OutDir)$(AssemblyName).deps.json" DestinationFiles="$(PublishDir)bin\$(AssemblyName).deps.json" />
   </Target>
 
 </Project>

@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Reflection;
 
 using Microsoft.Extensions.Configuration;
@@ -50,6 +51,11 @@ namespace Serilog.Settings.Configuration
             if (IsContainer(toType, out var elementType) && TryCreateContainer(out var result))
                 return result;
 
+            if (TryBuildCtorExpression(_section, toType, resolutionContext, out var ctorExpression))
+            {
+                return Expression.Lambda<Func<object>>(ctorExpression).Compile().Invoke();
+            }
+
             // MS Config binding can work with a limited set of primitive types and collections
             return _section.Get(toType);
 
@@ -90,6 +96,126 @@ namespace Serilog.Settings.Configuration
                     addMethod.Invoke(result, new object[] { value });
                 }
 
+                return true;
+            }
+        }
+
+        internal static bool TryBuildCtorExpression(
+            IConfigurationSection section, Type parameterType, ResolutionContext resolutionContext, out NewExpression ctorExpression)
+        {
+            ctorExpression = null;
+
+            var typeDirective = section.GetValue<string>("$type") switch
+            {
+                not null => "$type",
+                null => section.GetValue<string>("type") switch
+                {
+                    not null => "type",
+                    null => null,
+                },
+            };
+
+            var type = typeDirective switch
+            {
+                not null => Type.GetType(section.GetValue<string>(typeDirective), throwOnError: false),
+                null => parameterType,
+            };
+
+            if (type is null or { IsAbstract: true })
+            {
+                return false;
+            }
+
+            var suppliedArguments = section.GetChildren().Where(s => s.Key != typeDirective)
+                .ToDictionary(s => s.Key, StringComparer.OrdinalIgnoreCase);
+
+            if (suppliedArguments.Count == 0 &&
+                type.GetConstructor(Type.EmptyTypes) is ConstructorInfo parameterlessCtor)
+            {
+                ctorExpression = Expression.New(parameterlessCtor);
+                return true;
+            }
+
+            var ctor =
+                (from c in type.GetConstructors()
+                 from p in c.GetParameters()
+                 let argumentBindResult = suppliedArguments.TryGetValue(p.Name, out var argValue) switch
+                 {
+                     true => new { success = true, hasMatch = true, value = (object)argValue },
+                     false => p.HasDefaultValue switch
+                     {
+                         true  => new { success = true,  hasMatch = false, value = p.DefaultValue },
+                         false => new { success = false, hasMatch = false, value = (object)null },
+                     },
+                 }
+                 group new { argumentBindResult, p.ParameterType } by c into gr
+                 where gr.All(z => z.argumentBindResult.success)
+                 let matchedArgs = gr.Where(z => z.argumentBindResult.hasMatch).ToList()
+                 orderby matchedArgs.Count descending,
+                         matchedArgs.Count(p => p.ParameterType == typeof(string)) descending
+                 select new
+                 {
+                     ConstructorInfo = gr.Key,
+                     ArgumentValues = gr.Select(z => new { Value = z.argumentBindResult.value, Type = z.ParameterType })
+                                        .ToList()
+                 }).FirstOrDefault();
+
+            if (ctor is null)
+            {
+                return false;
+            }
+            
+            var ctorArguments = new List<Expression>();
+            foreach (var argumentValue in ctor.ArgumentValues)
+            {
+                if (TryBindToCtorArgument(argumentValue.Value, argumentValue.Type, resolutionContext, out var argumentExpression))
+                {
+                    ctorArguments.Add(argumentExpression);
+                }
+                else
+                {
+                    return false;
+                }
+            }
+
+            ctorExpression = Expression.New(ctor.ConstructorInfo, ctorArguments);
+            return true;
+
+            static bool TryBindToCtorArgument(object value, Type type, ResolutionContext resolutionContext, out Expression argumentExpression)
+            {
+                argumentExpression = null;
+
+                if (value is IConfigurationSection s)
+                {
+                    if (s.Value is string argValue)
+                    {
+                        var stringArgumentValue = new StringArgumentValue(argValue);
+                        try
+                        {
+                            argumentExpression = Expression.Constant(
+                                stringArgumentValue.ConvertTo(type, resolutionContext),
+                                type);
+
+                            return true;
+                        }
+                        catch (Exception)
+                        {
+                            return false;
+                        }
+                    }
+                    else if (s.GetChildren().Any())
+                    {
+                        if (TryBuildCtorExpression(s, type, resolutionContext, out var ctorExpression))
+                        {
+                            argumentExpression = ctorExpression;
+                            return true;
+                        }
+
+                        return false;
+                    }
+                }
+
+                argumentExpression = Expression.Constant(value, type);
                 return true;
             }
         }

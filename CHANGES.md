@@ -1,6 +1,10 @@
 # Changelog
 
-3.2.0 (pre-release)
+3.3.0
+
+* #276, #225, #167 - added support for constructors with arguments for complex types
+
+3.2.0
 
 * #162 - LoggingFilterSwitch support
 * #202 - added support to AuditTo.Logger
