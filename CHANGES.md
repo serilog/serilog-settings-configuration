@@ -1,5 +1,9 @@
 # Changelog
 
+3.3.1
+
+* #287 - Fix static member access for concrete type parameters
+
 3.3.0
 
 * #276, #225, #167 - added support for constructors with arguments for complex types
