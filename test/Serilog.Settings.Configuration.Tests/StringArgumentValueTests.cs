@@ -89,14 +89,40 @@ namespace Serilog.Settings.Configuration.Tests
         [InlineData("Serilog.Settings.Configuration.Tests.Support.ClassWithStaticAccessors::AbstractProperty, Serilog.Settings.Configuration.Tests", typeof(AnAbstractClass))]
         [InlineData("Serilog.Settings.Configuration.Tests.Support.ClassWithStaticAccessors::InterfaceField, Serilog.Settings.Configuration.Tests", typeof(IAmAnInterface))]
         [InlineData("Serilog.Settings.Configuration.Tests.Support.ClassWithStaticAccessors::AbstractField, Serilog.Settings.Configuration.Tests", typeof(AnAbstractClass))]
-        public void StaticMembersAccessorsCanBeUsedForReferenceTypes(string input, Type targetType)
+        public void StaticMembersAccessorsCanBeUsedForAbstractTypes(string input, Type targetType)
         {
-            var stringArgumentValue = new StringArgumentValue($"{input}");
+            var stringArgumentValue = new StringArgumentValue(input);
 
             var actual = stringArgumentValue.ConvertTo(targetType, new ResolutionContext());
 
             Assert.IsAssignableFrom(targetType, actual);
             Assert.Equal(ConcreteImpl.Instance, actual);
+        }
+
+        [Theory]
+        [InlineData("Serilog.Settings.Configuration.Tests.Support.ClassWithStaticAccessors::ConcreteClassProperty, Serilog.Settings.Configuration.Tests", typeof(AConcreteClass))]
+        [InlineData("Serilog.Settings.Configuration.Tests.Support.ClassWithStaticAccessors::ConcreteClassField, Serilog.Settings.Configuration.Tests", typeof(AConcreteClass))]
+        public void StaticMembersAccessorsCanBeUsedForConcreteReferenceTypes(string input, Type targetType)
+        {
+            var stringArgumentValue = new StringArgumentValue(input);
+
+            var actual = stringArgumentValue.ConvertTo(targetType, new ResolutionContext());
+
+            Assert.IsAssignableFrom(targetType, actual);
+            Assert.Equal(ConcreteImplOfConcreteClass.Instance, actual);
+        }
+
+        [Theory]
+        [InlineData("Serilog.Settings.Configuration.Tests.Support.ClassWithStaticAccessors::IntProperty, Serilog.Settings.Configuration.Tests", typeof(int), 42)]
+        [InlineData("Serilog.Settings.Configuration.Tests.Support.ClassWithStaticAccessors::StringProperty, Serilog.Settings.Configuration.Tests", typeof(string),
+            "Serilog.Settings.Configuration.Tests.Support.ClassWithStaticAccessors::StringProperty, Serilog.Settings.Configuration.Tests")]
+        public void StaticMembersAccessorsCanBeUsedForBuiltInTypes(string input, Type targetType, object expected)
+        {
+            var stringArgumentValue = new StringArgumentValue(input);
+
+            var actual = stringArgumentValue.ConvertTo(targetType, new ResolutionContext());
+
+            Assert.Equal(expected, actual);
         }
 
         [Theory]
