@@ -100,6 +100,22 @@ namespace Serilog.Settings.Configuration.Tests
         }
 
         [Theory]
+        [InlineData("Serilog.Settings.Configuration.Tests.Support.ClassWithStaticAccessors::FuncIntParseField, Serilog.Settings.Configuration.Tests", typeof(Func<string, int>))]
+        [InlineData("Serilog.Settings.Configuration.Tests.Support.ClassWithStaticAccessors::NamedIntParseField, Serilog.Settings.Configuration.Tests", typeof(NamedIntParse))]
+        [InlineData("Serilog.Settings.Configuration.Tests.Support.ClassWithStaticAccessors::FuncIntParseProperty, Serilog.Settings.Configuration.Tests", typeof(Func<string, int>))]
+        [InlineData("Serilog.Settings.Configuration.Tests.Support.ClassWithStaticAccessors::NamedIntParseProperty, Serilog.Settings.Configuration.Tests", typeof(NamedIntParse))]
+        [InlineData("Serilog.Settings.Configuration.Tests.Support.ClassWithStaticAccessors::IntParseMethod, Serilog.Settings.Configuration.Tests", typeof(NamedIntParse))]
+        [InlineData("Serilog.Settings.Configuration.Tests.Support.ClassWithStaticAccessors::IntParseMethod, Serilog.Settings.Configuration.Tests", typeof(Func<string, int>))]
+        public void StaticMembersAccessorsCanBeUsedForDelegateTypes(string input, Type targetType)
+        {
+            var stringArgumentValue = new StringArgumentValue(input);
+
+            var actual = stringArgumentValue.ConvertTo(targetType, new ResolutionContext());
+
+            Assert.IsAssignableFrom(targetType, actual);
+        }
+
+        [Theory]
         [InlineData("Serilog.Settings.Configuration.Tests.Support.ClassWithStaticAccessors::ConcreteClassProperty, Serilog.Settings.Configuration.Tests", typeof(AConcreteClass))]
         [InlineData("Serilog.Settings.Configuration.Tests.Support.ClassWithStaticAccessors::ConcreteClassField, Serilog.Settings.Configuration.Tests", typeof(AConcreteClass))]
         public void StaticMembersAccessorsCanBeUsedForConcreteReferenceTypes(string input, Type targetType)

@@ -1,5 +1,9 @@
-﻿namespace Serilog.Settings.Configuration.Tests.Support
+﻿using System;
+
+namespace Serilog.Settings.Configuration.Tests.Support
 {
+    public delegate int NamedIntParse(string value);
+
     public interface IAmAnInterface
     {
     }
@@ -46,5 +50,11 @@
 #pragma warning restore 169
         public IAmAnInterface InstanceInterfaceProperty => ConcreteImpl.Instance;
         public IAmAnInterface InstanceInterfaceField = ConcreteImpl.Instance;
+
+        public static Func<string, int> FuncIntParseField = int.Parse;
+        public static NamedIntParse NamedIntParseField = int.Parse;
+        public static Func<string, int> FuncIntParseProperty => int.Parse;
+        public static NamedIntParse NamedIntParseProperty => int.Parse;
+        public static int IntParseMethod(string value) => int.Parse(value);
     }
 }
