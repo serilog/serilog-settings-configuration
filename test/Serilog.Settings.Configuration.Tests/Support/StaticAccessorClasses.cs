@@ -56,5 +56,7 @@ namespace Serilog.Settings.Configuration.Tests.Support
         public static Func<string, int> FuncIntParseProperty => int.Parse;
         public static NamedIntParse NamedIntParseProperty => int.Parse;
         public static int IntParseMethod(string value) => int.Parse(value);
+        public static int IntParseMethod(string value, string otherValue) => int.Parse(value); // will not be chosen, extra parameter
+        public static int IntParseMethod(object value) => throw new NotImplementedException(); // will not be chosen, wrong parameter type
     }
 }
