@@ -82,7 +82,7 @@ namespace Serilog.Settings.Configuration
                             .Where(x => x.IsStatic)
                             .ToList();
 
-                        if (methodCandidates.Count > 1 && typeof(Delegate).IsAssignableFrom(toType))
+                        if (methodCandidates.Count > 1)
                         {
                             // filter possible method overloads
 
