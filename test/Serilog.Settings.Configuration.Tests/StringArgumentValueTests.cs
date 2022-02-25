@@ -113,6 +113,8 @@ namespace Serilog.Settings.Configuration.Tests
             var actual = stringArgumentValue.ConvertTo(targetType, new ResolutionContext());
 
             Assert.IsAssignableFrom(targetType, actual);
+            var parser = (Delegate)actual;
+            Assert.Equal(100, parser.DynamicInvoke("100"));
         }
 
         [Theory]
