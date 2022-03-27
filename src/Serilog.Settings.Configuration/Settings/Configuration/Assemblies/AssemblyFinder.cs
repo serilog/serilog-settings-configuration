@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Reflection;
 using Microsoft.Extensions.DependencyModel;
@@ -22,7 +22,7 @@ namespace Serilog.Settings.Configuration.Assemblies
                 // `DependencyContext.Default` throws an exception when `Assembly.GetEntryAssembly()` returns null
                 if (Assembly.GetEntryAssembly() != null && DependencyContext.Default != null)
                 {
-                    return new DependencyContextAssemblyFinder(DependencyContext.Default);
+                    return new CompositeAssemblyFinder(new AppDomainAssemblyFinder(), new DependencyContextAssemblyFinder(DependencyContext.Default));
                 }
             }
             catch (NotSupportedException) when (typeof(object).Assembly.Location is "") // bundled mode detection
