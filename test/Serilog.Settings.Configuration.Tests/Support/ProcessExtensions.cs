@@ -34,6 +34,7 @@ namespace Serilog.Settings.Configuration.Tests.Support
             var startInfo = new ProcessStartInfo(command, arguments)
             {
                 CreateNoWindow = true,
+                WindowStyle = ProcessWindowStyle.Hidden,
                 UseShellExecute = useShellExecute,
                 WorkingDirectory = workingDirectory,
                 RedirectStandardOutput = redirect,

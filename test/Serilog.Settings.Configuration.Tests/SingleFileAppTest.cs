@@ -1,4 +1,3 @@
-#if !NETCOREAPP2_1
 using System.IO;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
@@ -9,8 +8,10 @@ namespace Serilog.Settings.Configuration.Tests
 {
     public class SingleFileAppTest
     {
-        [Fact]
-        void SingleFileApp()
+        [Theory]
+        [InlineData(true)]
+        [InlineData(false)]
+        void SingleFileApp(bool includeAllContentForSelfExtract)
         {
             var testDirectory = new DirectoryInfo(GetCurrentFilePath()).Parent?.Parent ?? throw new DirectoryNotFoundException("Can't find the 'test' directory");
             var workingDirectory = Path.Combine(testDirectory.FullName, "TestSingleFileApp");
@@ -18,7 +19,7 @@ namespace Serilog.Settings.Configuration.Tests
 
             try
             {
-                ProcessExtensions.RunDotnet(workingDirectory, "publish", "-c", "Release", "-o", publishDirectory);
+                ProcessExtensions.RunDotnet(workingDirectory, "publish", "-c", "Release", $"-p:IncludeAllContentForSelfExtract={includeAllContentForSelfExtract.ToString().ToLower()}", "-o", publishDirectory);
                 var exeName = RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? "TestSingleFileApp.exe" : "TestSingleFileApp";
                 var exePath = Path.Combine(publishDirectory, exeName);
                 var result = ProcessExtensions.RunCommand(exePath);
@@ -42,4 +43,3 @@ namespace Serilog.Settings.Configuration.Tests
         static string GetCurrentFilePath([CallerFilePath] string path = "") => path;
     }
 }
-#endif
