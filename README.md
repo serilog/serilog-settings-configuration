@@ -115,21 +115,6 @@ For legacy .NET Framework projects it also scans default probing path(s).
 
 For all other cases, as well as in the case of non-conventional configuration assembly names **DO** use [Using](#using-section-and-auto-discovery-of-configuration-assemblies) section.
 
-#### .NET Single File Applications
-
-Currently, auto-discovery of configuration assemblies requires special care when the application is deployed in [bundled mode](https://docs.microsoft.com/en-us/dotnet/core/deploying/single-file/overview).
-
-Starting with version 3.4.0, the configuration assemblies must be explicitly loaded prior to calling `loggerConfiguration.ReadFrom.Configuration(…)`.
-
-```csharp
-// Force loading of assemblies that might be used in the configuration (required when published as single file)
-_ = typeof(ConsoleLoggerConfigurationExtensions).Assembly;
-_ = typeof(SeqLoggerConfigurationExtensions).Assembly;
-loggerConfiguration.ReadFrom.Configuration(context.Configuration);
-```
-
-For versions older than 3.4.0, the [Using](#using-section-and-auto-discovery-of-configuration-assemblies) section must be used to load configuration assemblies as a workaround.
-
 ### MinimumLevel, LevelSwitches, overrides and dynamic reload
 
 The `MinimumLevel` configuration property can be set to a single value as in the sample above, or, levels can be overridden per logging source.

@@ -6,13 +6,6 @@ using Serilog.Debugging;
 
 try
 {
-    // Force loading of assemblies could become unnecessary if the [DependencyContextLoader][1]
-    // starts supporting applications published as single-file in the future.
-    // Unfortunately, as of .NET 6, loading the DependencyContext from a single-file application is not supported.
-    // [1]: https://github.com/dotnet/runtime/blob/v6.0.3/src/libraries/Microsoft.Extensions.DependencyModel/src/DependencyContextLoader.cs#L54-L55
-    _ = typeof(Serilog.Sinks.InMemory.InMemorySinkExtensions).Assembly;
-    _ = typeof(ConsoleLoggerConfigurationExtensions).Assembly;
-
     SelfLog.Enable(text => Console.Error.WriteLine(text));
 
     var configuration = new ConfigurationBuilder().AddInMemoryCollection(new Dictionary<string, string>
