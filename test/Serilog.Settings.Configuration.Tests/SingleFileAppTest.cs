@@ -19,7 +19,12 @@ namespace Serilog.Settings.Configuration.Tests
 
             try
             {
-                ProcessExtensions.RunDotnet(workingDirectory, "publish", "-c", "Release", $"-p:IncludeAllContentForSelfExtract={includeAllContentForSelfExtract.ToString().ToLower()}", "-o", publishDirectory);
+                ProcessExtensions.RunDotnet(workingDirectory, "publish",
+                    "-c", "Release",
+                    $"-p:IncludeAllContentForSelfExtract={includeAllContentForSelfExtract.ToString().ToLower()}",
+                    $"-p:CliBaseOutputPath={Path.Combine(publishDirectory, "bin" + Path.DirectorySeparatorChar)}",
+                    $"-p:CliBaseIntermediateOutputPath={Path.Combine(publishDirectory, "obj" + Path.DirectorySeparatorChar)}",
+                    "-o", publishDirectory);
                 var exeName = RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? "TestSingleFileApp.exe" : "TestSingleFileApp";
                 var exePath = Path.Combine(publishDirectory, exeName);
                 var result = ProcessExtensions.RunCommand(exePath);

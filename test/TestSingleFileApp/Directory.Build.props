@@ -1,0 +1,6 @@
+<Project>
+  <PropertyGroup>
+    <BaseOutputPath Condition="$(MSBuildProjectName) == 'TestSingleFileApp' AND $(CliBaseOutputPath) != ''">$(CliBaseOutputPath)</BaseOutputPath>
+    <BaseIntermediateOutputPath Condition="$(MSBuildProjectName) == 'TestSingleFileApp' AND $(CliBaseIntermediateOutputPath) != ''">$(CliBaseIntermediateOutputPath)</BaseIntermediateOutputPath>
+  </PropertyGroup>
+</Project>

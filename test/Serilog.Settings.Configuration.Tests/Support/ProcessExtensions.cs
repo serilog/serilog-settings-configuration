@@ -1,5 +1,7 @@
 using System;
 using System.Diagnostics;
+using System.Linq;
+using System.Text;
 
 namespace Serilog.Settings.Configuration.Tests.Support
 {
@@ -19,26 +21,33 @@ namespace Serilog.Settings.Configuration.Tests.Support
 
         public static void RunDotnet(string workingDirectory, params string[] args)
         {
-            RunCommand("dotnet", useShellExecute: true, workingDirectory, args);
+            RunCommand("dotnet", workingDirectory, args);
         }
 
         public static CommandResult RunCommand(string command, params string[] args)
         {
-            return RunCommand(command, useShellExecute: false, "", args);
+            return RunCommand(command, "", args);
         }
 
-        static CommandResult RunCommand(string command, bool useShellExecute, string workingDirectory, params string[] args)
+        static CommandResult RunCommand(string command, string workingDirectory, params string[] args)
         {
-            var arguments = $"\"{string.Join("\" \"", args)}\"";
-            var redirect = !useShellExecute;
-            var startInfo = new ProcessStartInfo(command, arguments)
+            var arguments = new StringBuilder(args.Select(e => e.Length + 3).Sum());
+            foreach (var arg in args)
+            {
+                var hasSpace = arg.Contains(" ");
+                if (hasSpace) arguments.Append('"');
+                arguments.Append(arg);
+                if (hasSpace) arguments.Append('"');
+                arguments.Append(' ');
+            }
+            var startInfo = new ProcessStartInfo(command, arguments.ToString())
             {
                 CreateNoWindow = true,
                 WindowStyle = ProcessWindowStyle.Hidden,
-                UseShellExecute = useShellExecute,
+                UseShellExecute = false,
                 WorkingDirectory = workingDirectory,
-                RedirectStandardOutput = redirect,
-                RedirectStandardError = redirect,
+                RedirectStandardOutput = true,
+                RedirectStandardError = true,
             };
             var process = new Process { StartInfo = startInfo };
             process.Start();
@@ -46,16 +55,29 @@ namespace Serilog.Settings.Configuration.Tests.Support
             var exited = process.WaitForExit((int)timeout.TotalMilliseconds);
             if (!exited)
             {
+                process.Kill();
                 throw new TimeoutException($"The command '{command} {arguments}' did not execute within {timeout.TotalSeconds} seconds");
             }
 
-            var error = redirect ? process.StandardError.ReadToEnd() : "";
+            var output = process.StandardOutput.ReadToEnd();
+            var error = process.StandardError.ReadToEnd();
             if (process.ExitCode != 0)
             {
-                throw new InvalidOperationException($"The command '{command} {arguments}' exited with code {process.ExitCode}");
+                var message = new StringBuilder();
+                message.AppendLine($"The command '{command} {arguments}' exited with code {process.ExitCode}");
+                if (output.Length > 0)
+                {
+                    message.AppendLine("*** Output ***");
+                    message.AppendLine(output);
+                }
+                if (error.Length > 0)
+                {
+                    message.AppendLine("*** Error ***");
+                    message.AppendLine(error);
+                }
+                throw new InvalidOperationException(message.ToString());
             }
 
-            var output = redirect ? process.StandardOutput.ReadToEnd() : "";
             return new CommandResult(output, error);
         }
     }
