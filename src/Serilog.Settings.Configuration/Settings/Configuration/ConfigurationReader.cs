@@ -512,7 +512,7 @@ namespace Serilog.Settings.Configuration
         static List<MethodInfo> FindConfigurationExtensionMethods(IReadOnlyCollection<Assembly> configurationAssemblies, Type configType)
         {
             // ExtensionAttribute can be polyfilled to support extension methods
-            bool hasExtensionAttribute(MethodInfo m) =>
+            bool HasExtensionAttribute(MethodInfo m) =>
                 m.CustomAttributes.Any(a => a.AttributeType.FullName == "System.Runtime.CompilerServices.ExtensionAttribute");
 
             return configurationAssemblies
