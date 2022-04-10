@@ -520,7 +520,7 @@ namespace Serilog.Settings.Configuration
                     .Select(t => t.GetTypeInfo())
                     .Where(t => t.IsSealed && t.IsAbstract && !t.IsNested))
                 .SelectMany(t => t.DeclaredMethods)
-                .Where(m => m.IsStatic && m.IsPublic && hasExtensionAttribute(m))
+                .Where(m => m.IsStatic && m.IsPublic && HasExtensionAttribute(m))
                 .Where(m => m.GetParameters()[0].ParameterType == configType)
                 .ToList();
         }
