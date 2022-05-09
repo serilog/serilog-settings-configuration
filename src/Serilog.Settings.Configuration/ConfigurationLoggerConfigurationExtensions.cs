@@ -13,6 +13,7 @@
 // limitations under the License.
 
 using System;
+using System.Reflection;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyModel;
 using Serilog.Configuration;
@@ -169,5 +170,39 @@ namespace Serilog
 
             return settingConfiguration.Settings(new ConfigurationReader(configSection, assemblyFinder, configuration: null));
         }
+
+        /// <summary>
+        /// Reads logger settings from the provided configuration object using the provided section name.
+        /// </summary>
+        /// <param name="settingConfiguration">Logger setting configuration.</param>
+        /// <param name="configuration">A configuration object which contains a Serilog section.</param>
+        /// <param name="sectionName">A section name for section which contains a Serilog section.</param>
+        /// <param name="assemblies">A collection of assemblies that contains sinks and other Types.</param>
+        /// <returns>An object allowing configuration to continue.</returns>
+        public static LoggerConfiguration Configuration(
+            this LoggerSettingsConfiguration settingConfiguration,
+            IConfiguration configuration,
+            string sectionName,
+            params Assembly[] assemblies)
+        {
+            if (settingConfiguration == null) throw new ArgumentNullException(nameof(settingConfiguration));
+            if (configuration == null) throw new ArgumentNullException(nameof(configuration));
+            if (sectionName == null) throw new ArgumentNullException(nameof(sectionName));
+
+            return settingConfiguration.Settings(new ConfigurationReader(configuration.GetSection(sectionName), assemblies, new ResolutionContext(configuration)));
+        }
+
+        /// <summary>
+        /// Reads logger settings from the provided configuration object using the default section name.
+        /// </summary>
+        /// <param name="settingConfiguration">Logger setting configuration.</param>
+        /// <param name="configuration">A configuration object which contains a Serilog section.</param>
+        /// <param name="assemblies">A collection of assemblies that contains sinks and other Types.</param>
+        /// <returns>An object allowing configuration to continue.</returns>
+        public static LoggerConfiguration Configuration(
+            this LoggerSettingsConfiguration settingConfiguration,
+            IConfiguration configuration,
+            params Assembly[] assemblies)
+            => Configuration(settingConfiguration, configuration, DefaultSectionName, assemblies);
     }
 }
