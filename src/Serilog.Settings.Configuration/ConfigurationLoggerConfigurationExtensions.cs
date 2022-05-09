@@ -117,7 +117,7 @@ namespace Serilog
         /// <param name="settingConfiguration">Logger setting configuration.</param>
         /// <param name="configuration">A configuration object which contains a Serilog section.</param>
         /// <param name="sectionName">A section name for section which contains a Serilog section.</param>
-        /// <param name="configurationAssemblySource">Defines how the package identifies assemblies to scan for sinks and other Types.</param>
+        /// <param name="configurationAssemblySource">Defines how the package identifies assemblies to scan for sinks and other types.</param>
         /// <returns>An object allowing configuration to continue.</returns>
         public static LoggerConfiguration Configuration(
             this LoggerSettingsConfiguration settingConfiguration,
@@ -141,7 +141,7 @@ namespace Serilog
         /// </summary>
         /// <param name="settingConfiguration">Logger setting configuration.</param>
         /// <param name="configuration">A configuration object which contains a Serilog section.</param>
-        /// <param name="configurationAssemblySource">Defines how the package identifies assemblies to scan for sinks and other Types.</param>
+        /// <param name="configurationAssemblySource">Defines how the package identifies assemblies to scan for sinks and other types.</param>
         /// <returns>An object allowing configuration to continue.</returns>
         public static LoggerConfiguration Configuration(
             this LoggerSettingsConfiguration settingConfiguration,
@@ -155,7 +155,7 @@ namespace Serilog
         /// </summary>
         /// <param name="settingConfiguration">Logger setting configuration.</param>
         /// <param name="configSection">The Serilog configuration section</param>
-        /// <param name="configurationAssemblySource">Defines how the package identifies assemblies to scan for sinks and other Types.</param>
+        /// <param name="configurationAssemblySource">Defines how the package identifies assemblies to scan for sinks and other types.</param>
         /// <returns>An object allowing configuration to continue.</returns>
         [Obsolete("Use ReadFrom.Configuration(IConfiguration configuration, string sectionName, ConfigurationAssemblySource configurationAssemblySource) instead.")]
         public static LoggerConfiguration ConfigurationSection(
@@ -177,7 +177,7 @@ namespace Serilog
         /// <param name="settingConfiguration">Logger setting configuration.</param>
         /// <param name="configuration">A configuration object which contains a Serilog section.</param>
         /// <param name="sectionName">A section name for section which contains a Serilog section.</param>
-        /// <param name="assemblies">A collection of assemblies that contains sinks and other Types.</param>
+        /// <param name="assemblies">A collection of assemblies that contains sinks and other types.</param>
         /// <returns>An object allowing configuration to continue.</returns>
         public static LoggerConfiguration Configuration(
             this LoggerSettingsConfiguration settingConfiguration,
@@ -197,7 +197,7 @@ namespace Serilog
         /// </summary>
         /// <param name="settingConfiguration">Logger setting configuration.</param>
         /// <param name="configuration">A configuration object which contains a Serilog section.</param>
-        /// <param name="assemblies">A collection of assemblies that contains sinks and other Types.</param>
+        /// <param name="assemblies">A collection of assemblies that contains sinks and other types.</param>
         /// <returns>An object allowing configuration to continue.</returns>
         public static LoggerConfiguration Configuration(
             this LoggerSettingsConfiguration settingConfiguration,
