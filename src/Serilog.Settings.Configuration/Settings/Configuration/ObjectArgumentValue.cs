@@ -88,12 +88,12 @@ namespace Serilog.Settings.Configuration
 
                 var configurationElements = _section.GetChildren().ToArray();
                 result = Activator.CreateInstance(toType);
-                
+
                 for (int i = 0; i < configurationElements.Length; ++i)
                 {
                     var argumentValue = ConfigurationReader.GetArgumentValue(configurationElements[i], _configurationAssemblies);
                     var value = argumentValue.ConvertTo(elementType, resolutionContext);
-                    addMethod.Invoke(result, new object[] { value });
+                    addMethod.Invoke(result, new[] { value });
                 }
 
                 return true;
@@ -164,7 +164,7 @@ namespace Serilog.Settings.Configuration
             {
                 return false;
             }
-            
+
             var ctorArguments = new List<Expression>();
             foreach (var argumentValue in ctor.ArgumentValues)
             {
