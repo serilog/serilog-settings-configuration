@@ -31,8 +31,8 @@ namespace Serilog.Settings.Configuration.Tests
             Assert.True(result.Contains("LiterateConsole"));
             Assert.True(result.Contains("DiagnosticTrace"));
 
-            Assert.Equal(1, result["LiterateConsole"].Count());
-            Assert.Equal(1, result["DiagnosticTrace"].Count());
+            Assert.Single(result["LiterateConsole"]);
+            Assert.Single(result["DiagnosticTrace"]);
         }
 
         [Fact]
@@ -49,7 +49,7 @@ namespace Serilog.Settings.Configuration.Tests
             Assert.Equal(1, result.Count);
             Assert.True(result.Contains("LiterateConsole"));
 
-            Assert.Equal(1, result["LiterateConsole"].Count());
+            Assert.Single(result["LiterateConsole"]);
         }
 
         [Fact]
@@ -67,14 +67,14 @@ namespace Serilog.Settings.Configuration.Tests
 
             var result = _configurationReader.GetMethodCalls(JsonStringConfigSource.LoadSection(json, "WriteTo"));
 
-            Assert.Equal(1, result.Count);
+            Assert.Single(result);
             Assert.True(result.Contains("LiterateConsole"));
 
-            Assert.Equal(1, result["LiterateConsole"].Count());
+            Assert.Single(result["LiterateConsole"]);
 
             var args = result["LiterateConsole"].Single().ToArray();
 
-            Assert.Equal(1, args.Length);
+            Assert.Single(args);
             Assert.Equal("outputTemplate", args[0].Key);
             Assert.Equal("{Message}", args[0].Value.ConvertTo(typeof(string), new ResolutionContext()));
         }
@@ -114,8 +114,8 @@ namespace Serilog.Settings.Configuration.Tests
             Assert.True(result.Contains("DiagnosticTrace"));
             Assert.True(result.Contains("File"));
 
-            Assert.Equal(1, result["LiterateConsole"].Count());
-            Assert.Equal(1, result["DiagnosticTrace"].Count());
+            Assert.Single(result["LiterateConsole"]);
+            Assert.Single(result["DiagnosticTrace"]);
             Assert.Equal(2, result["File"].Count());
         }
 
@@ -133,9 +133,9 @@ namespace Serilog.Settings.Configuration.Tests
             Assert.True(result.Contains("WithMachineName"));
             Assert.True(result.Contains("WithThreadId"));
 
-            Assert.Equal(1, result["FromLogContext"].Count());
-            Assert.Equal(1, result["WithMachineName"].Count());
-            Assert.Equal(1, result["WithThreadId"].Count());
+            Assert.Single(result["FromLogContext"]);
+            Assert.Single(result["WithMachineName"]);
+            Assert.Single(result["WithThreadId"]);
         }
 
         [Fact]

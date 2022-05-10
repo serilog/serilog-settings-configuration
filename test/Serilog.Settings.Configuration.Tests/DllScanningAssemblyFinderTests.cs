@@ -1,4 +1,4 @@
-﻿#if PRIVATE_BIN
+﻿#if NETFRAMEWORK
 using System;
 using System.IO;
 #endif
@@ -22,7 +22,7 @@ namespace Serilog.Settings.Configuration.Tests
             Assert.Single(assemblyNames);
         }
 
-#if PRIVATE_BIN
+#if NETFRAMEWORK
         [Fact]
         public void ShouldProbePrivateBinPath()
         {
