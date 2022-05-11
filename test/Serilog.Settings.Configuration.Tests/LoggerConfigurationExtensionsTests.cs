@@ -24,7 +24,7 @@ namespace Serilog.Settings.Configuration.Tests
             LogEvent evt = null;
 
             var json = @"{
-		        ""NotSerilog"": {            
+		        ""NotSerilog"": {
 			        ""Properties"": {
 				        ""App"": ""Test""
 			        }
@@ -53,12 +53,12 @@ namespace Serilog.Settings.Configuration.Tests
         public void ReadFromConfigurationSectionThrowsWhenTryingToCallConfigurationMethodWithIConfigurationParam()
         {
             var json = @"{
-                ""NotSerilog"": {            
+                ""NotSerilog"": {
                     ""Using"": [""TestDummies""],
                     ""WriteTo"": [{
                         ""Name"": ""DummyWithConfiguration"",
                         ""Args"": {}
-                    }]        
+                    }]
                 }
             }";
 
@@ -84,12 +84,12 @@ namespace Serilog.Settings.Configuration.Tests
         public void ReadFromConfigurationDoesNotThrowWhenTryingToCallConfigurationMethodWithIConfigurationParam()
         {
             var json = @"{
-                ""NotSerilog"": {            
+                ""NotSerilog"": {
                     ""Using"": [""TestDummies""],
                     ""WriteTo"": [{
                         ""Name"": ""DummyWithConfiguration"",
                         ""Args"": {}
-                    }]        
+                    }]
                 }
             }";
 
@@ -97,7 +97,7 @@ namespace Serilog.Settings.Configuration.Tests
                 .AddJsonString(json)
                 .Build();
 
-            var exception = new LoggerConfiguration()
+            _ = new LoggerConfiguration()
                    .ReadFrom.Configuration(config, "NotSerilog")
                    .CreateLogger();
 
@@ -108,12 +108,12 @@ namespace Serilog.Settings.Configuration.Tests
         public void ReadFromConfigurationSectionDoesNotThrowWhenTryingToCallConfigurationMethodWithOptionalIConfigurationParam()
         {
             var json = @"{
-                ""NotSerilog"": {            
+                ""NotSerilog"": {
                     ""Using"": [""TestDummies""],
                     ""WriteTo"": [{
                         ""Name"": ""DummyWithOptionalConfiguration"",
                         ""Args"": {}
-                    }]        
+                    }]
                 }
             }";
 
