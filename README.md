@@ -111,13 +111,26 @@ var logger = new LoggerConfiguration()
     .CreateLogger();
 ```
 
+Alternatively, you can also pass an array of configuration assemblies:
+
+```csharp
+var configurationAssemblies = new[]
+{
+    typeof(ConsoleLoggerConfigurationExtensions).Assembly,
+    typeof(FileLoggerConfigurationExtensions).Assembly,
+};
+var logger = new LoggerConfiguration()
+    .ReadFrom.Configuration(configuration, configurationAssemblies)
+    .CreateLogger();
+```
+
 For legacy .NET Framework projects it also scans default probing path(s).
 
 For all other cases, as well as in the case of non-conventional configuration assembly names **DO** use [Using](#using-section-and-auto-discovery-of-configuration-assemblies) section.
 
-#### .NET 5.0 Single File Applications
+#### .NET 5.0 onwards Single File Applications
 
-Currently, auto-discovery of configuration assemblies is not supported in bundled mode. **DO** use [Using](#using-section-and-auto-discovery-of-configuration-assemblies) section for workaround.
+Currently, auto-discovery of configuration assemblies is not supported in bundled mode. **DO** use [Using](#using-section-and-auto-discovery-of-configuration-assemblies) section or explicitly pass a collection of configuration assemblies for workaround.
 
 ### MinimumLevel, LevelSwitches, overrides and dynamic reload
 
