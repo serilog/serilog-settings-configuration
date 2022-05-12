@@ -17,7 +17,7 @@ namespace TestDummies.Console
         public static ConsoleTheme Theme;
 
         [ThreadStatic]
-        static List<LogEvent> EmittedList = new List<LogEvent>();
+        static List<LogEvent> EmittedList;
 
         public static List<LogEvent> Emitted => EmittedList ?? (EmittedList = new List<LogEvent>());
 

@@ -11,7 +11,8 @@ namespace Serilog.Settings.Configuration
         {
             RealSwitch = realSwitch ?? throw new ArgumentNullException(nameof(realSwitch));
 
-            var expressionProperty = realSwitch.GetType().GetProperty("Expression");
+            var type = realSwitch.GetType();
+            var expressionProperty = type.GetProperty("Expression") ?? throw new MissingMemberException(type.FullName, "Expression");
 
             _setProxy = (Action<string>)Delegate.CreateDelegate(
                 typeof(Action<string>),

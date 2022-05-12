@@ -146,7 +146,7 @@ namespace Serilog.Settings.Configuration
             var defaultMinLevelDirective = minimumLevelDirective.Value != null ? minimumLevelDirective : minimumLevelDirective.GetSection("Default");
             if (defaultMinLevelDirective.Value != null)
             {
-                ApplyMinimumLevel(defaultMinLevelDirective, (configuration, levelSwitch) => configuration.ControlledBy(levelSwitch));
+                ApplyMinimumLevelConfiguration(defaultMinLevelDirective, (configuration, levelSwitch) => configuration.ControlledBy(levelSwitch));
             }
 
             var minLevelControlledByDirective = minimumLevelDirective.GetSection("ControlledBy");
@@ -163,7 +163,7 @@ namespace Serilog.Settings.Configuration
                 var overridenLevelOrSwitch = overrideDirective.Value;
                 if (Enum.TryParse(overridenLevelOrSwitch, out LogEventLevel _))
                 {
-                    ApplyMinimumLevel(overrideDirective, (configuration, levelSwitch) => configuration.Override(overridePrefix, levelSwitch));
+                    ApplyMinimumLevelConfiguration(overrideDirective, (configuration, levelSwitch) => configuration.Override(overridePrefix, levelSwitch));
                 }
                 else
                 {
@@ -173,7 +173,7 @@ namespace Serilog.Settings.Configuration
                 }
             }
 
-            void ApplyMinimumLevel(IConfigurationSection directive, Action<LoggerMinimumLevelConfiguration, LoggingLevelSwitch> applyConfigAction)
+            void ApplyMinimumLevelConfiguration(IConfigurationSection directive, Action<LoggerMinimumLevelConfiguration, LoggingLevelSwitch> applyConfigAction)
             {
                 var minimumLevel = ParseLogEventLevel(directive.Value);
 
@@ -261,9 +261,9 @@ namespace Serilog.Settings.Configuration
             var propertiesDirective = _section.GetSection("Properties");
             if (propertiesDirective.GetChildren().Any())
             {
-                foreach (var enrichProperyDirective in propertiesDirective.GetChildren())
+                foreach (var enrichPropertyDirective in propertiesDirective.GetChildren())
                 {
-                    loggerConfiguration.Enrich.WithProperty(enrichProperyDirective.Key, enrichProperyDirective.Value);
+                    loggerConfiguration.Enrich.WithProperty(enrichPropertyDirective.Key, enrichPropertyDirective.Value);
                 }
             }
         }
@@ -356,11 +356,11 @@ namespace Serilog.Settings.Configuration
             return assemblies.Values.ToList().AsReadOnly();
         }
 
-        void CallConfigurationMethods(ILookup<string, Dictionary<string, IConfigurationArgumentValue>> methods, IList<MethodInfo> configurationMethods, object receiver)
+        void CallConfigurationMethods(ILookup<string, Dictionary<string, IConfigurationArgumentValue>> methods, IReadOnlyCollection<MethodInfo> configurationMethods, object receiver)
         {
             foreach (var method in methods.SelectMany(g => g.Select(x => new { g.Key, Value = x })))
             {
-                var methodInfo = SelectConfigurationMethod(configurationMethods, method.Key, method.Value.Keys);
+                var methodInfo = SelectConfigurationMethod(configurationMethods, method.Key, method.Value.Keys.ToList());
 
                 if (methodInfo != null)
                 {
@@ -409,7 +409,7 @@ namespace Serilog.Settings.Configuration
             return parameter.DefaultValue;
         }
 
-        internal static MethodInfo SelectConfigurationMethod(IEnumerable<MethodInfo> candidateMethods, string name, IEnumerable<string> suppliedArgumentNames)
+        internal static MethodInfo SelectConfigurationMethod(IReadOnlyCollection<MethodInfo> candidateMethods, string name, IReadOnlyCollection<string> suppliedArgumentNames)
         {
             // Per issue #111, it is safe to use case-insensitive matching on argument names. The CLR doesn't permit this type
             // of overloading, and the Microsoft.Extensions.Configuration keys are case-insensitive (case is preserved with some
@@ -464,7 +464,7 @@ namespace Serilog.Settings.Configuration
             return suppliedNames.Any(s => ParameterNameMatches(actualParameterName, s));
         }
 
-        static IList<MethodInfo> FindSinkConfigurationMethods(IReadOnlyCollection<Assembly> configurationAssemblies)
+        static IReadOnlyCollection<MethodInfo> FindSinkConfigurationMethods(IReadOnlyCollection<Assembly> configurationAssemblies)
         {
             var found = FindConfigurationExtensionMethods(configurationAssemblies, typeof(LoggerSinkConfiguration));
             if (configurationAssemblies.Contains(typeof(LoggerSinkConfiguration).GetTypeInfo().Assembly))
@@ -473,7 +473,7 @@ namespace Serilog.Settings.Configuration
             return found;
         }
 
-        static IList<MethodInfo> FindAuditSinkConfigurationMethods(IReadOnlyCollection<Assembly> configurationAssemblies)
+        static IReadOnlyCollection<MethodInfo> FindAuditSinkConfigurationMethods(IReadOnlyCollection<Assembly> configurationAssemblies)
         {
             var found = FindConfigurationExtensionMethods(configurationAssemblies, typeof(LoggerAuditSinkConfiguration));
             if (configurationAssemblies.Contains(typeof(LoggerAuditSinkConfiguration).GetTypeInfo().Assembly))
@@ -481,7 +481,7 @@ namespace Serilog.Settings.Configuration
             return found;
         }
 
-        static IList<MethodInfo> FindFilterConfigurationMethods(IReadOnlyCollection<Assembly> configurationAssemblies)
+        static IReadOnlyCollection<MethodInfo> FindFilterConfigurationMethods(IReadOnlyCollection<Assembly> configurationAssemblies)
         {
             var found = FindConfigurationExtensionMethods(configurationAssemblies, typeof(LoggerFilterConfiguration));
             if (configurationAssemblies.Contains(typeof(LoggerFilterConfiguration).GetTypeInfo().Assembly))
@@ -490,7 +490,7 @@ namespace Serilog.Settings.Configuration
             return found;
         }
 
-        static IList<MethodInfo> FindDestructureConfigurationMethods(IReadOnlyCollection<Assembly> configurationAssemblies)
+        static IReadOnlyCollection<MethodInfo> FindDestructureConfigurationMethods(IReadOnlyCollection<Assembly> configurationAssemblies)
         {
             var found = FindConfigurationExtensionMethods(configurationAssemblies, typeof(LoggerDestructuringConfiguration));
             if (configurationAssemblies.Contains(typeof(LoggerDestructuringConfiguration).GetTypeInfo().Assembly))
@@ -499,7 +499,7 @@ namespace Serilog.Settings.Configuration
             return found;
         }
 
-        static IList<MethodInfo> FindEventEnricherConfigurationMethods(IReadOnlyCollection<Assembly> configurationAssemblies)
+        static IReadOnlyCollection<MethodInfo> FindEventEnricherConfigurationMethods(IReadOnlyCollection<Assembly> configurationAssemblies)
         {
             var found = FindConfigurationExtensionMethods(configurationAssemblies, typeof(LoggerEnrichmentConfiguration));
             if (configurationAssemblies.Contains(typeof(LoggerEnrichmentConfiguration).GetTypeInfo().Assembly))
