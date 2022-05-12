@@ -681,6 +681,7 @@ namespace Serilog.Settings.Configuration.Tests
 
             ConfigFromJson(json);
 
+            Assert.NotNull(DummyPolicy.Current);
             Assert.Equal(typeof(TimeSpan), DummyPolicy.Current.Type);
             Assert.Equal(new[] { typeof(int), typeof(string) }, DummyPolicy.Current.Array);
             Assert.Equal(new[] { typeof(byte), typeof(short) }, DummyPolicy.Current.List);

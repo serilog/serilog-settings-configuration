@@ -48,8 +48,8 @@ namespace Serilog.Settings.Configuration
             if (toType.IsArray)
                 return CreateArray();
 
-            if (IsContainer(toType, out var elementType) && TryCreateContainer(out var result))
-                return result;
+            if (IsContainer(toType, out var elementType) && TryCreateContainer(out var container))
+                return container;
 
             if (TryBuildCtorExpression(_section, toType, resolutionContext, out var ctorExpression))
             {
@@ -61,17 +61,17 @@ namespace Serilog.Settings.Configuration
 
             object CreateArray()
             {
-                var elementType = toType.GetElementType();
+                var arrayElementType = toType.GetElementType()!;
                 var configurationElements = _section.GetChildren().ToArray();
-                var result = Array.CreateInstance(elementType, configurationElements.Length);
+                var array = Array.CreateInstance(arrayElementType, configurationElements.Length);
                 for (int i = 0; i < configurationElements.Length; ++i)
                 {
                     var argumentValue = ConfigurationReader.GetArgumentValue(configurationElements[i], _configurationAssemblies);
-                    var value = argumentValue.ConvertTo(elementType, resolutionContext);
-                    result.SetValue(value, i);
+                    var value = argumentValue.ConvertTo(arrayElementType, resolutionContext);
+                    array.SetValue(value, i);
                 }
 
-                return result;
+                return array;
             }
 
             bool TryCreateContainer(out object result)
@@ -82,7 +82,7 @@ namespace Serilog.Settings.Configuration
                     return false;
 
                 // https://docs.microsoft.com/en-us/dotnet/csharp/programming-guide/classes-and-structs/object-and-collection-initializers#collection-initializers
-                var addMethod = toType.GetMethods().FirstOrDefault(m => !m.IsStatic && m.Name == "Add" && m.GetParameters()?.Length == 1 && m.GetParameters()[0].ParameterType == elementType);
+                var addMethod = toType.GetMethods().FirstOrDefault(m => !m.IsStatic && m.Name == "Add" && m.GetParameters().Length == 1 && m.GetParameters()[0].ParameterType == elementType);
                 if (addMethod == null)
                     return false;
 

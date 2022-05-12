@@ -12,6 +12,8 @@ using Serilog.Core;
 using Serilog.Events;
 using Serilog.Debugging;
 
+// ReSharper disable UnusedType.Global
+
 namespace Sample
 {
     public class Program
@@ -31,7 +33,7 @@ namespace Sample
                 .ReadFrom.Configuration(configuration)
                 .CreateLogger();
 
-            logger.Information("Args: {a}", args);
+            logger.Information("Args: {Args}", args);
 
             do
             {
@@ -79,6 +81,7 @@ namespace Sample
     public class LoginData
     {
         public string Username;
+        // ReSharper disable once NotAccessedField.Global
         public string Password;
     }
 
@@ -88,12 +91,12 @@ namespace Sample
         {
             result = null;
 
-            if (value is LoginData)
+            if (value is LoginData loginData)
             {
                 result = new StructureValue(
                     new List<LogEventProperty>
                     {
-                        new LogEventProperty("Username", new ScalarValue(((LoginData)value).Username))
+                        new("Username", new ScalarValue(loginData.Username))
                     });
             }
 
