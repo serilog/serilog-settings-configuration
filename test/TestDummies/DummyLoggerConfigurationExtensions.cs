@@ -129,7 +129,9 @@ namespace TestDummies
             return LoggerSinkConfiguration.Wrap(
                 loggerSinkConfiguration,
                 s => new DummyWrappingSink(s),
-                wrappedSinkAction);
+                wrappedSinkAction,
+                LogEventLevel.Verbose,
+                levelSwitch: null);
         }
 
         public static LoggerConfiguration WithDummyHardCodedString(

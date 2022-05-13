@@ -43,9 +43,8 @@ foreach ($test in dir test/*.Tests) {
     echo "build: Testing project in $test"
 
     if ($PSVersionTable.Platform -eq "Unix") {
-        & dotnet test -c Release -f netcoreapp2.1
         & dotnet test -c Release -f netcoreapp3.1
-        & dotnet test -c Release -f net50
+        & dotnet test -c Release -f net6.0
     } else {
         & dotnet test -c Release
     }
@@ -58,13 +57,10 @@ foreach ($test in dir test/*.Tests) {
 if ($PSVersionTable.Platform -eq "Unix") {
     Push-Location sample/Sample
 
-    & dotnet run -f netcoreapp2.1 -c Release --run-once
-    if ($LASTEXITCODE -ne 0) { exit 4 }
-
     & dotnet run -f netcoreapp3.1 -c Release --run-once
     if ($LASTEXITCODE -ne 0) { exit 4 }
 
-    & dotnet run -f net50         -c Release --run-once
+    & dotnet run -f net6.0        -c Release --run-once
     if ($LASTEXITCODE -ne 0) { exit 4 }
 
     Pop-Location

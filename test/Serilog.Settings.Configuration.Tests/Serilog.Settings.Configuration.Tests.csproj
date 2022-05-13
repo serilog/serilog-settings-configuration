@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFrameworks>net50;netcoreapp3.1;netcoreapp2.1;net452</TargetFrameworks>
+    <TargetFrameworks>net6.0;netcoreapp3.1;net462</TargetFrameworks>
     <LangVersion>latest</LangVersion>
     <AssemblyName>Serilog.Settings.Configuration.Tests</AssemblyName>
     <AssemblyOriginatorKeyFile>../../assets/Serilog.snk</AssemblyOriginatorKeyFile>
@@ -9,10 +9,6 @@
     <PublicSign Condition=" '$(OS)' != 'Windows_NT' ">true</PublicSign>
   </PropertyGroup>
 
-  <PropertyGroup Condition="'$(TargetFramework)' == 'net452'">
-    <DefineConstants>$(DefineConstants);PRIVATE_BIN</DefineConstants>
-  </PropertyGroup>
-  
   <ItemGroup>
     <None Include="*.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
@@ -24,26 +20,12 @@
     <ProjectReference Include="..\TestDummies\TestDummies.csproj" />
   </ItemGroup>
 
-  <ItemGroup Condition="'$(TargetFramework)' == 'net452'">
-    <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="1.1.2" />
-  </ItemGroup>
-
-  <ItemGroup Condition="'$(TargetFramework)' == 'netcoreapp2.1'">
-    <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="2.1.1" />
-  </ItemGroup>
-
-  <ItemGroup Condition="'$(TargetFramework)' == 'netcoreapp3.1'">
-    <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="3.1.10" />
-  </ItemGroup>
-
-  <ItemGroup Condition="'$(TargetFramework)' == 'net50'">
-    <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="5.0.0" />
-  </ItemGroup>
-
   <ItemGroup>
-    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="16.11.0" />
-    <PackageReference Include="Serilog.Filters.Expressions" Version="2.0.0" />
-    <PackageReference Include="xunit.runner.visualstudio" Version="2.2.0" />
-    <PackageReference Include="xunit" Version="2.2.0" />
+    <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="6.0.0" />
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.2.0" />
+    <PackageReference Include="Microsoft.TestPlatform.ObjectModel" Version="17.2.0" />
+    <PackageReference Include="Serilog.Expressions" Version="3.3.0" />
+    <PackageReference Include="xunit.runner.visualstudio" Version="2.4.5" />
+    <PackageReference Include="xunit" Version="2.4.1" />
   </ItemGroup>
 </Project>

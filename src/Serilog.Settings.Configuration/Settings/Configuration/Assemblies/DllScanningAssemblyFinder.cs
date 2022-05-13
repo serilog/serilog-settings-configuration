@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -16,7 +16,7 @@ namespace Serilog.Settings.Configuration.Assemblies
             {
                 probeDirs.Add(AppDomain.CurrentDomain.BaseDirectory);
 
-#if PRIVATE_BIN
+#if NETFRAMEWORK
                 var privateBinPath = AppDomain.CurrentDomain.SetupInformation.PrivateBinPath;
                 if (!string.IsNullOrEmpty(privateBinPath))
                 {

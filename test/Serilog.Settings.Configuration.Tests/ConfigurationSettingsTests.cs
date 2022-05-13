@@ -38,7 +38,7 @@ namespace Serilog.Settings.Configuration.Tests
             LogEvent evt = null;
 
             var json = @"{
-                ""Serilog"": {            
+                ""Serilog"": {
                     ""Properties"": {
                         ""App"": ""Test""
                     }
@@ -58,23 +58,25 @@ namespace Serilog.Settings.Configuration.Tests
         [Theory]
         [InlineData("extended syntax",
             @"{
-                ""Serilog"": {            
+                ""Serilog"": {
                     ""Using"": [""TestDummies""],
                     ""WriteTo"": [
                         { ""Name"": ""DummyConsole""},
                         { ""Name"": ""DummyWithLevelSwitch""},
-                    ]        
+                    ]
                 }
             }")]
         [InlineData("simplified syntax",
             @"{
-                ""Serilog"": {            
+                ""Serilog"": {
                     ""Using"": [""TestDummies""],
-                    ""WriteTo"": [""DummyConsole"", ""DummyWithLevelSwitch"" ]        
+                    ""WriteTo"": [""DummyConsole"", ""DummyWithLevelSwitch"" ]
                 }
             }")]
         public void ParameterlessSinksAreConfigured(string syntax, string json)
         {
+            _ = syntax;
+
             var log = ConfigFromJson(json)
                 .CreateLogger();
 
@@ -83,15 +85,15 @@ namespace Serilog.Settings.Configuration.Tests
 
             log.Write(Some.InformationEvent());
 
-            Assert.Equal(1, DummyConsoleSink.Emitted.Count);
-            Assert.Equal(1, DummyWithLevelSwitchSink.Emitted.Count);
+            Assert.Single(DummyConsoleSink.Emitted);
+            Assert.Single(DummyWithLevelSwitchSink.Emitted);
         }
 
         [Fact]
         public void ConfigurationAssembliesFromDllScanning()
         {
             var json = @"{
-                ""Serilog"": {            
+                ""Serilog"": {
                     ""Using"": [""TestDummies""],
                     ""WriteTo"": [""DummyConsole""]
                 }
@@ -109,19 +111,19 @@ namespace Serilog.Settings.Configuration.Tests
 
             log.Write(Some.InformationEvent());
 
-            Assert.Equal(1, DummyConsoleSink.Emitted.Count);
+            Assert.Single(DummyConsoleSink.Emitted);
         }
 
         [Fact]
         public void SinksAreConfigured()
         {
             var json = @"{
-                ""Serilog"": {            
+                ""Serilog"": {
                     ""Using"": [""TestDummies""],
                     ""WriteTo"": [{
                         ""Name"": ""DummyRollingFile"",
                         ""Args"": {""pathFormat"" : ""C:\\""}
-                    }]        
+                    }]
                 }
             }";
 
@@ -133,20 +135,20 @@ namespace Serilog.Settings.Configuration.Tests
 
             log.Write(Some.InformationEvent());
 
-            Assert.Equal(1, DummyRollingFileSink.Emitted.Count);
-            Assert.Equal(0, DummyRollingFileAuditSink.Emitted.Count);
+            Assert.Single(DummyRollingFileSink.Emitted);
+            Assert.Empty(DummyRollingFileAuditSink.Emitted);
         }
 
         [Fact]
         public void AuditSinksAreConfigured()
         {
             var json = @"{
-                ""Serilog"": {            
+                ""Serilog"": {
                     ""Using"": [""TestDummies""],
                     ""AuditTo"": [{
                         ""Name"": ""DummyRollingFile"",
                         ""Args"": {""pathFormat"" : ""C:\\""}
-                    }]        
+                    }]
                 }
             }";
 
@@ -158,16 +160,16 @@ namespace Serilog.Settings.Configuration.Tests
 
             log.Write(Some.InformationEvent());
 
-            Assert.Equal(0, DummyRollingFileSink.Emitted.Count);
-            Assert.Equal(1, DummyRollingFileAuditSink.Emitted.Count);
+            Assert.Empty(DummyRollingFileSink.Emitted);
+            Assert.Single(DummyRollingFileAuditSink.Emitted);
         }
 
         [Fact]
         public void AuditToSubLoggersAreConfigured()
         {
             var json = @"{
-            ""Serilog"": {            
-                ""Using"": [""TestDummies""],       
+            ""Serilog"": {
+                ""Using"": [""TestDummies""],
                 ""AuditTo"": [{
                     ""Name"": ""Logger"",
                     ""Args"": {
@@ -177,7 +179,7 @@ namespace Serilog.Settings.Configuration.Tests
                                 ""Args"": {""pathFormat"" : ""C:\\""}
                             }]}
                     }
-                }]        
+                }]
             }
             }";
 
@@ -189,8 +191,8 @@ namespace Serilog.Settings.Configuration.Tests
 
             log.Write(Some.InformationEvent());
 
-            Assert.Equal(0, DummyRollingFileSink.Emitted.Count);
-            Assert.Equal(1, DummyRollingFileAuditSink.Emitted.Count);
+            Assert.Empty(DummyRollingFileSink.Emitted);
+            Assert.Single(DummyRollingFileAuditSink.Emitted);
         }
 
         [Fact]
@@ -202,7 +204,7 @@ namespace Serilog.Settings.Configuration.Tests
                         ""Override"" : {
                             ""System"" : ""Warning""
                         }
-                    }        
+                    }
                 }
             }";
 
@@ -236,7 +238,7 @@ namespace Serilog.Settings.Configuration.Tests
                             ""System"" : ""Warning"",
                             ""System.Threading"": ""Debug""
                         }
-                    }        
+                    }
                 }
             }";
 
@@ -252,23 +254,23 @@ namespace Serilog.Settings.Configuration.Tests
             var custom = log.ForContext(Constants.SourceContextPropertyName, typeof(System.Threading.Tasks.Task).FullName + "<42>");
             custom.Write(Some.DebugEvent());
             Assert.NotNull(evt);
-            
+
             evt = null;
             var systemThreadingLogger = log.ForContext<System.Threading.Tasks.Task>();
             systemThreadingLogger.Write(Some.DebugEvent());
-            Assert.NotNull(evt);              
+            Assert.NotNull(evt);
         }
 
         [Fact]
         public void SinksWithAbstractParamsAreConfiguredWithTypeName()
         {
             var json = @"{
-                ""Serilog"": {            
+                ""Serilog"": {
                     ""Using"": [""TestDummies""],
                     ""WriteTo"": [{
                         ""Name"": ""DummyConsole"",
                         ""Args"": {""theme"" : ""Serilog.Settings.Configuration.Tests.Support.CustomConsoleTheme, Serilog.Settings.Configuration.Tests""}
-                    }]        
+                    }]
                 }
             }";
 
@@ -285,12 +287,12 @@ namespace Serilog.Settings.Configuration.Tests
         public void SinksAreConfiguredWithStaticMember()
         {
             var json = @"{
-                ""Serilog"": {            
+                ""Serilog"": {
                     ""Using"": [""TestDummies""],
                     ""WriteTo"": [{
                         ""Name"": ""DummyConsole"",
                         ""Args"": {""theme"" : ""TestDummies.Console.Themes.ConsoleThemes::Theme1, TestDummies""}
-                    }]        
+                    }]
                 }
             }";
 
@@ -400,7 +402,7 @@ namespace Serilog.Settings.Configuration.Tests
         public void SettingMinimumLevelControlledByToAnUndeclaredSwitchThrows()
         {
             var json = @"{
-                ""Serilog"": {            
+                ""Serilog"": {
                     ""LevelSwitches"": {""$switch1"" : ""Warning"" },
                     ""MinimumLevel"" : {
                         ""ControlledBy"" : ""$switch2""
@@ -420,7 +422,7 @@ namespace Serilog.Settings.Configuration.Tests
         public void LoggingLevelSwitchIsPassedToSinks()
         {
             var json = @"{
-                ""Serilog"": {      
+                ""Serilog"": {
                     ""Using"": [""TestDummies""],
                     ""LevelSwitches"": {""$switch1"" : ""Information"" },
                     ""MinimumLevel"" : {
@@ -429,7 +431,7 @@ namespace Serilog.Settings.Configuration.Tests
                     ""WriteTo"": [{
                         ""Name"": ""DummyWithLevelSwitch"",
                         ""Args"": {""controlLevelSwitch"" : ""$switch1""}
-                    }]      
+                    }]
                 }
             }";
 
@@ -456,7 +458,7 @@ namespace Serilog.Settings.Configuration.Tests
         public void ReferencingAnUndeclaredSwitchInSinkThrows()
         {
             var json = @"{
-                ""Serilog"": {      
+                ""Serilog"": {
                     ""Using"": [""TestDummies""],
                     ""LevelSwitches"": {""$switch1"" : ""Information"" },
                     ""MinimumLevel"" : {
@@ -465,7 +467,7 @@ namespace Serilog.Settings.Configuration.Tests
                     ""WriteTo"": [{
                         ""Name"": ""DummyWithLevelSwitch"",
                         ""Args"": {""controlLevelSwitch"" : ""$switch2""}
-                    }]      
+                    }]
                 }
             }";
 
@@ -493,7 +495,7 @@ namespace Serilog.Settings.Configuration.Tests
                     ""WriteTo"": [{
                         ""Name"": ""DummyWithLevelSwitch"",
                         ""Args"": {""controlLevelSwitch"" : ""$specificSwitch""}
-                    }]     
+                    }]
                 }
             }";
 
@@ -532,12 +534,12 @@ namespace Serilog.Settings.Configuration.Tests
         public void SinkWithIConfigurationArguments()
         {
             var json = @"{
-                ""Serilog"": {            
+                ""Serilog"": {
                     ""Using"": [""TestDummies""],
                     ""WriteTo"": [{
                         ""Name"": ""DummyWithConfiguration"",
                         ""Args"": {}
-                    }]        
+                    }]
                 }
             }";
 
@@ -556,12 +558,12 @@ namespace Serilog.Settings.Configuration.Tests
         public void SinkWithOptionalIConfigurationArguments()
         {
             var json = @"{
-                ""Serilog"": {            
+                ""Serilog"": {
                     ""Using"": [""TestDummies""],
                     ""WriteTo"": [{
                         ""Name"": ""DummyWithOptionalConfiguration"",
                         ""Args"": {}
-                    }]        
+                    }]
                 }
             }";
 
@@ -580,12 +582,12 @@ namespace Serilog.Settings.Configuration.Tests
         public void SinkWithIConfigSectionArguments()
         {
             var json = @"{
-                ""Serilog"": {            
+                ""Serilog"": {
                     ""Using"": [""TestDummies""],
                     ""WriteTo"": [{
                         ""Name"": ""DummyWithConfigSection"",
                         ""Args"": {""configurationSection"" : { ""foo"" : ""bar"" } }
-                    }]        
+                    }]
                 }
             }";
 
@@ -604,13 +606,13 @@ namespace Serilog.Settings.Configuration.Tests
         public void SinkWithConfigurationBindingArgument()
         {
             var json = @"{
-                ""Serilog"": {            
+                ""Serilog"": {
                     ""Using"": [""TestDummies""],
                     ""WriteTo"": [{
                         ""Name"": ""DummyRollingFile"",
                         ""Args"": {""pathFormat"" : ""C:\\"",
                                    ""objectBinding"" : [ { ""foo"" : ""bar"" }, { ""abc"" : ""xyz"" } ] }
-                    }]        
+                    }]
                 }
             }";
 
@@ -621,20 +623,20 @@ namespace Serilog.Settings.Configuration.Tests
 
             log.Write(Some.InformationEvent());
 
-            Assert.Equal(1, DummyRollingFileSink.Emitted.Count);
+            Assert.Single(DummyRollingFileSink.Emitted);
         }
 
         [Fact]
         public void SinkWithStringArrayArgument()
         {
             var json = @"{
-                ""Serilog"": {            
+                ""Serilog"": {
                     ""Using"": [""TestDummies""],
                     ""WriteTo"": [{
                         ""Name"": ""DummyRollingFile"",
                         ""Args"": {""pathFormat"" : ""C:\\"",
                                    ""stringArrayBinding"" : [ ""foo"", ""bar"", ""baz"" ] }
-                    }]        
+                    }]
                 }
             }";
 
@@ -645,7 +647,7 @@ namespace Serilog.Settings.Configuration.Tests
 
             log.Write(Some.InformationEvent());
 
-            Assert.Equal(1, DummyRollingFileSink.Emitted.Count);
+            Assert.Single(DummyRollingFileSink.Emitted);
         }
 
         [Fact]
@@ -673,7 +675,7 @@ namespace Serilog.Settings.Configuration.Tests
                                 ""System.UInt32""
                             ]
                         }
-                    }]        
+                    }]
                 }
             }";
 
@@ -693,13 +695,13 @@ namespace Serilog.Settings.Configuration.Tests
         public void SinkWithIntArrayArgument()
         {
             var json = @"{
-                ""Serilog"": {            
+                ""Serilog"": {
                     ""Using"": [""TestDummies""],
                     ""WriteTo"": [{
                         ""Name"": ""DummyRollingFile"",
                         ""Args"": {""pathFormat"" : ""C:\\"",
                                    ""intArrayBinding"" : [ 1,2,3,4,5 ] }
-                    }]        
+                    }]
                 }
             }";
 
@@ -710,7 +712,7 @@ namespace Serilog.Settings.Configuration.Tests
 
             log.Write(Some.InformationEvent());
 
-            Assert.Equal(1, DummyRollingFileSink.Emitted.Count);
+            Assert.Single(DummyRollingFileSink.Emitted);
         }
 
         [Trait("Bugfix", "#111")]
@@ -718,12 +720,12 @@ namespace Serilog.Settings.Configuration.Tests
         public void CaseInsensitiveArgumentNameMatching()
         {
             var json = @"{
-                ""Serilog"": {            
+                ""Serilog"": {
                     ""Using"": [""TestDummies""],
                     ""WriteTo"": [{
                         ""Name"": ""DummyRollingFile"",
                         ""Args"": {""PATHFORMAT"" : ""C:\\""}
-                    }]        
+                    }]
                 }
             }";
 
@@ -734,7 +736,7 @@ namespace Serilog.Settings.Configuration.Tests
 
             log.Write(Some.InformationEvent());
 
-            Assert.Equal(1, DummyRollingFileSink.Emitted.Count);
+            Assert.Single(DummyRollingFileSink.Emitted);
         }
 
         [Trait("Bugfix", "#91")]
@@ -742,7 +744,7 @@ namespace Serilog.Settings.Configuration.Tests
         public void WriteToLoggerWithRestrictedToMinimumLevelIsSupported()
         {
             var json = @"{
-            ""Serilog"": {            
+            ""Serilog"": {
                 ""Using"": [""TestDummies""],
                 ""WriteTo"": [{
                     ""Name"": ""Logger"",
@@ -752,9 +754,9 @@ namespace Serilog.Settings.Configuration.Tests
                                 ""Name"": ""DummyRollingFile"",
                                 ""Args"": {""pathFormat"" : ""C:\\""}
                             }]},
-                        ""restrictedToMinimumLevel"": ""Warning"" 
+                        ""restrictedToMinimumLevel"": ""Warning""
                     }
-                }]        
+                }]
             }
             }";
 
@@ -766,7 +768,7 @@ namespace Serilog.Settings.Configuration.Tests
             log.Write(Some.InformationEvent());
             log.Write(Some.WarningEvent());
 
-            Assert.Equal(1, DummyRollingFileSink.Emitted.Count);
+            Assert.Single(DummyRollingFileSink.Emitted);
         }
 
         [Trait("Bugfix", "#91")]
@@ -774,9 +776,9 @@ namespace Serilog.Settings.Configuration.Tests
         public void WriteToSubLoggerWithLevelSwitchIsSupported()
         {
             var json = @"{
-            ""Serilog"": {            
+            ""Serilog"": {
                 ""Using"": [""TestDummies""],
-                ""LevelSwitches"": {""$switch1"" : ""Warning"" },          
+                ""LevelSwitches"": {""$switch1"" : ""Warning"" },
                 ""MinimumLevel"" : {
                         ""ControlledBy"" : ""$switch1""
                     },
@@ -789,7 +791,7 @@ namespace Serilog.Settings.Configuration.Tests
                                 ""Args"": {""pathFormat"" : ""C:\\""}
                             }]}
                     }
-                }]        
+                }]
             }
             }";
 
@@ -801,7 +803,7 @@ namespace Serilog.Settings.Configuration.Tests
             log.Write(Some.InformationEvent());
             log.Write(Some.WarningEvent());
 
-            Assert.Equal(1, DummyRollingFileSink.Emitted.Count);
+            Assert.Single(DummyRollingFileSink.Emitted);
         }
 
         [Trait("Bugfix", "#103")]
@@ -809,22 +811,22 @@ namespace Serilog.Settings.Configuration.Tests
         public void InconsistentComplexVsScalarArgumentValuesThrowsIOE()
         {
             var jsonDiscreteValue = @"{
-                ""Serilog"": {            
+                ""Serilog"": {
                     ""Using"": [""TestDummies""],
                     ""WriteTo"": [{
                         ""Name"": ""DummyRollingFile"",
                         ""Args"": {""pathFormat"" : ""C:\\""}
-                    }]        
+                    }]
                 }
             }";
 
             var jsonComplexValue = @"{
-                ""Serilog"": {            
+                ""Serilog"": {
                     ""Using"": [""TestDummies""],
                     ""WriteTo"": [{
                         ""Name"": ""DummyRollingFile"",
                         ""Args"": {""pathFormat"" : { ""foo"" : ""bar"" } }
-                    }]        
+                    }]
                 }
             }";
 
