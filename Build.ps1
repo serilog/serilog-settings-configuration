@@ -18,7 +18,7 @@ $buildSuffix = @{ $true = "$($suffix)-$($commitHash)"; $false = "$($branch)-$($c
 echo "build: Package version suffix is $suffix"
 echo "build: Build version suffix is $buildSuffix"
 
-foreach ($src in ls src/*) {
+foreach ($src in gci src/*) {
     Push-Location $src
 
 	echo "build: Packaging project in $src"
@@ -35,7 +35,7 @@ foreach ($src in ls src/*) {
     Pop-Location
 }
 
-foreach ($test in ls test/*.Tests) {
+foreach ($test in gci test/*.Tests) {
     Push-Location $test
 
 	echo "build: Testing project in $test"
@@ -46,7 +46,7 @@ foreach ($test in ls test/*.Tests) {
     Pop-Location
 }
 
-foreach ($test in ls test/*.PerformanceTests) {
+foreach ($test in gci test/*.PerformanceTests) {
     Push-Location $test
 
 	echo "build: Building performance test project in $test"
