@@ -18,7 +18,7 @@ namespace Serilog.Settings.Configuration.Tests
         [Fact]
         public void ShouldProbeCurrentDirectory()
         {
-            var assemblyNames = new DllScanningAssemblyFinder().FindAssembliesContainingName("testdummies");
+            var assemblyNames = new DllScanningAssemblyFinder().FindAssembliesContainingName("TestDummies");
             Assert.Single(assemblyNames);
         }
 
@@ -33,9 +33,9 @@ namespace Serilog.Settings.Configuration.Tests
             DirectoryInfo GetOrCreateDirectory(string name)
                 => Directory.Exists(name) ? new DirectoryInfo(name) : Directory.CreateDirectory(name);
 
-            File.Copy("testdummies.dll", $"{BinDir1}/customSink1.dll", true);
-            File.Copy("testdummies.dll", $"{BinDir2}/customSink2.dll", true);
-            File.Copy("testdummies.dll", $"{BinDir3}/thirdpartydependency.dll", true);
+            File.Copy("TestDummies.dll", $"{BinDir1}/customSink1.dll", true);
+            File.Copy("TestDummies.dll", $"{BinDir2}/customSink2.dll", true);
+            File.Copy("TestDummies.dll", $"{BinDir3}/thirdpartydependency.dll", true);
 
             var ad = AppDomain.CreateDomain("serilog", null,
                 new AppDomainSetup
