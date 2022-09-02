@@ -63,11 +63,12 @@ namespace Serilog.Settings.Configuration
             if (convertor != null)
                 return convertor(argumentValue);
 
-            if ((toTypeInfo.IsInterface || toTypeInfo.IsAbstract) && !string.IsNullOrWhiteSpace(argumentValue))
+            if (!string.IsNullOrWhiteSpace(argumentValue))
             {
-                //check if value looks like a static property or field directive
+                // check if value looks like a static property or field directive
                 // like "Namespace.TypeName::StaticProperty, AssemblyName"
-                if (TryParseStaticMemberAccessor(argumentValue, out var accessorTypeName, out var memberName))
+                if (toType != typeof(string) &&
+                    TryParseStaticMemberAccessor(argumentValue, out var accessorTypeName, out var memberName))
                 {
                     var accessorType = Type.GetType(accessorTypeName, throwOnError: true);
                     // is there a public static property with that name ?
@@ -96,25 +97,28 @@ namespace Serilog.Settings.Configuration
                     throw new InvalidOperationException($"Could not find a public static property or field with name `{memberName}` on type `{accessorTypeName}`");
                 }
 
-                // maybe it's the assembly-qualified type name of a concrete implementation
-                // with a default constructor
-                var type = FindType(argumentValue.Trim());
-                if (type == null)
+                if (toTypeInfo.IsInterface || toTypeInfo.IsAbstract)
                 {
-                    throw new InvalidOperationException($"Type {argumentValue} was not found.");
+                    // maybe it's the assembly-qualified type name of a concrete implementation
+                    // with a default constructor
+                    var type = FindType(argumentValue.Trim());
+                    if (type == null)
+                    {
+                        throw new InvalidOperationException($"Type {argumentValue} was not found.");
+                    }
+
+                    var ctor = type.GetTypeInfo().DeclaredConstructors.Where(ci => !ci.IsStatic).FirstOrDefault(ci =>
+                    {
+                        var parameters = ci.GetParameters();
+                        return parameters.Length == 0 || parameters.All(pi => pi.HasDefaultValue);
+                    });
+
+                    if (ctor == null)
+                        throw new InvalidOperationException($"A default constructor was not found on {type.FullName}.");
+
+                    var call = ctor.GetParameters().Select(pi => pi.DefaultValue).ToArray();
+                    return ctor.Invoke(call);
                 }
-
-                var ctor = type.GetTypeInfo().DeclaredConstructors.Where(ci => !ci.IsStatic).FirstOrDefault(ci =>
-                {
-                    var parameters = ci.GetParameters();
-                    return parameters.Length == 0 || parameters.All(pi => pi.HasDefaultValue);
-                });
-
-                if (ctor == null)
-                    throw new InvalidOperationException($"A default constructor was not found on {type.FullName}.");
-
-                var call = ctor.GetParameters().Select(pi => pi.DefaultValue).ToArray();
-                return ctor.Invoke(call);
             }
 
             return Convert.ChangeType(argumentValue, toType);

@@ -5,10 +5,6 @@ namespace TestDummies
 {
     public class DummyThreadIdEnricher : ILogEventEnricher
     {
-        static DummyThreadIdEnricher()
-        {
-        }
-
         public void Enrich(LogEvent logEvent, ILogEventPropertyFactory propertyFactory)
         {
             logEvent.AddPropertyIfAbsent(propertyFactory

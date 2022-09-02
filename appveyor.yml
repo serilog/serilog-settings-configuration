@@ -1,34 +1,37 @@
 version: '{build}'
+
 skip_tags: true
+
 image:
-  - Visual Studio 2019
+  - Visual Studio 2022
   - Ubuntu
-configuration: Release
+
 build_script:
-- ps: ./Build.ps1
+- pwsh: ./Build.ps1
+
+test: off
+
+artifacts:
+- path: artifacts/Serilog.*.nupkg
+- path: artifacts/Serilog.*.snupkg
+
 for:
 -
   matrix:
     only:
-      - image: Ubuntu
-  build_script:
-  - pwsh ./Build.ps1
-test: off
-artifacts:
-- path: artifacts/Serilog.*.nupkg
-- path: artifacts/Serilog.*.snupkg
-deploy:
-- provider: NuGet
-  api_key:
-    secure: 6WetFj2k7TEactDaHhg0m0q/WpCldFAUtgAjN8VK9Qn2fsY1vdufRB8XIKnPX9zn
-  on:
-    branch: /^(main|dev)$/
-- provider: GitHub
-  auth_token:
-    secure: p4LpVhBKxGS5WqucHxFQ5c7C8cP74kbNB0Z8k9Oxx/PMaDQ1+ibmoexNqVU5ZlmX
-  artifacts:
-    /Serilog.*\.nupkg/
-    /Serilog.*\.snupkg/
-  tag: v$(appveyor_build_version)
-  on:
-    branch: main
+      - image: Visual Studio
+  deploy:
+  - provider: NuGet
+    api_key:
+      secure: 60gpLnipFCiKLpS7ECI1C6EPJW27KzVwqrBVkEzX6FIMTmsG//HD3p8Oq7WdQPm8
+    on:
+      branch: /^(main|dev)$/
+  - provider: GitHub
+    auth_token:
+      secure: p4LpVhBKxGS5WqucHxFQ5c7C8cP74kbNB0Z8k9Oxx/PMaDQ1+ibmoexNqVU5ZlmX
+    artifacts:
+      /Serilog.*\.nupkg/
+      /Serilog.*\.snupkg/
+    tag: v$(appveyor_build_version)
+    on:
+      branch: main

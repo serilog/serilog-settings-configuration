@@ -4,6 +4,10 @@ using Microsoft.Extensions.Configuration;
 
 using Xunit;
 
+// ReSharper disable UnusedMember.Local
+// ReSharper disable UnusedParameter.Local
+// ReSharper disable UnusedType.Local
+
 namespace Serilog.Settings.Configuration.Tests
 {
     public class ObjectArgumentValueTests
