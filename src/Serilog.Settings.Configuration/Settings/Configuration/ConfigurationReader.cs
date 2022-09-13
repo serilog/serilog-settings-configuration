@@ -22,12 +22,18 @@ namespace Serilog.Settings.Configuration
         readonly IConfigurationSection _section;
         readonly IReadOnlyCollection<Assembly> _configurationAssemblies;
         readonly ResolutionContext _resolutionContext;
+#if NETSTANDARD || NET461
+        readonly IConfigurationRoot _configurationRoot;
+#endif
 
         public ConfigurationReader(IConfigurationSection configSection, AssemblyFinder assemblyFinder, IConfiguration configuration = null)
         {
             _section = configSection ?? throw new ArgumentNullException(nameof(configSection));
             _configurationAssemblies = LoadConfigurationAssemblies(_section, assemblyFinder);
             _resolutionContext = new ResolutionContext(configuration);
+#if NETSTANDARD || NET461
+            _configurationRoot = configuration as IConfigurationRoot;
+#endif
         }
 
         // Used internally for processing nested configuration sections -- see GetMethodCalls below.
@@ -36,6 +42,9 @@ namespace Serilog.Settings.Configuration
             _section = configSection ?? throw new ArgumentNullException(nameof(configSection));
             _configurationAssemblies = configurationAssemblies ?? throw new ArgumentNullException(nameof(configurationAssemblies));
             _resolutionContext = resolutionContext ?? throw new ArgumentNullException(nameof(resolutionContext));
+            #if NETSTANDARD || NET461
+            _configurationRoot = resolutionContext.HasAppConfiguration ? resolutionContext.AppConfiguration as IConfigurationRoot : null;
+            #endif
         }
 
         public void Configure(LoggerConfiguration loggerConfiguration)
@@ -143,7 +152,7 @@ namespace Serilog.Settings.Configuration
         {
             var minimumLevelDirective = _section.GetSection("MinimumLevel");
 
-            var defaultMinLevelDirective = minimumLevelDirective.Value != null ? minimumLevelDirective : minimumLevelDirective.GetSection("Default");
+            IConfigurationSection defaultMinLevelDirective = GetDefaultMinLevelDirective();
             if (defaultMinLevelDirective.Value != null)
             {
                 ApplyMinimumLevelConfiguration(defaultMinLevelDirective, (configuration, levelSwitch) => configuration.ControlledBy(levelSwitch));
@@ -181,6 +190,34 @@ namespace Serilog.Settings.Configuration
                 applyConfigAction(loggerConfiguration.MinimumLevel, levelSwitch);
 
                 SubscribeToLoggingLevelChanges(directive, levelSwitch);
+            }
+
+            IConfigurationSection GetDefaultMinLevelDirective()
+            {
+                #if NETSTANDARD || NET461
+
+                var defaultLevelDirective = minimumLevelDirective.GetSection("Default");
+                if (_configurationRoot != null && minimumLevelDirective.Value != null && defaultLevelDirective.Value != null)
+                {
+                    foreach (var provider in _configurationRoot.Providers.Reverse())
+                    {
+                        if (provider.TryGet(minimumLevelDirective.Path, out _))
+                        {
+                            return _configurationRoot.GetSection(minimumLevelDirective.Path);
+                        }
+
+                        if (provider.TryGet(defaultLevelDirective.Path, out _))
+                        {
+                            return _configurationRoot.GetSection(defaultLevelDirective.Path);
+                        }
+                    }
+
+                    return null;
+                }
+
+                #endif //NET451 or fallback
+
+                return minimumLevelDirective.Value != null ? minimumLevelDirective : minimumLevelDirective.GetSection("Default");
             }
         }
 

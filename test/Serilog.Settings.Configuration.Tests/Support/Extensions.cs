@@ -14,5 +14,7 @@ namespace Serilog.Settings.Configuration.Tests.Support
             str = str.Replace('\'', '"');
             return str;
         }
+
+        public static string Format(this string template, params object[] paramObjects) => string.Format(template, paramObjects);
     }
 }
