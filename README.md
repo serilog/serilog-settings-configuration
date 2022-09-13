@@ -56,7 +56,7 @@ For a more sophisticated example go to the [sample](sample/Sample) folder.
 
 Root section name can be changed:
 
-```json
+```yaml
 {
   "CustomSection": {
     ...
@@ -74,7 +74,7 @@ var logger = new LoggerConfiguration()
 
 `Using` section contains list of **assemblies** in which configuration methods (`WriteTo.File()`, `Enrich.WithThreadId()`) reside.
 
-```json
+```yaml
 "Serilog": {
     "Using":  [ "Serilog.Sinks.Console", "Serilog.Enrichers.Thread", /* ... */ ],
     // ...
@@ -83,7 +83,7 @@ var logger = new LoggerConfiguration()
 
 For .NET Core projects build tools produce `.deps.json` files and this package implements a convention using `Microsoft.Extensions.DependencyModel` to find any package among dependencies with `Serilog` anywhere in the name and pulls configuration methods from it, so the `Using` section in example above can be omitted:
 
-```json
+```yaml
 {
   "Serilog": {
     "MinimumLevel": "Debug",
@@ -195,7 +195,7 @@ Or alternatively, the long-form (`"Name":` ...) syntax from the example above ca
 
 By `Microsoft.Extensions.Configuration.Json` convention, array syntax implicitly defines index for each element in order to make unique paths for configuration keys. So the example above is equivalent to:
 
-```json
+```yaml
 "WriteTo": {
     "0": "Console",
     "1": "DiagnosticTrace"
@@ -204,7 +204,7 @@ By `Microsoft.Extensions.Configuration.Json` convention, array syntax implicitly
 
 And
 
-```json
+```yaml
 "WriteTo:0": "Console",
 "WriteTo:1": "DiagnosticTrace"
 ```
@@ -213,7 +213,7 @@ And
 
 When overriding settings with [environment variables](https://docs.microsoft.com/en-us/aspnet/core/fundamentals/configuration/?view=aspnetcore-3.1#environment-variables) it becomes less convenient and fragile, so you can specify custom names:
 
-```json
+```yaml
 "WriteTo": {
     "ConsoleSink": "Console",
     "DiagnosticTraceSink": { "Name": "DiagnosticTrace" }
@@ -228,7 +228,7 @@ This section defines a static list of key-value pairs that will enrich log event
 
 This section defines filters that will be applied to log events. It is especially usefull in combination with _[Serilog.Expressions](https://github.com/serilog/serilog-expressions)_ (or legacy _[Serilog.Filters.Expressions](https://github.com/serilog/serilog-filters-expressions)_) package so you can write expression in text form:
 
-```json
+```yaml
 "Filter": [{
   "Name": "ByIncludingOnly",
   "Args": {
@@ -239,7 +239,7 @@ This section defines filters that will be applied to log events. It is especiall
 
 Using this package you can also declare `LoggingFilterSwitch`-es in custom section and reference them for filter parameters:
 
-```json
+```yaml
 {
     "Serilog": {
         "FilterSwitches": { "filterSwitch": "Application = 'Sample'" },
@@ -260,7 +260,7 @@ Level updates to switches are also respected for a dynamic update.
 
 Some Serilog packages require a reference to a logger configuration object. The sample program in this project illustrates this with the following entry configuring the _[Serilog.Sinks.Async](https://github.com/serilog/serilog-sinks-async)_ package to wrap the _[Serilog.Sinks.File](https://github.com/serilog/serilog-sinks-file)_ package. The `configure` parameter references the File sink configuration:
 
-```json
+```yaml
 "WriteTo:Async": {
   "Name": "Async",
   "Args": {
@@ -286,7 +286,7 @@ When the configuration specifies a discrete value for a parameter (such as a str
 
 Static member access can be used for passing to the configuration argument via [special](https://github.com/serilog/serilog-settings-configuration/blob/dev/test/Serilog.Settings.Configuration.Tests/StringArgumentValueTests.cs#L35) syntax:
 
-```json
+```yaml
 {
   "Args": {
      "encoding": "System.Text.Encoding::UTF8",
@@ -299,7 +299,7 @@ Static member access can be used for passing to the configuration argument via [
 
 If the parameter value is not a discrete value, it will try to find a best matching public constructor for the argument:
 
-```json
+```yaml
 {
   "Name": "Console",
   "Args": {
@@ -317,7 +317,7 @@ For other cases the package will use the configuration binding system provided b
 
 If parameter type is an interface or an abstract class you need to specify the full type name that implements abstract type. The implementation type should have parameterless constructor.
 
-```json
+```yaml
 "Destructure": [
     { "Name": "With", "Args": { "policy": "Sample.CustomPolicy, Sample" } },
     ...
