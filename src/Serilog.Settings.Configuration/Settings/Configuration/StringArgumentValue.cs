@@ -71,6 +71,43 @@ namespace Serilog.Settings.Configuration
                     TryParseStaticMemberAccessor(argumentValue, out var accessorTypeName, out var memberName))
                 {
                     var accessorType = Type.GetType(accessorTypeName, throwOnError: true);
+
+                    // if delegate, look for a method and then construct a delegate
+                    if (typeof(Delegate).IsAssignableFrom(toType) || typeof(MethodInfo) == toType)
+                    {
+                        var methodCandidates = accessorType.GetTypeInfo().DeclaredMethods
+                            .Where(x => x.Name == memberName)
+                            .Where(x => x.IsPublic)
+                            .Where(x => !x.IsGenericMethod)
+                            .Where(x => x.IsStatic)
+                            .ToList();
+
+                        if (methodCandidates.Count > 1)
+                        {
+                            // filter possible method overloads
+
+                            var delegateSig = toType.GetMethod("Invoke");
+                            var delegateParameters = delegateSig!.GetParameters().Select(x => x.ParameterType);
+                            methodCandidates = methodCandidates
+                                .Where(x => x.ReturnType == delegateSig.ReturnType && x.GetParameters().Select(y => y.ParameterType).SequenceEqual(delegateParameters))
+                                .ToList();
+                        }
+
+                        var methodCandidate = methodCandidates.SingleOrDefault();
+
+                        if (methodCandidate != null)
+                        {
+                            if (typeof(MethodInfo) == toType)
+                            {
+                                return methodCandidate;
+                            }
+                            else
+                            {
+                                return methodCandidate.CreateDelegate(toType);
+                            }
+                        }
+                    }
+
                     // is there a public static property with that name ?
                     var publicStaticPropertyInfo = accessorType.GetTypeInfo().DeclaredProperties
                         .Where(x => x.Name == memberName)
