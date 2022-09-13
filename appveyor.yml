@@ -21,7 +21,7 @@ deploy:
     secure: 60gpLnipFCiKLpS7ECI1C6EPJW27KzVwqrBVkEzX6FIMTmsG//HD3p8Oq7WdQPm8
   on:
     branch: /^(main|dev)$/
-    image: Visual Studio 2022
+    OS: Windows_NT
 - provider: GitHub
   auth_token:
     secure: p4LpVhBKxGS5WqucHxFQ5c7C8cP74kbNB0Z8k9Oxx/PMaDQ1+ibmoexNqVU5ZlmX
@@ -31,4 +31,4 @@ deploy:
   tag: v$(appveyor_build_version)
   on:
     branch: main
-    image: Visual Studio 2022
+    OS: Windows_NT
