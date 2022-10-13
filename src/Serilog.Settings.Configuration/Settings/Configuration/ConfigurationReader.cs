@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using System.Runtime.CompilerServices;
 using System.Text.RegularExpressions;
 
 using Microsoft.Extensions.Configuration;
@@ -548,15 +549,24 @@ namespace Serilog.Settings.Configuration
         static List<MethodInfo> FindConfigurationExtensionMethods(IReadOnlyCollection<Assembly> configurationAssemblies, Type configType)
         {
             // ExtensionAttribute can be polyfilled to support extension methods
-            bool HasExtensionAttribute(MethodInfo m) =>
-                m.CustomAttributes.Any(a => a.AttributeType.FullName == "System.Runtime.CompilerServices.ExtensionAttribute");
+            static bool HasCustomExtensionAttribute(MethodInfo m)
+            {
+                try
+                {
+                    return m.CustomAttributes.Any(a => a.AttributeType.FullName == "System.Runtime.CompilerServices.ExtensionAttribute");
+                }
+                catch (CustomAttributeFormatException)
+                {
+                    return false;
+                }
+            }
 
             return configurationAssemblies
                 .SelectMany(a => a.ExportedTypes
                     .Select(t => t.GetTypeInfo())
                     .Where(t => t.IsSealed && t.IsAbstract && !t.IsNested))
                 .SelectMany(t => t.DeclaredMethods)
-                .Where(m => m.IsStatic && m.IsPublic && HasExtensionAttribute(m))
+                .Where(m => m.IsStatic && m.IsPublic && (m.IsDefined(typeof(ExtensionAttribute), false) || HasCustomExtensionAttribute(m)))
                 .Where(m => m.GetParameters()[0].ParameterType == configType)
                 .ToList();
         }
