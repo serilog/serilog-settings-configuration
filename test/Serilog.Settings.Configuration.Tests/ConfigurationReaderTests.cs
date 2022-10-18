@@ -204,6 +204,7 @@ namespace Serilog.Settings.Configuration.Tests
         public static IEnumerable<object[]> ObjectMinimumLevel => new List<object[]>
         {
             new object[] { GetConfigRoot(appsettingsJsonLevel: minimumLevelObjectTemplate.Format(LogEventLevel.Error)), LogEventLevel.Error },
+            new object[] { GetConfigRoot(appsettingsJsonLevel: minimumLevelObjectTemplate.Format(LogEventLevel.Error.ToString().ToUpper())), LogEventLevel.Error },
             new object[] { GetConfigRoot(appsettingsDevelopmentJsonLevel: minimumLevelObjectTemplate.Format(LogEventLevel.Error)), LogEventLevel.Error },
             new object[] { GetConfigRoot(envVariables: new Dictionary<string, string>(){{minimumLevelObjectKey, LogEventLevel.Error.ToString() } }), LogEventLevel.Error },
             new object[] { GetConfigRoot(

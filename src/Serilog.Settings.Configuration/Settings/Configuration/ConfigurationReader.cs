@@ -578,10 +578,9 @@ namespace Serilog.Settings.Configuration
 
         static LogEventLevel ParseLogEventLevel(string value)
         {
-            if (!Enum.TryParse(value, out LogEventLevel parsedLevel))
+            if (!Enum.TryParse(value, ignoreCase: true, out LogEventLevel parsedLevel))
                 throw new InvalidOperationException($"The value {value} is not a valid Serilog level.");
             return parsedLevel;
         }
-
     }
 }
