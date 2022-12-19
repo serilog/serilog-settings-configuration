@@ -1,6 +1,5 @@
-﻿namespace Serilog.Settings.Configuration.Tests.Support
-{
-    public abstract class AbstractClass { }
+﻿namespace Serilog.Settings.Configuration.Tests.Support;
 
-    public class ConcreteClass : AbstractClass { }
-}
+public abstract class AbstractClass { }
+
+public class ConcreteClass : AbstractClass { }

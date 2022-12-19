@@ -12,21 +12,20 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-namespace Serilog.Settings.Configuration
+namespace Serilog.Settings.Configuration;
+
+/// <summary>
+/// Defines how the package will identify the assemblies which are scanned for sinks and other Type information.
+/// </summary>
+public enum ConfigurationAssemblySource
 {
     /// <summary>
-    /// Defines how the package will identify the assemblies which are scanned for sinks and other Type information.
+    /// Try to scan the assemblies already in memory. This is the default. If GetEntryAssembly is null, fallback to DLL scanning.
     /// </summary>
-    public enum ConfigurationAssemblySource
-    {
-        /// <summary>
-        /// Try to scan the assemblies already in memory. This is the default. If GetEntryAssembly is null, fallback to DLL scanning.
-        /// </summary>
-        UseLoadedAssemblies,
+    UseLoadedAssemblies,
 
-        /// <summary>
-        /// Scan for assemblies in DLLs from the working directory. This is the fallback when GetEntryAssembly is null.
-        /// </summary>
-        AlwaysScanDllFiles
-    }
+    /// <summary>
+    /// Scan for assemblies in DLLs from the working directory. This is the fallback when GetEntryAssembly is null.
+    /// </summary>
+    AlwaysScanDllFiles
 }
