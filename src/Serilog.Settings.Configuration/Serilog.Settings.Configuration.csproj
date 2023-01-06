@@ -3,19 +3,15 @@
   <PropertyGroup>
     <Description>Microsoft.Extensions.Configuration (appsettings.json) support for Serilog.</Description>
     <VersionPrefix>3.5.0</VersionPrefix>
-    <LangVersion>latest</LangVersion>
     <Authors>Serilog Contributors</Authors>
     <TargetFrameworks>netstandard2.0;net451;net461</TargetFrameworks>
-    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <AssemblyName>Serilog.Settings.Configuration</AssemblyName>
     <AssemblyOriginatorKeyFile>../../assets/Serilog.snk</AssemblyOriginatorKeyFile>
     <SignAssembly>true</SignAssembly>
     <PublicSign Condition=" '$(OS)' != 'Windows_NT' ">true</PublicSign>
-    <PackageId>Serilog.Settings.Configuration</PackageId>
     <PackageTags>serilog;json</PackageTags>
     <PackageIcon>icon.png</PackageIcon>
-    <PackageProjectUrl>https://github.com/serilog/serilog-settings-configuration/</PackageProjectUrl>
     <PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
     <RootNamespace>Serilog</RootNamespace>
     <PublishRepositoryUrl>true</PublishRepositoryUrl>
@@ -28,7 +24,7 @@
     <PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.1.1" PrivateAssets="All" />
     <PackageReference Include="Microsoft.Extensions.DependencyModel" Version="3.0.0" />
     <PackageReference Include="Serilog" Version="2.10.0" />
-    <None Include="..\..\assets\icon.png" Pack="true" PackagePath="" />
+    <None Include="..\..\assets\icon.png" Pack="true" PackagePath="" Visible="false" />
   </ItemGroup>
 
   <ItemGroup Condition="$(TargetFramework) == 'net451'">

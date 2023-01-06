@@ -45,43 +45,42 @@ public class DynamicLevelChangeTests
     [Fact]
     public void ShouldRespectDynamicLevelChanges()
     {
-        using (var logger = new LoggerConfiguration()
+        using var logger = new LoggerConfiguration()
             .ReadFrom
             .Configuration(new ConfigurationBuilder().Add(_configSource).Build())
-            .CreateLogger())
-        {
-            DummyConsoleSink.Emitted.Clear();
-            logger.Write(Some.DebugEvent());
-            Assert.Empty(DummyConsoleSink.Emitted);
+            .CreateLogger();
 
-            DummyConsoleSink.Emitted.Clear();
-            UpdateConfig(minimumLevel: LogEventLevel.Debug);
-            logger.Write(Some.DebugEvent());
-            Assert.Empty(DummyConsoleSink.Emitted);
+        DummyConsoleSink.Emitted.Clear();
+        logger.Write(Some.DebugEvent());
+        Assert.Empty(DummyConsoleSink.Emitted);
 
-            DummyConsoleSink.Emitted.Clear();
-            UpdateConfig(switchLevel: LogEventLevel.Debug);
-            logger.Write(Some.DebugEvent());
-            logger.ForContext(Constants.SourceContextPropertyName, "Root.Test").Write(Some.DebugEvent());
-            Assert.Single(DummyConsoleSink.Emitted);
+        DummyConsoleSink.Emitted.Clear();
+        UpdateConfig(minimumLevel: LogEventLevel.Debug);
+        logger.Write(Some.DebugEvent());
+        Assert.Empty(DummyConsoleSink.Emitted);
 
-            DummyConsoleSink.Emitted.Clear();
-            UpdateConfig(overrideLevel: LogEventLevel.Debug);
-            logger.ForContext(Constants.SourceContextPropertyName, "Root.Test").Write(Some.DebugEvent());
-            Assert.Single(DummyConsoleSink.Emitted);
+        DummyConsoleSink.Emitted.Clear();
+        UpdateConfig(switchLevel: LogEventLevel.Debug);
+        logger.Write(Some.DebugEvent());
+        logger.ForContext(Constants.SourceContextPropertyName, "Root.Test").Write(Some.DebugEvent());
+        Assert.Single(DummyConsoleSink.Emitted);
 
-            DummyConsoleSink.Emitted.Clear();
-            UpdateConfig(filterExpression: "Prop = 'Val_1'");
-            logger.Write(Some.DebugEvent());
-            logger.ForContext("Prop", "Val_1").Write(Some.DebugEvent());
-            Assert.Single(DummyConsoleSink.Emitted);
+        DummyConsoleSink.Emitted.Clear();
+        UpdateConfig(overrideLevel: LogEventLevel.Debug);
+        logger.ForContext(Constants.SourceContextPropertyName, "Root.Test").Write(Some.DebugEvent());
+        Assert.Single(DummyConsoleSink.Emitted);
 
-            DummyConsoleSink.Emitted.Clear();
-            UpdateConfig(filterExpression: "Prop = 'Val_2'");
-            logger.Write(Some.DebugEvent());
-            logger.ForContext("Prop", "Val_1").Write(Some.DebugEvent());
-            Assert.Empty(DummyConsoleSink.Emitted);
-        }
+        DummyConsoleSink.Emitted.Clear();
+        UpdateConfig(filterExpression: "Prop = 'Val_1'");
+        logger.Write(Some.DebugEvent());
+        logger.ForContext("Prop", "Val_1").Write(Some.DebugEvent());
+        Assert.Single(DummyConsoleSink.Emitted);
+
+        DummyConsoleSink.Emitted.Clear();
+        UpdateConfig(filterExpression: "Prop = 'Val_2'");
+        logger.Write(Some.DebugEvent());
+        logger.ForContext("Prop", "Val_1").Write(Some.DebugEvent());
+        Assert.Empty(DummyConsoleSink.Emitted);
     }
 
     void UpdateConfig(LogEventLevel? minimumLevel = null, LogEventLevel? switchLevel = null, LogEventLevel? overrideLevel = null, string filterExpression = null)
