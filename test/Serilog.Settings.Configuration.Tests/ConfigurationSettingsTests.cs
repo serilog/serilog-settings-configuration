@@ -1,4 +1,4 @@
-﻿using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Configuration;
 using Serilog.Core;
 using Serilog.Events;
 using Serilog.Settings.Configuration.Tests.Support;
@@ -12,22 +12,27 @@ public class ConfigurationSettingsTests
 {
     static LoggerConfiguration ConfigFromJson(string jsonString, string secondJsonSource = null)
     {
-        return ConfigFromJson(jsonString, secondJsonSource, out _);
+        return ConfigFromJson(jsonString, secondJsonSource, out _, out _);
     }
 
     static LoggerConfiguration ConfigFromJson(string jsonString, out IConfiguration configuration)
     {
-        return ConfigFromJson(jsonString, null, out configuration);
+        return ConfigFromJson(jsonString, null, out configuration, out _);
     }
 
-    static LoggerConfiguration ConfigFromJson(string jsonString, string secondJsonSource, out IConfiguration configuration)
+    static LoggerConfiguration ConfigFromJson(string jsonString, out LoadedConfiguration loadedConfiguration)
+    {
+        return ConfigFromJson(jsonString, null, out _, out loadedConfiguration);
+    }
+
+    static LoggerConfiguration ConfigFromJson(string jsonString, string secondJsonSource, out IConfiguration configuration, out LoadedConfiguration loadedConfiguration)
     {
         var builder = new ConfigurationBuilder().AddJsonString(jsonString);
         if (secondJsonSource != null)
             builder.AddJsonString(secondJsonSource);
         configuration = builder.Build();
         return new LoggerConfiguration()
-            .ReadFrom.Configuration(configuration);
+            .ReadFrom.Configuration(configuration, out loadedConfiguration);
     }
 
     [Fact]
@@ -384,10 +389,12 @@ public class ConfigurationSettingsTests
             }}";
         LogEvent evt = null;
 
-        var log = ConfigFromJson(json)
+        var log = ConfigFromJson(json, out LoadedConfiguration loadedConfiguration)
             .WriteTo.Sink(new DelegatingSink(e => evt = e))
             .CreateLogger();
 
+        Assert.Contains("switch1", loadedConfiguration.LogLevelSwitches);
+        Assert.Equal(LogEventLevel.Warning, loadedConfiguration.LogLevelSwitches["switch1"].MinimumLevel);
         log.Write(Some.DebugEvent());
         Assert.True(evt is null, "LoggingLevelSwitch initial level was Warning. It should not log Debug messages");
         log.Write(Some.InformationEvent());
@@ -542,7 +549,7 @@ public class ConfigurationSettingsTests
             }";
 
         DummyConfigurationSink.Reset();
-        var log = ConfigFromJson(json, out var expectedConfig)
+        var log = ConfigFromJson(json, out IConfiguration expectedConfig)
             .CreateLogger();
 
         log.Write(Some.InformationEvent());
@@ -566,7 +573,7 @@ public class ConfigurationSettingsTests
             }";
 
         DummyConfigurationSink.Reset();
-        var log = ConfigFromJson(json, out var expectedConfig)
+        var log = ConfigFromJson(json, out IConfiguration expectedConfig)
             .CreateLogger();
 
         log.Write(Some.InformationEvent());

@@ -20,6 +20,8 @@ sealed class ResolutionContext
         _appConfiguration = appConfiguration;
     }
 
+    public IDictionary<string, LoggingLevelSwitch> LogLevelSwitches => _declaredLevelSwitches;
+
     /// <summary>
     /// Looks up a switch in the declared LoggingLevelSwitches
     /// </summary>

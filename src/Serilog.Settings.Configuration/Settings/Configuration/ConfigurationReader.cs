@@ -58,6 +58,11 @@ class ConfigurationReader : IConfigurationReader
         ApplyAuditSinks(loggerConfiguration);
     }
 
+    public LoadedConfiguration GetLoadedConfiguration()
+    {
+        return new LoadedConfiguration(_resolutionContext.LogLevelSwitches);
+    }
+
     void ProcessFilterSwitchDeclarations()
     {
         var filterSwitchesDirective = _section.GetSection("FilterSwitches");

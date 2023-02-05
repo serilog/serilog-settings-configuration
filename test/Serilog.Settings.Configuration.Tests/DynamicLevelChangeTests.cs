@@ -47,8 +47,10 @@ public class DynamicLevelChangeTests
     {
         using var logger = new LoggerConfiguration()
             .ReadFrom
-            .Configuration(new ConfigurationBuilder().Add(_configSource).Build())
+            .Configuration(new ConfigurationBuilder().Add(_configSource).Build(), out var loadedConfiguration)
             .CreateLogger();
+
+        Assert.Equal(LogEventLevel.Information, loadedConfiguration.LogLevelSwitches["mySwitch"].MinimumLevel);
 
         DummyConsoleSink.Emitted.Clear();
         logger.Write(Some.DebugEvent());
@@ -64,6 +66,7 @@ public class DynamicLevelChangeTests
         logger.Write(Some.DebugEvent());
         logger.ForContext(Constants.SourceContextPropertyName, "Root.Test").Write(Some.DebugEvent());
         Assert.Single(DummyConsoleSink.Emitted);
+        Assert.Equal(LogEventLevel.Debug, loadedConfiguration.LogLevelSwitches["mySwitch"].MinimumLevel);
 
         DummyConsoleSink.Emitted.Clear();
         UpdateConfig(overrideLevel: LogEventLevel.Debug);
