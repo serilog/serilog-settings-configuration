@@ -7,7 +7,7 @@ namespace Serilog.Settings.Configuration;
 /// </summary>
 public class LoadedConfiguration
 {
-    readonly IDictionary<string,LoggingLevelSwitch> _logLevelSwitches;
+    readonly IDictionary<string, LoggingLevelSwitch> _logLevelSwitches;
 
     internal LoadedConfiguration(IDictionary<string, LoggingLevelSwitch> logLevelSwitches)
     {
