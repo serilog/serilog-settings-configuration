@@ -393,8 +393,8 @@ public class ConfigurationSettingsTests
             .WriteTo.Sink(new DelegatingSink(e => evt = e))
             .CreateLogger();
 
-        Assert.Contains("switch1", loadedConfiguration.LogLevelSwitches);
-        Assert.Equal(LogEventLevel.Warning, loadedConfiguration.LogLevelSwitches["switch1"].MinimumLevel);
+        Assert.Contains("$switch1", loadedConfiguration.LogLevelSwitches);
+        Assert.Equal(LogEventLevel.Warning, loadedConfiguration.LogLevelSwitches["$switch1"].MinimumLevel);
         log.Write(Some.DebugEvent());
         Assert.True(evt is null, "LoggingLevelSwitch initial level was Warning. It should not log Debug messages");
         log.Write(Some.InformationEvent());
