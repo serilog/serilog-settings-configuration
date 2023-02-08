@@ -155,7 +155,7 @@ class StringArgumentValue : IConfigurationArgumentValue
             }
         }
 
-        return Convert.ChangeType(argumentValue, toType, resolutionContext.FormatProvider);
+        return Convert.ChangeType(argumentValue, toType, resolutionContext.ReaderOptions.FormatProvider);
     }
 
     internal static Type FindType(string typeName)

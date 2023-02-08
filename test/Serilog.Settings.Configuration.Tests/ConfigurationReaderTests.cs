@@ -1,4 +1,4 @@
-﻿using System.Globalization;
+using System.Globalization;
 using System.Reflection;
 using Microsoft.Extensions.Configuration;
 using Serilog.Events;
@@ -18,7 +18,7 @@ public class ConfigurationReaderTests
         _configurationReader = new ConfigurationReader(
             JsonStringConfigSource.LoadSection("{ 'Serilog': {  } }", "Serilog"),
             AssemblyFinder.ForSource(ConfigurationAssemblySource.UseLoadedAssemblies),
-            CultureInfo.InvariantCulture);
+            new ConfigurationReaderOptions());
     }
 
     [Fact]
@@ -197,7 +197,7 @@ public class ConfigurationReaderTests
     [MemberData(nameof(FlatMinimumLevel))]
     public void FlatMinimumLevelCorrectOneIsEnabledOnLogger(IConfigurationRoot root, LogEventLevel expectedMinimumLevel)
     {
-        var reader = new ConfigurationReader(root.GetSection("Serilog"), AssemblyFinder.ForSource(ConfigurationAssemblySource.UseLoadedAssemblies), CultureInfo.InvariantCulture, root);
+        var reader = new ConfigurationReader(root.GetSection("Serilog"), AssemblyFinder.ForSource(ConfigurationAssemblySource.UseLoadedAssemblies), new ConfigurationReaderOptions(), root);
         var loggerConfig = new LoggerConfiguration();
 
         reader.Configure(loggerConfig);
@@ -221,7 +221,7 @@ public class ConfigurationReaderTests
     [MemberData(nameof(ObjectMinimumLevel))]
     public void ObjectMinimumLevelCorrectOneIsEnabledOnLogger(IConfigurationRoot root, LogEventLevel expectedMinimumLevel)
     {
-        var reader = new ConfigurationReader(root.GetSection("Serilog"), AssemblyFinder.ForSource(ConfigurationAssemblySource.UseLoadedAssemblies), CultureInfo.InvariantCulture, root);
+        var reader = new ConfigurationReader(root.GetSection("Serilog"), AssemblyFinder.ForSource(ConfigurationAssemblySource.UseLoadedAssemblies), new ConfigurationReaderOptions(), root);
         var loggerConfig = new LoggerConfiguration();
 
         reader.Configure(loggerConfig);
@@ -263,7 +263,7 @@ public class ConfigurationReaderTests
     [MemberData(nameof(MixedMinimumLevel))]
     public void MixedMinimumLevelCorrectOneIsEnabledOnLogger(IConfigurationRoot root, LogEventLevel expectedMinimumLevel)
     {
-        var reader = new ConfigurationReader(root.GetSection("Serilog"), AssemblyFinder.ForSource(ConfigurationAssemblySource.UseLoadedAssemblies), CultureInfo.InvariantCulture, root);
+        var reader = new ConfigurationReader(root.GetSection("Serilog"), AssemblyFinder.ForSource(ConfigurationAssemblySource.UseLoadedAssemblies), new ConfigurationReaderOptions(), root);
         var loggerConfig = new LoggerConfiguration();
 
         reader.Configure(loggerConfig);
@@ -275,7 +275,7 @@ public class ConfigurationReaderTests
     public void NoConfigurationRootUsedStillValid()
     {
         var section = JsonStringConfigSource.LoadSection("{ 'Nest': { 'Serilog': { 'MinimumLevel': 'Error' } } }", "Nest");
-        var reader = new ConfigurationReader(section.GetSection("Serilog"), AssemblyFinder.ForSource(ConfigurationAssemblySource.UseLoadedAssemblies), CultureInfo.InvariantCulture, section);
+        var reader = new ConfigurationReader(section.GetSection("Serilog"), AssemblyFinder.ForSource(ConfigurationAssemblySource.UseLoadedAssemblies), new ConfigurationReaderOptions(), section);
         var loggerConfig = new LoggerConfiguration();
 
         reader.Configure(loggerConfig);

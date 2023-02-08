@@ -186,6 +186,22 @@ You can also declare `LoggingLevelSwitch`-es in custom section and reference the
 
 Level updates to switches are also respected for a dynamic update.
 
+Since version 4.0.0, both declared switches (i.e. `Serilog:LevelSwitches` section) and minimum level override switches (i.e. `Serilog:MinimumLevel:Override` section) are exposed through a callback on the reader options so that a reference can be kept:
+
+```csharp
+var allSwitches = new Dictionary<string, LoggingLevelSwitch>();
+var options = new ConfigurationReaderOptions
+{
+    OnLevelSwitchCreated = (switchName, levelSwitch) => allSwitches[switchName] = levelSwitch
+};
+
+var logger = new LoggerConfiguration()
+    .ReadFrom.Configuration(configuration, options)
+    .CreateLogger();
+
+LoggingLevelSwitch controlSwitch = allSwitches["$controlSwitch"];
+```
+
 ### WriteTo, Enrich, AuditTo, Destructure sections
 
 These sections support simplified syntax, for example the following is valid if no arguments are needed by the sinks:
