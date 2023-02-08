@@ -9,8 +9,8 @@ namespace Serilog.Settings.Configuration;
 /// </summary>
 sealed class ResolutionContext
 {
-    readonly IDictionary<string, LoggingLevelSwitch> _declaredLevelSwitches;
-    readonly IDictionary<string, LoggingFilterSwitchProxy> _declaredFilterSwitches;
+    readonly Dictionary<string, LoggingLevelSwitch> _declaredLevelSwitches;
+    readonly Dictionary<string, LoggingFilterSwitchProxy> _declaredFilterSwitches;
     readonly IConfiguration _appConfiguration;
 
     public ResolutionContext(IConfiguration appConfiguration = null)
@@ -20,7 +20,7 @@ sealed class ResolutionContext
         _appConfiguration = appConfiguration;
     }
 
-    public IDictionary<string, LoggingLevelSwitch> LogLevelSwitches => _declaredLevelSwitches;
+    public IReadOnlyDictionary<string, LoggingLevelSwitch> LogLevelSwitches => _declaredLevelSwitches;
 
     /// <summary>
     /// Looks up a switch in the declared LoggingLevelSwitches
