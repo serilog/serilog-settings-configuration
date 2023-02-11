@@ -22,11 +22,11 @@ class ConfigurationReader : IConfigurationReader
     readonly ResolutionContext _resolutionContext;
     readonly IConfigurationRoot _configurationRoot;
 
-    public ConfigurationReader(IConfigurationSection configSection, AssemblyFinder assemblyFinder, IConfiguration configuration = null)
+    public ConfigurationReader(IConfigurationSection configSection, AssemblyFinder assemblyFinder, IFormatProvider formatProvider, IConfiguration configuration = null)
     {
         _section = configSection ?? throw new ArgumentNullException(nameof(configSection));
         _configurationAssemblies = LoadConfigurationAssemblies(_section, assemblyFinder);
-        _resolutionContext = new ResolutionContext(configuration);
+        _resolutionContext = new ResolutionContext(configuration, formatProvider);
         _configurationRoot = configuration as IConfigurationRoot;
     }
 

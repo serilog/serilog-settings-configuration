@@ -13,12 +13,15 @@ sealed class ResolutionContext
     readonly IDictionary<string, LoggingFilterSwitchProxy> _declaredFilterSwitches;
     readonly IConfiguration _appConfiguration;
 
-    public ResolutionContext(IConfiguration appConfiguration = null)
+    public ResolutionContext(IConfiguration appConfiguration = null, IFormatProvider formatProvider = null)
     {
         _declaredLevelSwitches = new Dictionary<string, LoggingLevelSwitch>();
         _declaredFilterSwitches = new Dictionary<string, LoggingFilterSwitchProxy>();
         _appConfiguration = appConfiguration;
+        FormatProvider = formatProvider;
     }
+
+    public IFormatProvider FormatProvider { get; }
 
     /// <summary>
     /// Looks up a switch in the declared LoggingLevelSwitches

@@ -1,4 +1,5 @@
-﻿using Microsoft.Extensions.Configuration;
+using System.Globalization;
+using Microsoft.Extensions.Configuration;
 using Serilog.Core;
 using Serilog.Events;
 using Serilog.Settings.Configuration.Tests.Support;
@@ -102,7 +103,7 @@ public class ConfigurationSettingsTests
         var log = new LoggerConfiguration()
             .ReadFrom.Configuration(
                 configuration: config,
-                configurationAssemblySource: ConfigurationAssemblySource.AlwaysScanDllFiles)
+                readerOptions: new ConfigurationReaderOptions(ConfigurationAssemblySource.AlwaysScanDllFiles))
             .CreateLogger();
 
         DummyConsoleSink.Emitted.Clear();
@@ -646,6 +647,50 @@ public class ConfigurationSettingsTests
         log.Write(Some.InformationEvent());
 
         Assert.Single(DummyRollingFileSink.Emitted);
+    }
+
+    [Theory]
+    [InlineData(".")]
+    [InlineData(",")]
+    [Trait("BugFix", "https://github.com/serilog/serilog-settings-configuration/issues/325")]
+    public void DestructureNumericNumbers(string numberDecimalSeparator)
+    {
+        var originalCulture = Thread.CurrentThread.CurrentCulture;
+
+        var culture = (CultureInfo)CultureInfo.InvariantCulture.Clone();
+        culture.NumberFormat.NumberDecimalSeparator = numberDecimalSeparator;
+
+        Thread.CurrentThread.CurrentCulture = culture;
+
+        try
+        {
+            var json = @"{
+                ""Serilog"": {
+                    ""Using"": [ ""TestDummies"" ],
+                    ""Destructure"": [{
+                        ""Name"": ""DummyNumbers"",
+                        ""Args"": {
+                            ""floatValue"": 0.1,
+                            ""doubleValue"": 0.2,
+                            ""decimalValue"": 0.3
+                        }
+                    }]
+                }
+            }";
+
+            DummyPolicy.Current = null;
+
+            ConfigFromJson(json);
+
+            Assert.NotNull(DummyPolicy.Current);
+            Assert.Equal(0.1f, DummyPolicy.Current.Float);
+            Assert.Equal(0.2d, DummyPolicy.Current.Double);
+            Assert.Equal(0.3m, DummyPolicy.Current.Decimal);
+        }
+        finally
+        {
+            Thread.CurrentThread.CurrentCulture = originalCulture;
+        }
     }
 
     [Fact]

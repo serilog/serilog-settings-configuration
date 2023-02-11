@@ -18,6 +18,12 @@ public class DummyPolicy : IDestructuringPolicy
 
     public Type Type { get; set; }
 
+    public float Float { get; set; }
+
+    public double Double { get; set; }
+
+    public decimal Decimal { get; set; }
+
     public bool TryDestructure(object value, ILogEventPropertyValueFactory propertyValueFactory, out LogEventPropertyValue result)
     {
         result = null;
