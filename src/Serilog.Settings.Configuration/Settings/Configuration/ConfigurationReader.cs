@@ -20,7 +20,7 @@ class ConfigurationReader : IConfigurationReader
     readonly IConfigurationSection _section;
     readonly IReadOnlyCollection<Assembly> _configurationAssemblies;
     readonly ResolutionContext _resolutionContext;
-#if NETSTANDARD || NET461
+#if !NET451
     readonly IConfigurationRoot _configurationRoot;
 #endif
 
@@ -29,7 +29,7 @@ class ConfigurationReader : IConfigurationReader
         _section = configSection ?? throw new ArgumentNullException(nameof(configSection));
         _configurationAssemblies = LoadConfigurationAssemblies(_section, assemblyFinder);
         _resolutionContext = new ResolutionContext(configuration);
-#if NETSTANDARD || NET461
+#if !NET451
         _configurationRoot = configuration as IConfigurationRoot;
 #endif
     }
@@ -40,7 +40,7 @@ class ConfigurationReader : IConfigurationReader
         _section = configSection ?? throw new ArgumentNullException(nameof(configSection));
         _configurationAssemblies = configurationAssemblies ?? throw new ArgumentNullException(nameof(configurationAssemblies));
         _resolutionContext = resolutionContext ?? throw new ArgumentNullException(nameof(resolutionContext));
-        #if NETSTANDARD || NET461
+        #if !NET451
         _configurationRoot = resolutionContext.HasAppConfiguration ? resolutionContext.AppConfiguration as IConfigurationRoot : null;
         #endif
     }
@@ -192,7 +192,7 @@ class ConfigurationReader : IConfigurationReader
 
         IConfigurationSection GetDefaultMinLevelDirective()
         {
-            #if NETSTANDARD || NET461
+            #if !NET451
 
             var defaultLevelDirective = minimumLevelDirective.GetSection("Default");
             if (_configurationRoot != null && minimumLevelDirective.Value != null && defaultLevelDirective.Value != null)
