@@ -4,7 +4,7 @@
     <Description>Microsoft.Extensions.Configuration (appsettings.json) support for Serilog.</Description>
     <VersionPrefix>3.5.0</VersionPrefix>
     <Authors>Serilog Contributors</Authors>
-    <TargetFrameworks>netstandard2.0;net451;net461</TargetFrameworks>
+    <TargetFrameworks>netstandard2.0;net461</TargetFrameworks>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <AssemblyName>Serilog.Settings.Configuration</AssemblyName>
     <AssemblyOriginatorKeyFile>../../assets/Serilog.snk</AssemblyOriginatorKeyFile>
@@ -21,17 +21,15 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Using Remove="System.Net.Http" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.1.1" PrivateAssets="All" />
-    <PackageReference Include="Microsoft.Extensions.DependencyModel" Version="3.0.0" />
+    <PackageReference Include="Microsoft.Extensions.Configuration.Binder" Version="6.0.0" />
+    <PackageReference Include="Microsoft.Extensions.DependencyModel" Version="6.0.0" />
     <PackageReference Include="Serilog" Version="2.10.0" />
     <None Include="..\..\assets\icon.png" Pack="true" PackagePath="" Visible="false" />
   </ItemGroup>
 
-  <ItemGroup Condition="$(TargetFramework) == 'net451'">
-    <PackageReference Include="Microsoft.Extensions.Configuration.Binder" Version="1.1.2" />
-  </ItemGroup>
-
-  <ItemGroup Condition="$(TargetFramework) != 'net451'">
-    <PackageReference Include="Microsoft.Extensions.Configuration.Binder" Version="2.0.0" />
-  </ItemGroup>
 </Project>

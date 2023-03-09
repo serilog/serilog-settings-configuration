@@ -222,8 +222,6 @@ public class ConfigurationReaderTests
         AssertLogEventLevels(loggerConfig, expectedMinimumLevel);
     }
 
-    #if !(NET452)
-
     // currently only works in the .NET 4.6.1 and .NET Standard builds of Serilog.Settings.Configuration
     public static IEnumerable<object[]> MixedMinimumLevel => new List<object[]>
     {
@@ -265,8 +263,6 @@ public class ConfigurationReaderTests
 
         AssertLogEventLevels(loggerConfig, expectedMinimumLevel);
     }
-
-    #endif
 
     [Fact]
     public void NoConfigurationRootUsedStillValid()
