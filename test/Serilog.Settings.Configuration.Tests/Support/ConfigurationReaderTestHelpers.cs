@@ -5,20 +5,22 @@ namespace Serilog.Settings.Configuration.Tests.Support;
 
 static class ConfigurationReaderTestHelpers
 {
-    public const string minimumLevelFlatTemplate = @"
-{{
-    'Serilog': {{
-        'MinimumLevel': '{0}'
-    }}
-}}";
-    public const string minimumLevelObjectTemplate = @"
-{{
-    'Serilog': {{
-        'MinimumLevel': {{
-            'Default': '{0}'
+    public const string minimumLevelFlatTemplate = """
+    {{
+        'Serilog': {{
+            'MinimumLevel': '{0}'
         }}
     }}
-}}";
+    """;
+    public const string minimumLevelObjectTemplate = """
+    {{
+        'Serilog': {{
+            'MinimumLevel': {{
+                'Default': '{0}'
+            }}
+        }}
+    }}
+    """;
     public const string minimumLevelFlatKey = "Serilog:MinimumLevel";
     public const string minimumLevelObjectKey = "Serilog:MinimumLevel:Default";
 

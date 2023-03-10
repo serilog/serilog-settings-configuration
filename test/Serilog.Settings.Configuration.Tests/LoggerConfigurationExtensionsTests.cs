@@ -21,13 +21,15 @@ public class LoggerConfigurationExtensionsTests
     {
         LogEvent evt = null;
 
-        var json = @"{
-		        ""NotSerilog"": {
-			        ""Properties"": {
-				        ""App"": ""Test""
-			        }
-		        }
-	        }";
+        var json = """
+            {
+                "NotSerilog": {
+                    "Properties": {
+                        "App": "Test"
+                    }
+                }
+            }
+            """;
 
         var config = new ConfigurationBuilder()
             .AddJsonString(json)
@@ -50,15 +52,17 @@ public class LoggerConfigurationExtensionsTests
     [Trait("BugFix", "https://github.com/serilog/serilog-settings-configuration/issues/143")]
     public void ReadFromConfigurationSectionThrowsWhenTryingToCallConfigurationMethodWithIConfigurationParam()
     {
-        var json = @"{
-                ""NotSerilog"": {
-                    ""Using"": [""TestDummies""],
-                    ""WriteTo"": [{
-                        ""Name"": ""DummyWithConfiguration"",
-                        ""Args"": {}
+        var json = """
+            {
+                "NotSerilog": {
+                    "Using": ["TestDummies"],
+                    "WriteTo": [{
+                        "Name": "DummyWithConfiguration",
+                        "Args": {}
                     }]
                 }
-            }";
+            }
+            """;
 
         var config = new ConfigurationBuilder()
             .AddJsonString(json)
@@ -81,15 +85,17 @@ public class LoggerConfigurationExtensionsTests
     [Fact]
     public void ReadFromConfigurationDoesNotThrowWhenTryingToCallConfigurationMethodWithIConfigurationParam()
     {
-        var json = @"{
-                ""NotSerilog"": {
-                    ""Using"": [""TestDummies""],
-                    ""WriteTo"": [{
-                        ""Name"": ""DummyWithConfiguration"",
-                        ""Args"": {}
+        var json = """
+            {
+                "NotSerilog": {
+                    "Using": ["TestDummies"],
+                    "WriteTo": [{
+                        "Name": "DummyWithConfiguration",
+                        "Args": {}
                     }]
                 }
-            }";
+            }
+            """;
 
         var config = new ConfigurationBuilder()
             .AddJsonString(json)
@@ -105,15 +111,17 @@ public class LoggerConfigurationExtensionsTests
     [Trait("BugFix", "https://github.com/serilog/serilog-settings-configuration/issues/143")]
     public void ReadFromConfigurationSectionDoesNotThrowWhenTryingToCallConfigurationMethodWithOptionalIConfigurationParam()
     {
-        var json = @"{
-                ""NotSerilog"": {
-                    ""Using"": [""TestDummies""],
-                    ""WriteTo"": [{
-                        ""Name"": ""DummyWithOptionalConfiguration"",
-                        ""Args"": {}
+        var json = """
+            {
+                "NotSerilog": {
+                    "Using": ["TestDummies"],
+                    "WriteTo": [{
+                        "Name": "DummyWithOptionalConfiguration",
+                        "Args": {}
                     }]
                 }
-            }";
+            }
+            """;
 
         var config = new ConfigurationBuilder()
             .AddJsonString(json)
