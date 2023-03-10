@@ -16,7 +16,7 @@ public class ConfigurationReaderTests
     public ConfigurationReaderTests()
     {
         _configurationReader = new ConfigurationReader(
-            JsonStringConfigSource.LoadSection(@"{ 'Serilog': {  } }", "Serilog"),
+            JsonStringConfigSource.LoadSection("{ 'Serilog': {  } }", "Serilog"),
             AssemblyFinder.ForSource(ConfigurationAssemblySource.UseLoadedAssemblies),
             CultureInfo.InvariantCulture);
     }
@@ -24,10 +24,11 @@ public class ConfigurationReaderTests
     [Fact]
     public void WriteToSupportSimplifiedSyntax()
     {
-        var json = @"
-{
-    'WriteTo': [ 'LiterateConsole', 'DiagnosticTrace' ]
-}";
+        var json = """
+        {
+            'WriteTo': [ 'LiterateConsole', 'DiagnosticTrace' ]
+        }
+        """;
 
         var result = _configurationReader.GetMethodCalls(JsonStringConfigSource.LoadSection(json, "WriteTo"));
         Assert.Equal(2, result.Count);
@@ -41,12 +42,13 @@ public class ConfigurationReaderTests
     [Fact]
     public void WriteToSupportExpandedSyntaxWithoutArgs()
     {
-        var json = @"
-{
-    'WriteTo': [ {
-        'Name': 'LiterateConsole'
-    }]
-}";
+        var json = """
+        {
+            'WriteTo': [ {
+                'Name': 'LiterateConsole'
+            }]
+        }
+        """;
 
         var result = _configurationReader.GetMethodCalls(JsonStringConfigSource.LoadSection(json, "WriteTo"));
         Assert.Equal(1, result.Count);
@@ -58,15 +60,16 @@ public class ConfigurationReaderTests
     [Fact]
     public void WriteToSupportExpandedSyntaxWithArgs()
     {
-        var json = @"
-{
-    'WriteTo': [ {
-        'Name': 'LiterateConsole',
-        'Args': {
-            'outputTemplate': '{Message}'
-        },
-    }]
-}";
+        var json = """
+        {
+            'WriteTo': [ {
+                'Name': 'LiterateConsole',
+                'Args': {
+                    'outputTemplate': '{Message}'
+                },
+            }]
+        }
+        """;
 
         var result = _configurationReader.GetMethodCalls(JsonStringConfigSource.LoadSection(json, "WriteTo"));
 
@@ -85,30 +88,31 @@ public class ConfigurationReaderTests
     [Fact]
     public void WriteToSupportMultipleSinksOfTheSameKind()
     {
-        var json = @"
-{
-    'WriteTo': [
-      {
-        'Name': 'LiterateConsole',
-        'Args': {
-            'outputTemplate': '{Message}'
-          },
-      },
-      'DiagnosticTrace'
-    ],
-    'WriteTo:File1': {
-        'Name': 'File',
-        'Args': {
-            'outputTemplate': '{Message}'
-        },
-    },
-    'WriteTo:File2': {
-        'Name': 'File',
-        'Args': {
-            'outputTemplate': '{Message}'
-        },
-    }
-}";
+        var json = """
+        {
+            'WriteTo': [
+              {
+                'Name': 'LiterateConsole',
+                'Args': {
+                    'outputTemplate': '{Message}'
+                  },
+              },
+              'DiagnosticTrace'
+            ],
+            'WriteTo:File1': {
+                'Name': 'File',
+                'Args': {
+                    'outputTemplate': '{Message}'
+                },
+            },
+            'WriteTo:File2': {
+                'Name': 'File',
+                'Args': {
+                    'outputTemplate': '{Message}'
+                },
+            }
+        }
+        """;
 
         var result = _configurationReader.GetMethodCalls(JsonStringConfigSource.LoadSection(json, "WriteTo"));
 
@@ -125,10 +129,11 @@ public class ConfigurationReaderTests
     [Fact]
     public void Enrich_SupportSimplifiedSyntax()
     {
-        var json = @"
-{
-    'Enrich': [ 'FromLogContext', 'WithMachineName', 'WithThreadId' ]
-}";
+        var json = """
+        {
+            'Enrich': [ 'FromLogContext', 'WithMachineName', 'WithThreadId' ]
+        }
+        """;
 
         var result = _configurationReader.GetMethodCalls(JsonStringConfigSource.LoadSection(json, "Enrich"));
         Assert.Equal(3, result.Count);
@@ -269,7 +274,7 @@ public class ConfigurationReaderTests
     [Fact]
     public void NoConfigurationRootUsedStillValid()
     {
-        var section = JsonStringConfigSource.LoadSection(@"{ 'Nest': { 'Serilog': { 'MinimumLevel': 'Error' } } }", "Nest");
+        var section = JsonStringConfigSource.LoadSection("{ 'Nest': { 'Serilog': { 'MinimumLevel': 'Error' } } }", "Nest");
         var reader = new ConfigurationReader(section.GetSection("Serilog"), AssemblyFinder.ForSource(ConfigurationAssemblySource.UseLoadedAssemblies), CultureInfo.InvariantCulture, section);
         var loggerConfig = new LoggerConfiguration();
 

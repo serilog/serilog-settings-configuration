@@ -36,13 +36,15 @@ public class ConfigurationSettingsTests
     {
         LogEvent evt = null;
 
-        var json = @"{
-                ""Serilog"": {
-                    ""Properties"": {
-                        ""App"": ""Test""
+        var json = """
+            {
+                "Serilog": {
+                    "Properties": {
+                        "App": "Test"
                     }
                 }
-            }";
+            }
+            """;
 
         var log = ConfigFromJson(json)
             .WriteTo.Sink(new DelegatingSink(e => evt = e))
@@ -55,23 +57,25 @@ public class ConfigurationSettingsTests
     }
 
     [Theory]
-    [InlineData("extended syntax",
-        @"{
-                ""Serilog"": {
-                    ""Using"": [""TestDummies""],
-                    ""WriteTo"": [
-                        { ""Name"": ""DummyConsole""},
-                        { ""Name"": ""DummyWithLevelSwitch""},
-                    ]
-                }
-            }")]
-    [InlineData("simplified syntax",
-        @"{
-                ""Serilog"": {
-                    ""Using"": [""TestDummies""],
-                    ""WriteTo"": [""DummyConsole"", ""DummyWithLevelSwitch"" ]
-                }
-            }")]
+    [InlineData("extended syntax", """
+    {
+        "Serilog": {
+            "Using": ["TestDummies"],
+            "WriteTo": [
+                { "Name": "DummyConsole"},
+                { "Name": "DummyWithLevelSwitch"},
+            ]
+        }
+    }
+    """)]
+    [InlineData("simplified syntax", """
+    {
+        "Serilog": {
+            "Using": ["TestDummies"],
+            "WriteTo": ["DummyConsole", "DummyWithLevelSwitch" ]
+        }
+    }
+    """)]
     public void ParameterlessSinksAreConfigured(string syntax, string json)
     {
         _ = syntax;
@@ -91,12 +95,14 @@ public class ConfigurationSettingsTests
     [Fact]
     public void ConfigurationAssembliesFromDllScanning()
     {
-        var json = @"{
-                ""Serilog"": {
-                    ""Using"": [""TestDummies""],
-                    ""WriteTo"": [""DummyConsole""]
+        var json = """
+            {
+                "Serilog": {
+                    "Using": ["TestDummies"],
+                    "WriteTo": ["DummyConsole"]
                 }
-            }";
+            }
+            """;
 
         var builder = new ConfigurationBuilder().AddJsonString(json);
         var config = builder.Build();
@@ -116,15 +122,17 @@ public class ConfigurationSettingsTests
     [Fact]
     public void SinksAreConfigured()
     {
-        var json = @"{
-                ""Serilog"": {
-                    ""Using"": [""TestDummies""],
-                    ""WriteTo"": [{
-                        ""Name"": ""DummyRollingFile"",
-                        ""Args"": {""pathFormat"" : ""C:\\""}
+        var json = """
+            {
+                "Serilog": {
+                    "Using": ["TestDummies"],
+                    "WriteTo": [{
+                        "Name": "DummyRollingFile",
+                        "Args": {"pathFormat" : "C:\\"}
                     }]
                 }
-            }";
+            }
+            """;
 
         var log = ConfigFromJson(json)
             .CreateLogger();
@@ -141,15 +149,17 @@ public class ConfigurationSettingsTests
     [Fact]
     public void AuditSinksAreConfigured()
     {
-        var json = @"{
-                ""Serilog"": {
-                    ""Using"": [""TestDummies""],
-                    ""AuditTo"": [{
-                        ""Name"": ""DummyRollingFile"",
-                        ""Args"": {""pathFormat"" : ""C:\\""}
+        var json = """
+            {
+                "Serilog": {
+                    "Using": ["TestDummies"],
+                    "AuditTo": [{
+                        "Name": "DummyRollingFile",
+                        "Args": {"pathFormat" : "C:\\"}
                     }]
                 }
-            }";
+            }
+            """;
 
         var log = ConfigFromJson(json)
             .CreateLogger();
@@ -166,21 +176,23 @@ public class ConfigurationSettingsTests
     [Fact]
     public void AuditToSubLoggersAreConfigured()
     {
-        var json = @"{
-            ""Serilog"": {
-                ""Using"": [""TestDummies""],
-                ""AuditTo"": [{
-                    ""Name"": ""Logger"",
-                    ""Args"": {
-                        ""configureLogger"" : {
-                            ""AuditTo"": [{
-                                ""Name"": ""DummyRollingFile"",
-                                ""Args"": {""pathFormat"" : ""C:\\""}
-                            }]}
-                    }
-                }]
+        var json = """
+            {
+                "Serilog": {
+                    "Using": ["TestDummies"],
+                    "AuditTo": [{
+                        "Name": "Logger",
+                        "Args": {
+                            "configureLogger" : {
+                                "AuditTo": [{
+                                    "Name": "DummyRollingFile",
+                                    "Args": {"pathFormat" : "C:\\"}
+                                }]}
+                        }
+                    }]
+                }
             }
-            }";
+            """;
 
         var log = ConfigFromJson(json)
             .CreateLogger();
@@ -197,15 +209,17 @@ public class ConfigurationSettingsTests
     [Fact]
     public void TestMinimumLevelOverrides()
     {
-        var json = @"{
-                ""Serilog"": {
-                    ""MinimumLevel"" : {
-                        ""Override"" : {
-                            ""System"" : ""Warning""
+        var json = """
+            {
+                "Serilog": {
+                    "MinimumLevel" : {
+                        "Override" : {
+                            "System" : "Warning"
                         }
                     }
                 }
-            }";
+            }
+            """;
 
         LogEvent evt = null;
 
@@ -229,17 +243,19 @@ public class ConfigurationSettingsTests
     [Fact]
     public void TestMinimumLevelOverridesForChildContext()
     {
-        var json = @"{
-                ""Serilog"": {
-                    ""MinimumLevel"" : {
-                        ""Default"" : ""Warning"",
-                        ""Override"" : {
-                            ""System"" : ""Warning"",
-                            ""System.Threading"": ""Debug""
+        var json = """
+            {
+                "Serilog": {
+                    "MinimumLevel" : {
+                        "Default" : "Warning",
+                        "Override" : {
+                            "System" : "Warning",
+                            "System.Threading": "Debug"
                         }
                     }
                 }
-            }";
+            }
+            """;
 
         LogEvent evt = null;
 
@@ -263,15 +279,17 @@ public class ConfigurationSettingsTests
     [Fact]
     public void SinksWithAbstractParamsAreConfiguredWithTypeName()
     {
-        var json = @"{
-                ""Serilog"": {
-                    ""Using"": [""TestDummies""],
-                    ""WriteTo"": [{
-                        ""Name"": ""DummyConsole"",
-                        ""Args"": {""theme"" : ""Serilog.Settings.Configuration.Tests.Support.CustomConsoleTheme, Serilog.Settings.Configuration.Tests""}
+        var json = """
+            {
+                "Serilog": {
+                    "Using": ["TestDummies"],
+                    "WriteTo": [{
+                        "Name": "DummyConsole",
+                        "Args": {"theme" : "Serilog.Settings.Configuration.Tests.Support.CustomConsoleTheme, Serilog.Settings.Configuration.Tests"}
                     }]
                 }
-            }";
+            }
+            """;
 
         DummyConsoleSink.Theme = null;
 
@@ -285,15 +303,17 @@ public class ConfigurationSettingsTests
     [Fact]
     public void SinksAreConfiguredWithStaticMember()
     {
-        var json = @"{
-                ""Serilog"": {
-                    ""Using"": [""TestDummies""],
-                    ""WriteTo"": [{
-                        ""Name"": ""DummyConsole"",
-                        ""Args"": {""theme"" : ""TestDummies.Console.Themes.ConsoleThemes::Theme1, TestDummies""}
+        var json = """
+            {
+                "Serilog": {
+                    "Using": ["TestDummies"],
+                    "WriteTo": [{
+                        "Name": "DummyConsole",
+                        "Args": {"theme" : "TestDummies.Console.Themes.ConsoleThemes::Theme1, TestDummies"}
                     }]
                 }
-            }";
+            }
+            """;
 
         DummyConsoleSink.Theme = null;
 
@@ -328,11 +348,13 @@ public class ConfigurationSettingsTests
     [Fact]
     public void LoggingLevelSwitchWithInvalidNameThrowsFormatException()
     {
-        var json = @"{
-                ""Serilog"": {
-                    ""LevelSwitches"": {""1InvalidSwitchName"" : ""Warning"" }
+        var json = """
+            {
+                "Serilog": {
+                    "LevelSwitches": {"1InvalidSwitchName" : "Warning" }
                 }
-            }";
+            }
+            """;
 
         var ex = Assert.Throws<FormatException>(() => ConfigFromJson(json));
 
@@ -346,17 +368,19 @@ public class ConfigurationSettingsTests
     [InlineData("mySwitch")]
     public void LoggingFilterSwitchIsConfigured(string switchName)
     {
-        var json = $@"{{
-                'Serilog': {{
-                    'FilterSwitches': {{ '{switchName}': 'Prop = 42' }},
-                    'Filter:BySwitch': {{
+        var json = $$"""
+            {
+                'Serilog': {
+                    'FilterSwitches': { '{{switchName}}': 'Prop = 42' },
+                    'Filter:BySwitch': {
                         'Name': 'ControlledBy',
-                        'Args': {{
+                        'Args': {
                             'switch': '$mySwitch'
-                        }}
-                    }}
-                }}
-            }}";
+                        }
+                    }
+                }
+            }
+            """;
         LogEvent evt = null;
 
         var log = ConfigFromJson(json)
@@ -375,14 +399,16 @@ public class ConfigurationSettingsTests
     [InlineData("switch1")]
     public void LoggingLevelSwitchIsConfigured(string switchName)
     {
-        var json = $@"{{
-                'Serilog': {{
-                    'LevelSwitches': {{ '{switchName}' : 'Warning' }},
-                    'MinimumLevel' : {{
+        var json = $$"""
+            {
+                'Serilog': {
+                    'LevelSwitches': { '{{switchName}}' : 'Warning' },
+                    'MinimumLevel' : {
                         'ControlledBy' : '$switch1'
-                    }}
-                }}
-            }}";
+                    }
+                }
+            }
+            """;
         LogEvent evt = null;
 
         var log = ConfigFromJson(json)
@@ -400,14 +426,16 @@ public class ConfigurationSettingsTests
     [Fact]
     public void SettingMinimumLevelControlledByToAnUndeclaredSwitchThrows()
     {
-        var json = @"{
-                ""Serilog"": {
-                    ""LevelSwitches"": {""$switch1"" : ""Warning"" },
-                    ""MinimumLevel"" : {
-                        ""ControlledBy"" : ""$switch2""
+        var json = """
+            {
+                "Serilog": {
+                    "LevelSwitches": {"$switch1" : "Warning" },
+                    "MinimumLevel" : {
+                        "ControlledBy" : "$switch2"
                     }
                 }
-            }";
+            }
+            """;
 
         var ex = Assert.Throws<InvalidOperationException>(() =>
             ConfigFromJson(json)
@@ -420,19 +448,21 @@ public class ConfigurationSettingsTests
     [Fact]
     public void LoggingLevelSwitchIsPassedToSinks()
     {
-        var json = @"{
-                ""Serilog"": {
-                    ""Using"": [""TestDummies""],
-                    ""LevelSwitches"": {""$switch1"" : ""Information"" },
-                    ""MinimumLevel"" : {
-                        ""ControlledBy"" : ""$switch1""
+        var json = """
+            {
+                "Serilog": {
+                    "Using": ["TestDummies"],
+                    "LevelSwitches": {"$switch1" : "Information" },
+                    "MinimumLevel" : {
+                        "ControlledBy" : "$switch1"
                     },
-                    ""WriteTo"": [{
-                        ""Name"": ""DummyWithLevelSwitch"",
-                        ""Args"": {""controlLevelSwitch"" : ""$switch1""}
+                    "WriteTo": [{
+                        "Name": "DummyWithLevelSwitch",
+                        "Args": {"controlLevelSwitch" : "$switch1"}
                     }]
                 }
-            }";
+            }
+            """;
 
         LogEvent evt = null;
 
@@ -456,19 +486,21 @@ public class ConfigurationSettingsTests
     [Fact]
     public void ReferencingAnUndeclaredSwitchInSinkThrows()
     {
-        var json = @"{
-                ""Serilog"": {
-                    ""Using"": [""TestDummies""],
-                    ""LevelSwitches"": {""$switch1"" : ""Information"" },
-                    ""MinimumLevel"" : {
-                        ""ControlledBy"" : ""$switch1""
+        var json = """
+            {
+                "Serilog": {
+                    "Using": ["TestDummies"],
+                    "LevelSwitches": {"$switch1" : "Information" },
+                    "MinimumLevel" : {
+                        "ControlledBy" : "$switch1"
                     },
-                    ""WriteTo"": [{
-                        ""Name"": ""DummyWithLevelSwitch"",
-                        ""Args"": {""controlLevelSwitch"" : ""$switch2""}
+                    "WriteTo": [{
+                        "Name": "DummyWithLevelSwitch",
+                        "Args": {"controlLevelSwitch" : "$switch2"}
                     }]
                 }
-            }";
+            }
+            """;
 
         var ex = Assert.Throws<InvalidOperationException>(() =>
             ConfigFromJson(json)
@@ -481,22 +513,24 @@ public class ConfigurationSettingsTests
     [Fact]
     public void LoggingLevelSwitchCanBeUsedForMinimumLevelOverrides()
     {
-        var json = @"{
-                ""Serilog"": {
-                    ""Using"": [""TestDummies""],
-                    ""LevelSwitches"": {""$specificSwitch"" : ""Warning"" },
-                    ""MinimumLevel"" : {
-                        ""Default"" : ""Debug"",
-                        ""Override"" : {
-                            ""System"" : ""$specificSwitch""
+        var json = """
+            {
+                "Serilog": {
+                    "Using": ["TestDummies"],
+                    "LevelSwitches": {"$specificSwitch" : "Warning" },
+                    "MinimumLevel" : {
+                        "Default" : "Debug",
+                        "Override" : {
+                            "System" : "$specificSwitch"
                         }
                     },
-                    ""WriteTo"": [{
-                        ""Name"": ""DummyWithLevelSwitch"",
-                        ""Args"": {""controlLevelSwitch"" : ""$specificSwitch""}
+                    "WriteTo": [{
+                        "Name": "DummyWithLevelSwitch",
+                        "Args": {"controlLevelSwitch" : "$specificSwitch"}
                     }]
                 }
-            }";
+            }
+            """;
 
         LogEvent evt = null;
 
@@ -532,15 +566,17 @@ public class ConfigurationSettingsTests
     [Trait("BugFix", "https://github.com/serilog/serilog-settings-configuration/issues/142")]
     public void SinkWithIConfigurationArguments()
     {
-        var json = @"{
-                ""Serilog"": {
-                    ""Using"": [""TestDummies""],
-                    ""WriteTo"": [{
-                        ""Name"": ""DummyWithConfiguration"",
-                        ""Args"": {}
+        var json = """
+            {
+                "Serilog": {
+                    "Using": ["TestDummies"],
+                    "WriteTo": [{
+                        "Name": "DummyWithConfiguration",
+                        "Args": {}
                     }]
                 }
-            }";
+            }
+            """;
 
         DummyConfigurationSink.Reset();
         var log = ConfigFromJson(json, out var expectedConfig)
@@ -556,15 +592,17 @@ public class ConfigurationSettingsTests
     [Trait("BugFix", "https://github.com/serilog/serilog-settings-configuration/issues/142")]
     public void SinkWithOptionalIConfigurationArguments()
     {
-        var json = @"{
-                ""Serilog"": {
-                    ""Using"": [""TestDummies""],
-                    ""WriteTo"": [{
-                        ""Name"": ""DummyWithOptionalConfiguration"",
-                        ""Args"": {}
+        var json = """
+            {
+                "Serilog": {
+                    "Using": ["TestDummies"],
+                    "WriteTo": [{
+                        "Name": "DummyWithOptionalConfiguration",
+                        "Args": {}
                     }]
                 }
-            }";
+            }
+            """;
 
         DummyConfigurationSink.Reset();
         var log = ConfigFromJson(json, out var expectedConfig)
@@ -580,15 +618,17 @@ public class ConfigurationSettingsTests
     [Fact]
     public void SinkWithIConfigSectionArguments()
     {
-        var json = @"{
-                ""Serilog"": {
-                    ""Using"": [""TestDummies""],
-                    ""WriteTo"": [{
-                        ""Name"": ""DummyWithConfigSection"",
-                        ""Args"": {""configurationSection"" : { ""foo"" : ""bar"" } }
+        var json = """
+            {
+                "Serilog": {
+                    "Using": ["TestDummies"],
+                    "WriteTo": [{
+                        "Name": "DummyWithConfigSection",
+                        "Args": {"configurationSection" : { "foo" : "bar" } }
                     }]
                 }
-            }";
+            }
+            """;
 
         DummyConfigurationSink.Reset();
         var log = ConfigFromJson(json)
@@ -604,16 +644,18 @@ public class ConfigurationSettingsTests
     [Fact]
     public void SinkWithConfigurationBindingArgument()
     {
-        var json = @"{
-                ""Serilog"": {
-                    ""Using"": [""TestDummies""],
-                    ""WriteTo"": [{
-                        ""Name"": ""DummyRollingFile"",
-                        ""Args"": {""pathFormat"" : ""C:\\"",
-                                   ""objectBinding"" : [ { ""foo"" : ""bar"" }, { ""abc"" : ""xyz"" } ] }
+        var json = """
+            {
+                "Serilog": {
+                    "Using": ["TestDummies"],
+                    "WriteTo": [{
+                        "Name": "DummyRollingFile",
+                        "Args": {"pathFormat" : "C:\\",
+                                   "objectBinding" : [ { "foo" : "bar" }, { "abc" : "xyz" } ] }
                     }]
                 }
-            }";
+            }
+            """;
 
         var log = ConfigFromJson(json)
             .CreateLogger();
@@ -628,16 +670,18 @@ public class ConfigurationSettingsTests
     [Fact]
     public void SinkWithStringArrayArgument()
     {
-        var json = @"{
-                ""Serilog"": {
-                    ""Using"": [""TestDummies""],
-                    ""WriteTo"": [{
-                        ""Name"": ""DummyRollingFile"",
-                        ""Args"": {""pathFormat"" : ""C:\\"",
-                                   ""stringArrayBinding"" : [ ""foo"", ""bar"", ""baz"" ] }
+        var json = """
+            {
+                "Serilog": {
+                    "Using": ["TestDummies"],
+                    "WriteTo": [{
+                        "Name": "DummyRollingFile",
+                        "Args": {"pathFormat" : "C:\\",
+                                   "stringArrayBinding" : [ "foo", "bar", "baz" ] }
                     }]
                 }
-            }";
+            }
+            """;
 
         var log = ConfigFromJson(json)
             .CreateLogger();
@@ -664,19 +708,21 @@ public class ConfigurationSettingsTests
 
         try
         {
-            var json = @"{
-                ""Serilog"": {
-                    ""Using"": [ ""TestDummies"" ],
-                    ""Destructure"": [{
-                        ""Name"": ""DummyNumbers"",
-                        ""Args"": {
-                            ""floatValue"": 0.1,
-                            ""doubleValue"": 0.2,
-                            ""decimalValue"": 0.3
+            var json = """
+            {
+                "Serilog": {
+                    "Using": [ "TestDummies" ],
+                    "Destructure": [{
+                        "Name": "DummyNumbers",
+                        "Args": {
+                            "floatValue": 0.1,
+                            "doubleValue": 0.2,
+                            "decimalValue": 0.3
                         }
                     }]
                 }
-            }";
+            }
+            """;
 
             DummyPolicy.Current = null;
 
@@ -696,31 +742,33 @@ public class ConfigurationSettingsTests
     [Fact]
     public void DestructureWithCollectionsOfTypeArgument()
     {
-        var json = @"{
-                ""Serilog"": {
-                    ""Using"": [ ""TestDummies"" ],
-                    ""Destructure"": [{
-                        ""Name"": ""DummyArrayOfType"",
-                        ""Args"": {
-                            ""list"": [
-                                ""System.Byte"",
-                                ""System.Int16""
+        var json = """
+            {
+                "Serilog": {
+                    "Using": [ "TestDummies" ],
+                    "Destructure": [{
+                        "Name": "DummyArrayOfType",
+                        "Args": {
+                            "list": [
+                                "System.Byte",
+                                "System.Int16"
                             ],
-                            ""array"" : [
-                                ""System.Int32"",
-                                ""System.String""
+                            "array" : [
+                                "System.Int32",
+                                "System.String"
                             ],
-                            ""type"" : ""System.TimeSpan"",
-                            ""custom"" : [
-                                ""System.Int64""
+                            "type" : "System.TimeSpan",
+                            "custom" : [
+                                "System.Int64"
                             ],
-                            ""customString"" : [
-                                ""System.UInt32""
+                            "customString" : [
+                                "System.UInt32"
                             ]
                         }
                     }]
                 }
-            }";
+            }
+            """;
 
         DummyPolicy.Current = null;
 
@@ -737,16 +785,18 @@ public class ConfigurationSettingsTests
     [Fact]
     public void SinkWithIntArrayArgument()
     {
-        var json = @"{
-                ""Serilog"": {
-                    ""Using"": [""TestDummies""],
-                    ""WriteTo"": [{
-                        ""Name"": ""DummyRollingFile"",
-                        ""Args"": {""pathFormat"" : ""C:\\"",
-                                   ""intArrayBinding"" : [ 1,2,3,4,5 ] }
+        var json = """
+            {
+                "Serilog": {
+                    "Using": ["TestDummies"],
+                    "WriteTo": [{
+                        "Name": "DummyRollingFile",
+                        "Args": {"pathFormat" : "C:\\",
+                                   "intArrayBinding" : [ 1,2,3,4,5 ] }
                     }]
                 }
-            }";
+            }
+            """;
 
         var log = ConfigFromJson(json)
             .CreateLogger();
@@ -762,15 +812,17 @@ public class ConfigurationSettingsTests
     [Fact]
     public void CaseInsensitiveArgumentNameMatching()
     {
-        var json = @"{
-                ""Serilog"": {
-                    ""Using"": [""TestDummies""],
-                    ""WriteTo"": [{
-                        ""Name"": ""DummyRollingFile"",
-                        ""Args"": {""PATHFORMAT"" : ""C:\\""}
+        var json = """
+            {
+                "Serilog": {
+                    "Using": ["TestDummies"],
+                    "WriteTo": [{
+                        "Name": "DummyRollingFile",
+                        "Args": {"PATHFORMAT" : "C:\\"}
                     }]
                 }
-            }";
+            }
+            """;
 
         var log = ConfigFromJson(json)
             .CreateLogger();
@@ -786,22 +838,24 @@ public class ConfigurationSettingsTests
     [Fact]
     public void WriteToLoggerWithRestrictedToMinimumLevelIsSupported()
     {
-        var json = @"{
-            ""Serilog"": {
-                ""Using"": [""TestDummies""],
-                ""WriteTo"": [{
-                    ""Name"": ""Logger"",
-                    ""Args"": {
-                        ""configureLogger"" : {
-                            ""WriteTo"": [{
-                                ""Name"": ""DummyRollingFile"",
-                                ""Args"": {""pathFormat"" : ""C:\\""}
+        var json = """
+        {
+            "Serilog": {
+                "Using": ["TestDummies"],
+                "WriteTo": [{
+                    "Name": "Logger",
+                    "Args": {
+                        "configureLogger" : {
+                            "WriteTo": [{
+                                "Name": "DummyRollingFile",
+                                "Args": {"pathFormat" : "C:\\"}
                             }]},
-                        ""restrictedToMinimumLevel"": ""Warning""
+                        "restrictedToMinimumLevel": "Warning"
                     }
                 }]
             }
-            }";
+        }
+        """;
 
         var log = ConfigFromJson(json)
         .CreateLogger();
@@ -818,25 +872,27 @@ public class ConfigurationSettingsTests
     [Fact]
     public void WriteToSubLoggerWithLevelSwitchIsSupported()
     {
-        var json = @"{
-            ""Serilog"": {
-                ""Using"": [""TestDummies""],
-                ""LevelSwitches"": {""$switch1"" : ""Warning"" },
-                ""MinimumLevel"" : {
-                        ""ControlledBy"" : ""$switch1""
+        var json = """
+        {
+            "Serilog": {
+                "Using": ["TestDummies"],
+                "LevelSwitches": {"$switch1" : "Warning" },
+                "MinimumLevel" : {
+                        "ControlledBy" : "$switch1"
                     },
-                ""WriteTo"": [{
-                    ""Name"": ""Logger"",
-                    ""Args"": {
-                        ""configureLogger"" : {
-                            ""WriteTo"": [{
-                                ""Name"": ""DummyRollingFile"",
-                                ""Args"": {""pathFormat"" : ""C:\\""}
+                "WriteTo": [{
+                    "Name": "Logger",
+                    "Args": {
+                        "configureLogger" : {
+                            "WriteTo": [{
+                                "Name": "DummyRollingFile",
+                                "Args": {"pathFormat" : "C:\\"}
                             }]}
                     }
                 }]
             }
-            }";
+        }
+        """;
 
         var log = ConfigFromJson(json)
             .CreateLogger();
@@ -853,25 +909,29 @@ public class ConfigurationSettingsTests
     [Fact]
     public void InconsistentComplexVsScalarArgumentValuesThrowsIOE()
     {
-        var jsonDiscreteValue = @"{
-                ""Serilog"": {
-                    ""Using"": [""TestDummies""],
-                    ""WriteTo"": [{
-                        ""Name"": ""DummyRollingFile"",
-                        ""Args"": {""pathFormat"" : ""C:\\""}
+        var jsonDiscreteValue = """
+            {
+                "Serilog": {
+                    "Using": ["TestDummies"],
+                    "WriteTo": [{
+                        "Name": "DummyRollingFile",
+                        "Args": {"pathFormat" : "C:\\"}
                     }]
                 }
-            }";
+            }
+            """;
 
-        var jsonComplexValue = @"{
-                ""Serilog"": {
-                    ""Using"": [""TestDummies""],
-                    ""WriteTo"": [{
-                        ""Name"": ""DummyRollingFile"",
-                        ""Args"": {""pathFormat"" : { ""foo"" : ""bar"" } }
+        var jsonComplexValue = """
+            {
+                "Serilog": {
+                    "Using": ["TestDummies"],
+                    "WriteTo": [{
+                        "Name": "DummyRollingFile",
+                        "Args": {"pathFormat" : { "foo" : "bar" } }
                     }]
                 }
-            }";
+            }
+            """;
 
         // These will combine into a ConfigurationSection object that has both
         // Value == "C:\" and GetChildren() == List<string>. No configuration
@@ -890,15 +950,17 @@ public class ConfigurationSettingsTests
     [Fact]
     public void DestructureLimitsNestingDepth()
     {
-        var json = @"{
-                ""Serilog"": {
-                    ""Destructure"": [
+        var json = """
+            {
+                "Serilog": {
+                    "Destructure": [
                     {
-                        ""Name"": ""ToMaximumDepth"",
-                        ""Args"": { ""maximumDestructuringDepth"": 3 }
+                        "Name": "ToMaximumDepth",
+                        "Args": { "maximumDestructuringDepth": 3 }
                     }]
                 }
-            }";
+            }
+            """;
 
         var NestedObject = new
         {
@@ -923,15 +985,17 @@ public class ConfigurationSettingsTests
     [Fact]
     public void DestructureLimitsStringLength()
     {
-        var json = @"{
-                ""Serilog"": {
-                    ""Destructure"": [
+        var json = """
+            {
+                "Serilog": {
+                    "Destructure": [
                     {
-                        ""Name"": ""ToMaximumStringLength"",
-                        ""Args"": { ""maximumStringLength"": 3 }
+                        "Name": "ToMaximumStringLength",
+                        "Args": { "maximumStringLength": 3 }
                     }]
                 }
-            }";
+            }
+            """;
 
         var inputString = "ABCDEFGH";
         var msg = GetDestructuredProperty(inputString, json);
@@ -942,15 +1006,17 @@ public class ConfigurationSettingsTests
     [Fact]
     public void DestructureLimitsCollectionCount()
     {
-        var json = @"{
-                ""Serilog"": {
-                    ""Destructure"": [
+        var json = """
+            {
+                "Serilog": {
+                    "Destructure": [
                     {
-                        ""Name"": ""ToMaximumCollectionCount"",
-                        ""Args"": { ""maximumCollectionCount"": 3 }
+                        "Name": "ToMaximumCollectionCount",
+                        "Args": { "maximumCollectionCount": 3 }
                     }]
                 }
-            }";
+            }
+            """;
 
         var collection = new[] { 1, 2, 3, 4, 5, 6 };
         var msg = GetDestructuredProperty(collection, json);
@@ -973,16 +1039,18 @@ public class ConfigurationSettingsTests
     [Fact]
     public void DestructuringWithCustomExtensionMethodIsApplied()
     {
-        var json = @"{
-                ""Serilog"": {
-                    ""Using"": [""TestDummies""],
-                    ""Destructure"": [
+        var json = """
+            {
+                "Serilog": {
+                    "Using": ["TestDummies"],
+                    "Destructure": [
                     {
-                        ""Name"": ""WithDummyHardCodedString"",
-                        ""Args"": { ""hardCodedString"": ""hardcoded"" }
+                        "Name": "WithDummyHardCodedString",
+                        "Args": { "hardCodedString": "hardcoded" }
                     }]
                 }
-            }";
+            }
+            """;
 
         LogEvent evt = null;
         var log = ConfigFromJson(json)
@@ -997,15 +1065,17 @@ public class ConfigurationSettingsTests
     [Fact]
     public void DestructuringAsScalarIsAppliedWithShortTypeName()
     {
-        var json = @"{
-                ""Serilog"": {
-                    ""Destructure"": [
+        var json = """
+            {
+                "Serilog": {
+                    "Destructure": [
                     {
-                        ""Name"": ""AsScalar"",
-                        ""Args"": { ""scalarType"": ""System.Version"" }
+                        "Name": "AsScalar",
+                        "Args": { "scalarType": "System.Version" }
                     }]
                 }
-            }";
+            }
+            """;
 
         LogEvent evt = null;
         var log = ConfigFromJson(json)
@@ -1021,15 +1091,17 @@ public class ConfigurationSettingsTests
     [Fact]
     public void DestructuringAsScalarIsAppliedWithAssemblyQualifiedName()
     {
-        var json = $@"{{
-                ""Serilog"": {{
-                    ""Destructure"": [
-                    {{
-                        ""Name"": ""AsScalar"",
-                        ""Args"": {{ ""scalarType"": ""{typeof(Version).AssemblyQualifiedName}"" }}
-                    }}]
-                }}
-            }}";
+        var json = $$"""
+            {
+                "Serilog": {
+                    "Destructure": [
+                    {
+                        "Name": "AsScalar",
+                        "Args": { "scalarType": "{{typeof(Version).AssemblyQualifiedName}}" }
+                    }]
+                }
+            }
+            """;
 
         LogEvent evt = null;
         var log = ConfigFromJson(json)
@@ -1045,18 +1117,20 @@ public class ConfigurationSettingsTests
     [Fact]
     public void WriteToSinkIsAppliedWithCustomSink()
     {
-        var json = $@"{{
-                ""Serilog"": {{
-                    ""Using"": [""TestDummies""],
-                    ""WriteTo"": [
-                    {{
-                        ""Name"": ""Sink"",
-                        ""Args"": {{
-                            ""sink"": ""{typeof(DummyRollingFileSink).AssemblyQualifiedName}""
-                        }}
-                    }}]
-                }}
-            }}";
+        var json = $$"""
+            {
+                "Serilog": {
+                    "Using": ["TestDummies"],
+                    "WriteTo": [
+                    {
+                        "Name": "Sink",
+                        "Args": {
+                            "sink": "{{typeof(DummyRollingFileSink).AssemblyQualifiedName}}"
+                        }
+                    }]
+                }
+            }
+            """;
 
         var log = ConfigFromJson(json)
             .CreateLogger();
@@ -1070,19 +1144,21 @@ public class ConfigurationSettingsTests
     [Fact]
     public void WriteToSinkIsAppliedWithCustomSinkAndMinimumLevel()
     {
-        var json = $@"{{
-                ""Serilog"": {{
-                    ""Using"": [""TestDummies""],
-                    ""WriteTo"": [
-                    {{
-                        ""Name"": ""Sink"",
-                        ""Args"": {{
-                            ""sink"": ""{typeof(DummyRollingFileSink).AssemblyQualifiedName}"",
-                            ""restrictedToMinimumLevel"": ""Warning""
-                        }}
-                    }}]
-                }}
-            }}";
+        var json = $$"""
+            {
+                "Serilog": {
+                    "Using": ["TestDummies"],
+                    "WriteTo": [
+                    {
+                        "Name": "Sink",
+                        "Args": {
+                            "sink": "{{typeof(DummyRollingFileSink).AssemblyQualifiedName}}",
+                            "restrictedToMinimumLevel": "Warning"
+                        }
+                    }]
+                }
+            }
+            """;
 
         var log = ConfigFromJson(json)
             .CreateLogger();
@@ -1097,20 +1173,22 @@ public class ConfigurationSettingsTests
     [Fact]
     public void WriteToSinkIsAppliedWithCustomSinkAndLevelSwitch()
     {
-        var json = $@"{{
-                ""Serilog"": {{
-                    ""Using"": [""TestDummies""],
-                    ""LevelSwitches"": {{""$switch1"": ""Warning"" }},
-                    ""WriteTo"": [
-                    {{
-                        ""Name"": ""Sink"",
-                        ""Args"": {{
-                            ""sink"": ""{typeof(DummyRollingFileSink).AssemblyQualifiedName}"",
-                            ""levelSwitch"": ""$switch1""
-                        }}
-                    }}]
-                }}
-            }}";
+        var json = $$"""
+            {
+                "Serilog": {
+                    "Using": ["TestDummies"],
+                    "LevelSwitches": {"$switch1": "Warning" },
+                    "WriteTo": [
+                    {
+                        "Name": "Sink",
+                        "Args": {
+                            "sink": "{{typeof(DummyRollingFileSink).AssemblyQualifiedName}}",
+                            "levelSwitch": "$switch1"
+                        }
+                    }]
+                }
+            }
+            """;
 
         var log = ConfigFromJson(json)
             .CreateLogger();
@@ -1125,18 +1203,20 @@ public class ConfigurationSettingsTests
     [Fact]
     public void AuditToSinkIsAppliedWithCustomSink()
     {
-        var json = $@"{{
-                ""Serilog"": {{
-                    ""Using"": [""TestDummies""],
-                    ""AuditTo"": [
-                    {{
-                        ""Name"": ""Sink"",
-                        ""Args"": {{
-                            ""sink"": ""{typeof(DummyRollingFileSink).AssemblyQualifiedName}""
-                        }}
-                    }}]
-                }}
-            }}";
+        var json = $$"""
+            {
+                "Serilog": {
+                    "Using": ["TestDummies"],
+                    "AuditTo": [
+                    {
+                        "Name": "Sink",
+                        "Args": {
+                            "sink": "{{typeof(DummyRollingFileSink).AssemblyQualifiedName}}"
+                        }
+                    }]
+                }
+            }
+            """;
 
         var log = ConfigFromJson(json)
             .CreateLogger();
@@ -1150,19 +1230,21 @@ public class ConfigurationSettingsTests
     [Fact]
     public void AuditToSinkIsAppliedWithCustomSinkAndMinimumLevel()
     {
-        var json = $@"{{
-                ""Serilog"": {{
-                    ""Using"": [""TestDummies""],
-                    ""AuditTo"": [
-                    {{
-                        ""Name"": ""Sink"",
-                        ""Args"": {{
-                            ""sink"": ""{typeof(DummyRollingFileSink).AssemblyQualifiedName}"",
-                            ""restrictedToMinimumLevel"": ""Warning""
-                        }}
-                    }}]
-                }}
-            }}";
+        var json = $$"""
+            {
+                "Serilog": {
+                    "Using": ["TestDummies"],
+                    "AuditTo": [
+                    {
+                        "Name": "Sink",
+                        "Args": {
+                            "sink": "{{typeof(DummyRollingFileSink).AssemblyQualifiedName}}",
+                            "restrictedToMinimumLevel": "Warning"
+                        }
+                    }]
+                }
+            }
+            """;
 
         var log = ConfigFromJson(json)
             .CreateLogger();
@@ -1177,20 +1259,22 @@ public class ConfigurationSettingsTests
     [Fact]
     public void AuditToSinkIsAppliedWithCustomSinkAndLevelSwitch()
     {
-        var json = $@"{{
-                ""Serilog"": {{
-                    ""Using"": [""TestDummies""],
-                    ""LevelSwitches"": {{""$switch1"": ""Warning"" }},
-                    ""AuditTo"": [
-                    {{
-                        ""Name"": ""Sink"",
-                        ""Args"": {{
-                            ""sink"": ""{typeof(DummyRollingFileSink).AssemblyQualifiedName}"",
-                            ""levelSwitch"": ""$switch1""
-                        }}
-                    }}]
-                }}
-            }}";
+        var json = $$"""
+            {
+                "Serilog": {
+                    "Using": ["TestDummies"],
+                    "LevelSwitches": {"$switch1": "Warning" },
+                    "AuditTo": [
+                    {
+                        "Name": "Sink",
+                        "Args": {
+                            "sink": "{{typeof(DummyRollingFileSink).AssemblyQualifiedName}}",
+                            "levelSwitch": "$switch1"
+                        }
+                    }]
+                }
+            }
+            """;
 
         var log = ConfigFromJson(json)
             .CreateLogger();
@@ -1207,18 +1291,20 @@ public class ConfigurationSettingsTests
     {
         LogEvent evt = null;
 
-        var json = $@"{{
-                ""Serilog"": {{
-                    ""Using"": [""TestDummies""],
-                    ""Enrich"": [
-                    {{
-                        ""Name"": ""With"",
-                        ""Args"": {{
-                            ""enricher"": ""{typeof(DummyThreadIdEnricher).AssemblyQualifiedName}""
-                        }}
-                    }}]
-                }}
-            }}";
+        var json = $$"""
+            {
+                "Serilog": {
+                    "Using": ["TestDummies"],
+                    "Enrich": [
+                    {
+                        "Name": "With",
+                        "Args": {
+                            "enricher": "{{typeof(DummyThreadIdEnricher).AssemblyQualifiedName}}"
+                        }
+                    }]
+                }
+            }
+            """;
 
         var log = ConfigFromJson(json)
             .WriteTo.Sink(new DelegatingSink(e => evt = e))
@@ -1235,18 +1321,20 @@ public class ConfigurationSettingsTests
     {
         LogEvent evt = null;
 
-        var json = $@"{{
-                ""Serilog"": {{
-                    ""Using"": [""TestDummies""],
-                    ""Filter"": [
-                    {{
-                        ""Name"": ""With"",
-                        ""Args"": {{
-                            ""filter"": ""{typeof(DummyAnonymousUserFilter).AssemblyQualifiedName}""
-                        }}
-                    }}]
-                }}
-            }}";
+        var json = $$"""
+            {
+                "Serilog": {
+                    "Using": ["TestDummies"],
+                    "Filter": [
+                    {
+                        "Name": "With",
+                        "Args": {
+                            "filter": "{{typeof(DummyAnonymousUserFilter).AssemblyQualifiedName}}"
+                        }
+                    }]
+                }
+            }
+            """;
 
         var log = ConfigFromJson(json)
             .WriteTo.Sink(new DelegatingSink(e => evt = e))

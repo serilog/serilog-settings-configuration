@@ -9,7 +9,8 @@ namespace Serilog.Settings.Configuration.Tests;
 
 public class DynamicLevelChangeTests
 {
-    const string DefaultConfig = @"{
+    const string DefaultConfig = """
+        {
             'Serilog': {
                 'Using': [ 'TestDummies' ],
                 'MinimumLevel': {
@@ -33,7 +34,8 @@ public class DynamicLevelChangeTests
                     }
                 }
             }
-        }";
+        }
+        """;
 
     readonly ReloadableConfigurationSource _configSource;
 
