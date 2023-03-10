@@ -156,4 +156,17 @@ public static class DummyLoggerConfigurationExtensions
             CustomStrings = customString,
         });
     }
+
+    public static LoggerConfiguration DummyNumbers(this LoggerDestructuringConfiguration loggerSinkConfiguration,
+        float floatValue,
+        double doubleValue,
+        decimal decimalValue)
+    {
+        return loggerSinkConfiguration.With(DummyPolicy.Current = new DummyPolicy
+        {
+            Float = floatValue,
+            Double = doubleValue,
+            Decimal = decimalValue,
+        });
+    }
 }

@@ -1,4 +1,4 @@
-﻿// Copyright 2013-2016 Serilog Contributors
+// Copyright 2013-2016 Serilog Contributors
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -42,6 +42,7 @@ public static class ConfigurationLoggerConfigurationExtensions
     /// <param name="dependencyContext">The dependency context from which sink/enricher packages can be located. If not supplied, the platform
     /// default will be used.</param>
     /// <returns>An object allowing configuration to continue.</returns>
+    [Obsolete("Use ReadFrom.Configuration(IConfiguration configuration, ConfigurationReaderOptions readerOptions) instead.")]
     public static LoggerConfiguration Configuration(
         this LoggerSettingsConfiguration settingConfiguration,
         IConfiguration configuration,
@@ -52,15 +53,8 @@ public static class ConfigurationLoggerConfigurationExtensions
         if (configuration == null) throw new ArgumentNullException(nameof(configuration));
         if (sectionName == null) throw new ArgumentNullException(nameof(sectionName));
 
-        var assemblyFinder = dependencyContext == null
-            ? AssemblyFinder.Auto()
-            : AssemblyFinder.ForDependencyContext(dependencyContext);
-
-        return settingConfiguration.Settings(
-            new ConfigurationReader(
-                configuration.GetSection(sectionName),
-                assemblyFinder,
-                configuration));
+        var readerOptions = new ConfigurationReaderOptions(dependencyContext) { SectionName = sectionName, FormatProvider = null };
+        return Configuration(settingConfiguration, configuration, readerOptions);
     }
 
     /// <summary>
@@ -73,10 +67,11 @@ public static class ConfigurationLoggerConfigurationExtensions
     /// <param name="dependencyContext">The dependency context from which sink/enricher packages can be located. If not supplied, the platform
     /// default will be used.</param>
     /// <returns>An object allowing configuration to continue.</returns>
+    [Obsolete("Use ReadFrom.Configuration(IConfiguration configuration, ConfigurationReaderOptions readerOptions) instead.")]
     public static LoggerConfiguration Configuration(
         this LoggerSettingsConfiguration settingConfiguration,
         IConfiguration configuration,
-        DependencyContext dependencyContext = null)
+        DependencyContext dependencyContext)
         => Configuration(settingConfiguration, configuration, DefaultSectionName, dependencyContext);
 
     /// <summary>
@@ -105,7 +100,8 @@ public static class ConfigurationLoggerConfigurationExtensions
             new ConfigurationReader(
                 configSection,
                 assemblyFinder,
-                configuration: null));
+                configuration: null,
+                formatProvider: null));
     }
 
     /// <summary>
@@ -118,6 +114,7 @@ public static class ConfigurationLoggerConfigurationExtensions
     /// <param name="sectionName">A section name for section which contains a Serilog section.</param>
     /// <param name="configurationAssemblySource">Defines how the package identifies assemblies to scan for sinks and other types.</param>
     /// <returns>An object allowing configuration to continue.</returns>
+    [Obsolete("Use ReadFrom.Configuration(IConfiguration configuration, ConfigurationReaderOptions readerOptions) instead.")]
     public static LoggerConfiguration Configuration(
         this LoggerSettingsConfiguration settingConfiguration,
         IConfiguration configuration,
@@ -128,9 +125,8 @@ public static class ConfigurationLoggerConfigurationExtensions
         if (configuration == null) throw new ArgumentNullException(nameof(configuration));
         if (sectionName == null) throw new ArgumentNullException(nameof(sectionName));
 
-        var assemblyFinder = AssemblyFinder.ForSource(configurationAssemblySource);
-
-        return settingConfiguration.Settings(new ConfigurationReader(configuration.GetSection(sectionName), assemblyFinder, configuration));
+        var readerOptions = new ConfigurationReaderOptions(configurationAssemblySource) { SectionName = sectionName, FormatProvider = null };
+        return Configuration(settingConfiguration, configuration, readerOptions);
     }
 
     /// <summary>
@@ -142,6 +138,7 @@ public static class ConfigurationLoggerConfigurationExtensions
     /// <param name="configuration">A configuration object which contains a Serilog section.</param>
     /// <param name="configurationAssemblySource">Defines how the package identifies assemblies to scan for sinks and other types.</param>
     /// <returns>An object allowing configuration to continue.</returns>
+    [Obsolete("Use ReadFrom.Configuration(IConfiguration configuration, ConfigurationReaderOptions readerOptions) instead.")]
     public static LoggerConfiguration Configuration(
         this LoggerSettingsConfiguration settingConfiguration,
         IConfiguration configuration,
@@ -167,7 +164,7 @@ public static class ConfigurationLoggerConfigurationExtensions
 
         var assemblyFinder = AssemblyFinder.ForSource(configurationAssemblySource);
 
-        return settingConfiguration.Settings(new ConfigurationReader(configSection, assemblyFinder, configuration: null));
+        return settingConfiguration.Settings(new ConfigurationReader(configSection, assemblyFinder, configuration: null, formatProvider: null));
     }
 
     /// <summary>
@@ -178,6 +175,7 @@ public static class ConfigurationLoggerConfigurationExtensions
     /// <param name="sectionName">A section name for section which contains a Serilog section.</param>
     /// <param name="assemblies">A collection of assemblies that contains sinks and other types.</param>
     /// <returns>An object allowing configuration to continue.</returns>
+    [Obsolete("Use ReadFrom.Configuration(IConfiguration configuration, ConfigurationReaderOptions readerOptions) instead.")]
     public static LoggerConfiguration Configuration(
         this LoggerSettingsConfiguration settingConfiguration,
         IConfiguration configuration,
@@ -188,7 +186,8 @@ public static class ConfigurationLoggerConfigurationExtensions
         if (configuration == null) throw new ArgumentNullException(nameof(configuration));
         if (sectionName == null) throw new ArgumentNullException(nameof(sectionName));
 
-        return settingConfiguration.Settings(new ConfigurationReader(configuration.GetSection(sectionName), assemblies, new ResolutionContext(configuration)));
+        var readerOptions = new ConfigurationReaderOptions(assemblies) { SectionName = sectionName, FormatProvider = null };
+        return Configuration(settingConfiguration, configuration, readerOptions);
     }
 
     /// <summary>
@@ -198,9 +197,51 @@ public static class ConfigurationLoggerConfigurationExtensions
     /// <param name="configuration">A configuration object which contains a Serilog section.</param>
     /// <param name="assemblies">A collection of assemblies that contains sinks and other types.</param>
     /// <returns>An object allowing configuration to continue.</returns>
+    [Obsolete("Use ReadFrom.Configuration(IConfiguration configuration, ConfigurationReaderOptions readerOptions) instead.")]
     public static LoggerConfiguration Configuration(
         this LoggerSettingsConfiguration settingConfiguration,
         IConfiguration configuration,
         params Assembly[] assemblies)
         => Configuration(settingConfiguration, configuration, DefaultSectionName, assemblies);
+
+    /// <summary>
+    /// Reads logger settings from the provided configuration object using the specified context.
+    /// </summary>
+    /// <param name="settingConfiguration">Logger setting configuration.</param>
+    /// <param name="configuration">A configuration object which contains a Serilog section.</param>
+    /// <param name="readerOptions">Options to adjust how the configuration object is processed.</param>
+    /// <returns>An object allowing configuration to continue.</returns>
+    public static LoggerConfiguration Configuration(
+        this LoggerSettingsConfiguration settingConfiguration,
+        IConfiguration configuration,
+        ConfigurationReaderOptions readerOptions = null)
+    {
+        var configurationReader = readerOptions switch
+        {
+            { ConfigurationAssemblySource: {} } => GetConfigurationReader(configuration, readerOptions, readerOptions.ConfigurationAssemblySource.Value),
+            { Assemblies: {} } => GetConfigurationReader(configuration, readerOptions, readerOptions.Assemblies),
+            _ => GetConfigurationReader(configuration, readerOptions ?? new ConfigurationReaderOptions(), readerOptions?.DependencyContext),
+        };
+        return settingConfiguration.Settings(configurationReader);
+    }
+
+    static ConfigurationReader GetConfigurationReader(IConfiguration configuration, ConfigurationReaderOptions readerOptions, DependencyContext dependencyContext)
+    {
+        var assemblyFinder = dependencyContext == null ? AssemblyFinder.Auto() : AssemblyFinder.ForDependencyContext(dependencyContext);
+        var section = configuration.GetSection(readerOptions.SectionName);
+        return new ConfigurationReader(section, assemblyFinder, readerOptions.FormatProvider, configuration);
+    }
+
+    static ConfigurationReader GetConfigurationReader(IConfiguration configuration, ConfigurationReaderOptions readerOptions, ConfigurationAssemblySource source)
+    {
+        var assemblyFinder = AssemblyFinder.ForSource(source);
+        var section = configuration.GetSection(readerOptions.SectionName);
+        return new ConfigurationReader(section, assemblyFinder, readerOptions.FormatProvider, configuration);
+    }
+
+    static ConfigurationReader GetConfigurationReader(IConfiguration configuration, ConfigurationReaderOptions readerOptions, IReadOnlyCollection<Assembly> assemblies)
+    {
+        var section = configuration.GetSection(readerOptions.SectionName);
+        return new ConfigurationReader(section, assemblies, new ResolutionContext(configuration, readerOptions.FormatProvider));
+    }
 }

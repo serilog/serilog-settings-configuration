@@ -65,8 +65,9 @@ Root section name can be changed:
 ```
 
 ```csharp
+var options = new ConfigurationReaderOptions { SectionName = "CustomSection" };
 var logger = new LoggerConfiguration()
-    .ReadFrom.Configuration(configuration, sectionName: "CustomSection")
+    .ReadFrom.Configuration(configuration, options)
     .CreateLogger();
 ```
 
@@ -106,8 +107,9 @@ In case of [non-standard](#azure-functions-v2-v3) dependency management you can 
 ```csharp
 var functionDependencyContext = DependencyContext.Load(typeof(Startup).Assembly);
 
+var options = new ConfigurationReaderOptions(functionDependencyContext) { SectionName = "AzureFunctionsJobHost:Serilog" };
 var logger = new LoggerConfiguration()
-    .ReadFrom.Configuration(hostConfig, sectionName: "AzureFunctionsJobHost:Serilog", dependencyContext: functionDependencyContext)
+    .ReadFrom.Configuration(hostConfig, options)
     .CreateLogger();
 ```
 
@@ -119,8 +121,9 @@ var configurationAssemblies = new[]
     typeof(ConsoleLoggerConfigurationExtensions).Assembly,
     typeof(FileLoggerConfigurationExtensions).Assembly,
 };
+var options = new ConfigurationReaderOptions(configurationAssemblies);
 var logger = new LoggerConfiguration()
-    .ReadFrom.Configuration(configuration, configurationAssemblies)
+    .ReadFrom.Configuration(configuration, options)
     .CreateLogger();
 ```
 
@@ -282,6 +285,8 @@ Some Serilog packages require a reference to a logger configuration object. The 
 
 When the configuration specifies a discrete value for a parameter (such as a string literal), the package will attempt to convert that value to the target method's declared CLR type of the parameter. Additional explicit handling is provided for parsing strings to `Uri`, `TimeSpan`, `enum`, arrays and custom collections.
 
+Since version 4.0.0, conversion will use the invariant culture (`CultureInfo.InvariantCulture`) as long as the `ReadFrom.Configuration(IConfiguration configuration, ConfigurationReaderOptions options)` method is used. Obsolete methods use the current culture to preserve backward compatibility.
+
 ### Static member support
 
 Static member access can be used for passing to the configuration argument via [special](https://github.com/serilog/serilog-settings-configuration/blob/dev/test/Serilog.Settings.Configuration.Tests/StringArgumentValueTests.cs#L35) syntax:
@@ -377,8 +382,9 @@ public class Startup : FunctionsStartup
             var functionDependencyContext = DependencyContext.Load(typeof(Startup).Assembly);
 
             var hostConfig = sp.GetRequiredService<IConfiguration>();
+            var options = new ConfigurationReaderOptions(functionDependencyContext) { SectionName = "AzureFunctionsJobHost:Serilog" };
             var logger = new LoggerConfiguration()
-                .ReadFrom.Configuration(hostConfig, sectionName: "AzureFunctionsJobHost:Serilog", dependencyContext: functionDependencyContext)
+                .ReadFrom.Configuration(hostConfig, options)
                 .CreateLogger();
 
             return new SerilogLoggerProvider(logger, dispose: true);

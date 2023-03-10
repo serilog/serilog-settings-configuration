@@ -96,7 +96,7 @@ public class LoggerConfigurationExtensionsTests
             .Build();
 
         _ = new LoggerConfiguration()
-               .ReadFrom.Configuration(config, "NotSerilog")
+               .ReadFrom.Configuration(config, new ConfigurationReaderOptions { SectionName = "NotSerilog" })
                .CreateLogger();
 
     }
