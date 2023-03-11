@@ -1351,17 +1351,19 @@ public class ConfigurationSettingsTests
     [InlineData("switch1")]
     public void TestLogLevelSwitchesCallback(string switchName)
     {
-        var json = $@"{{
-                'Serilog': {{
-                    'LevelSwitches': {{ '{switchName}': 'Information' }},
-                    'MinimumLevel': {{
-                        'Override': {{
+        var json = $$"""
+            {
+                'Serilog': {
+                    'LevelSwitches': { '{{switchName}}': 'Information' },
+                    'MinimumLevel': {
+                        'Override': {
                             'System': 'Warning',
                             'System.Threading': 'Debug'
-                        }}
-                    }}
-                }}
-            }}";
+                        }
+                    }
+                }
+            }
+            """;
 
         IDictionary<string, LoggingLevelSwitch> switches = new Dictionary<string, LoggingLevelSwitch>();
         var readerOptions = new ConfigurationReaderOptions { OnLevelSwitchCreated = (name, levelSwitch) => switches[name] = levelSwitch };
