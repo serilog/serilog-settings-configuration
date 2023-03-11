@@ -20,9 +20,9 @@ class ConfigurationReader : IConfigurationReader
     readonly IConfiguration _section;
     readonly IReadOnlyCollection<Assembly> _configurationAssemblies;
     readonly ResolutionContext _resolutionContext;
-    readonly IConfigurationRoot _configurationRoot;
+    readonly IConfigurationRoot? _configurationRoot;
 
-    public ConfigurationReader(IConfiguration configSection, AssemblyFinder assemblyFinder, ConfigurationReaderOptions readerOptions, IConfiguration configuration = null)
+    public ConfigurationReader(IConfiguration configSection, AssemblyFinder assemblyFinder, ConfigurationReaderOptions readerOptions, IConfiguration? configuration = null)
     {
         _section = configSection ?? throw new ArgumentNullException(nameof(configSection));
         _configurationAssemblies = LoadConfigurationAssemblies(_section, assemblyFinder);
@@ -145,8 +145,8 @@ class ConfigurationReader : IConfigurationReader
     {
         var minimumLevelDirective = _section.GetSection("MinimumLevel");
 
-        IConfigurationSection defaultMinLevelDirective = GetDefaultMinLevelDirective();
-        if (defaultMinLevelDirective.Value != null)
+        IConfigurationSection? defaultMinLevelDirective = GetDefaultMinLevelDirective();
+        if (defaultMinLevelDirective?.Value != null)
         {
             ApplyMinimumLevelConfiguration(defaultMinLevelDirective, (configuration, levelSwitch) => configuration.ControlledBy(levelSwitch));
         }
@@ -189,7 +189,7 @@ class ConfigurationReader : IConfigurationReader
             SubscribeToLoggingLevelChanges(directive, levelSwitch);
         }
 
-        IConfigurationSection GetDefaultMinLevelDirective()
+        IConfigurationSection? GetDefaultMinLevelDirective()
         {
             var defaultLevelDirective = minimumLevelDirective.GetSection("Default");
             if (_configurationRoot != null && minimumLevelDirective.Value != null && defaultLevelDirective.Value != null)
@@ -439,7 +439,7 @@ class ConfigurationReader : IConfigurationReader
         return parameter.DefaultValue;
     }
 
-    internal static MethodInfo SelectConfigurationMethod(IReadOnlyCollection<MethodInfo> candidateMethods, string name, IReadOnlyCollection<string> suppliedArgumentNames)
+    internal static MethodInfo? SelectConfigurationMethod(IReadOnlyCollection<MethodInfo> candidateMethods, string name, IReadOnlyCollection<string> suppliedArgumentNames)
     {
         // Per issue #111, it is safe to use case-insensitive matching on argument names. The CLR doesn't permit this type
         // of overloading, and the Microsoft.Extensions.Configuration keys are case-insensitive (case is preserved with some

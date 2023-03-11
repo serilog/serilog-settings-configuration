@@ -19,7 +19,7 @@ public class LoggerConfigurationExtensionsTests
     [Trait("BugFix", "https://github.com/serilog/serilog-settings-configuration/issues/143")]
     public void ReadFromConfigurationSectionReadsFromAnArbitrarySection()
     {
-        LogEvent evt = null;
+        LogEvent? evt = null;
 
         var json = """
             {
@@ -45,7 +45,7 @@ public class LoggerConfigurationExtensionsTests
         log.Information("Has a test property");
 
         Assert.NotNull(evt);
-        Assert.Equal("Test", evt.Properties["App"].LiteralValue());
+        Assert.Equal("Test", evt?.Properties["App"].LiteralValue());
     }
 
     [Fact]

@@ -9,13 +9,13 @@ namespace Serilog
         [System.Obsolete("Use ReadFrom.Configuration(IConfiguration configuration, ConfigurationReaderOptio" +
             "ns readerOptions) instead.")]
         public static Serilog.LoggerConfiguration Configuration(this Serilog.Configuration.LoggerSettingsConfiguration settingConfiguration, Microsoft.Extensions.Configuration.IConfiguration configuration, Serilog.Settings.Configuration.ConfigurationAssemblySource configurationAssemblySource) { }
-        public static Serilog.LoggerConfiguration Configuration(this Serilog.Configuration.LoggerSettingsConfiguration settingConfiguration, Microsoft.Extensions.Configuration.IConfiguration configuration, Serilog.Settings.Configuration.ConfigurationReaderOptions readerOptions = null) { }
+        public static Serilog.LoggerConfiguration Configuration(this Serilog.Configuration.LoggerSettingsConfiguration settingConfiguration, Microsoft.Extensions.Configuration.IConfiguration configuration, Serilog.Settings.Configuration.ConfigurationReaderOptions? readerOptions = null) { }
         [System.Obsolete("Use ReadFrom.Configuration(IConfiguration configuration, ConfigurationReaderOptio" +
             "ns readerOptions) instead.")]
         public static Serilog.LoggerConfiguration Configuration(this Serilog.Configuration.LoggerSettingsConfiguration settingConfiguration, Microsoft.Extensions.Configuration.IConfiguration configuration, params System.Reflection.Assembly[] assemblies) { }
         [System.Obsolete("Use ReadFrom.Configuration(IConfiguration configuration, ConfigurationReaderOptio" +
             "ns readerOptions) instead.")]
-        public static Serilog.LoggerConfiguration Configuration(this Serilog.Configuration.LoggerSettingsConfiguration settingConfiguration, Microsoft.Extensions.Configuration.IConfiguration configuration, string sectionName, Microsoft.Extensions.DependencyModel.DependencyContext dependencyContext = null) { }
+        public static Serilog.LoggerConfiguration Configuration(this Serilog.Configuration.LoggerSettingsConfiguration settingConfiguration, Microsoft.Extensions.Configuration.IConfiguration configuration, string sectionName, Microsoft.Extensions.DependencyModel.DependencyContext? dependencyContext = null) { }
         [System.Obsolete("Use ReadFrom.Configuration(IConfiguration configuration, ConfigurationReaderOptio" +
             "ns readerOptions) instead.")]
         public static Serilog.LoggerConfiguration Configuration(this Serilog.Configuration.LoggerSettingsConfiguration settingConfiguration, Microsoft.Extensions.Configuration.IConfiguration configuration, string sectionName, Serilog.Settings.Configuration.ConfigurationAssemblySource configurationAssemblySource) { }
@@ -24,7 +24,7 @@ namespace Serilog
         public static Serilog.LoggerConfiguration Configuration(this Serilog.Configuration.LoggerSettingsConfiguration settingConfiguration, Microsoft.Extensions.Configuration.IConfiguration configuration, string sectionName, params System.Reflection.Assembly[] assemblies) { }
         [System.Obsolete("Use ReadFrom.Configuration(IConfiguration configuration, string sectionName, Depe" +
             "ndencyContext dependencyContext) instead.")]
-        public static Serilog.LoggerConfiguration ConfigurationSection(this Serilog.Configuration.LoggerSettingsConfiguration settingConfiguration, Microsoft.Extensions.Configuration.IConfigurationSection configSection, Microsoft.Extensions.DependencyModel.DependencyContext dependencyContext = null) { }
+        public static Serilog.LoggerConfiguration ConfigurationSection(this Serilog.Configuration.LoggerSettingsConfiguration settingConfiguration, Microsoft.Extensions.Configuration.IConfigurationSection configSection, Microsoft.Extensions.DependencyModel.DependencyContext? dependencyContext = null) { }
         [System.Obsolete("Use ReadFrom.Configuration(IConfiguration configuration, string sectionName, Conf" +
             "igurationAssemblySource configurationAssemblySource) instead.")]
         public static Serilog.LoggerConfiguration ConfigurationSection(this Serilog.Configuration.LoggerSettingsConfiguration settingConfiguration, Microsoft.Extensions.Configuration.IConfigurationSection configSection, Serilog.Settings.Configuration.ConfigurationAssemblySource configurationAssemblySource) { }
@@ -40,11 +40,11 @@ namespace Serilog.Settings.Configuration
     public sealed class ConfigurationReaderOptions
     {
         public ConfigurationReaderOptions() { }
-        public ConfigurationReaderOptions(Microsoft.Extensions.DependencyModel.DependencyContext dependencyContext) { }
+        public ConfigurationReaderOptions(Microsoft.Extensions.DependencyModel.DependencyContext? dependencyContext) { }
         public ConfigurationReaderOptions(Serilog.Settings.Configuration.ConfigurationAssemblySource configurationAssemblySource) { }
         public ConfigurationReaderOptions(params System.Reflection.Assembly[] assemblies) { }
-        public System.IFormatProvider FormatProvider { get; init; }
-        public System.Action<string, Serilog.Core.LoggingLevelSwitch> OnLevelSwitchCreated { get; init; }
-        public string SectionName { get; init; }
+        public System.IFormatProvider? FormatProvider { get; init; }
+        public System.Action<string, Serilog.Core.LoggingLevelSwitch>? OnLevelSwitchCreated { get; init; }
+        public string? SectionName { get; init; }
     }
 }

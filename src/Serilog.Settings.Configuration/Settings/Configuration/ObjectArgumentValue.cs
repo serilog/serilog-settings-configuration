@@ -1,3 +1,4 @@
+using System.Diagnostics.CodeAnalysis;
 using System.Linq.Expressions;
 using System.Reflection;
 
@@ -20,7 +21,7 @@ class ObjectArgumentValue : IConfigurationArgumentValue
         _configurationAssemblies = configurationAssemblies ?? throw new ArgumentNullException(nameof(configurationAssemblies));
     }
 
-    public object ConvertTo(Type toType, ResolutionContext resolutionContext)
+    public object? ConvertTo(Type toType, ResolutionContext resolutionContext)
     {
         // return the entire section for internal processing
         if (toType == typeof(IConfigurationSection)) return _section;
@@ -71,7 +72,7 @@ class ObjectArgumentValue : IConfigurationArgumentValue
             return array;
         }
 
-        bool TryCreateContainer(out object result)
+        bool TryCreateContainer([NotNullWhen(true)] out object? result)
         {
             result = null;
 
@@ -98,7 +99,7 @@ class ObjectArgumentValue : IConfigurationArgumentValue
     }
 
     internal static bool TryBuildCtorExpression(
-        IConfigurationSection section, Type parameterType, ResolutionContext resolutionContext, out NewExpression ctorExpression)
+        IConfigurationSection section, Type parameterType, ResolutionContext resolutionContext, [NotNullWhen(true)] out NewExpression? ctorExpression)
     {
         ctorExpression = null;
 
@@ -138,11 +139,11 @@ class ObjectArgumentValue : IConfigurationArgumentValue
              from p in c.GetParameters()
              let argumentBindResult = suppliedArguments.TryGetValue(p.Name, out var argValue) switch
              {
-                 true => new { success = true, hasMatch = true, value = (object)argValue },
+                 true => new { success = true, hasMatch = true, value = (object?)argValue },
                  false => p.HasDefaultValue switch
                  {
-                     true  => new { success = true,  hasMatch = false, value = p.DefaultValue },
-                     false => new { success = false, hasMatch = false, value = (object)null },
+                     true  => new { success = true,  hasMatch = false, value = (object?)p.DefaultValue },
+                     false => new { success = false, hasMatch = false, value = (object?)null },
                  },
              }
              group new { argumentBindResult, p.ParameterType } by c into gr
@@ -178,7 +179,7 @@ class ObjectArgumentValue : IConfigurationArgumentValue
         ctorExpression = Expression.New(ctor.ConstructorInfo, ctorArguments);
         return true;
 
-        static bool TryBindToCtorArgument(object value, Type type, ResolutionContext resolutionContext, out Expression argumentExpression)
+        static bool TryBindToCtorArgument(object value, Type type, ResolutionContext resolutionContext, [NotNullWhen(true)] out Expression? argumentExpression)
         {
             argumentExpression = null;
 
@@ -217,7 +218,7 @@ class ObjectArgumentValue : IConfigurationArgumentValue
         }
     }
 
-    static bool IsContainer(Type type, out Type elementType)
+    static bool IsContainer(Type type, [NotNullWhen(true)] out Type? elementType)
     {
         elementType = null;
         foreach (var iface in type.GetInterfaces())

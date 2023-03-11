@@ -2,5 +2,5 @@
 
 interface IConfigurationArgumentValue
 {
-    object ConvertTo(Type toType, ResolutionContext resolutionContext);
+    object? ConvertTo(Type toType, ResolutionContext resolutionContext);
 }

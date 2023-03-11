@@ -6,9 +6,9 @@ namespace TestDummies;
 public class DummyWrappingSink : ILogEventSink
 {
     [ThreadStatic]
-    static List<LogEvent> _emitted;
+    static List<LogEvent>? _emitted;
 
-    public static List<LogEvent> Emitted => _emitted ?? (_emitted = new List<LogEvent>());
+    public static List<LogEvent> Emitted => _emitted ??= new List<LogEvent>();
 
     readonly ILogEventSink _sink;
 

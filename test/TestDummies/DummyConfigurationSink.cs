@@ -7,22 +7,22 @@ namespace TestDummies;
 public class DummyConfigurationSink : ILogEventSink
 {
     [ThreadStatic]
-    static List<LogEvent> _emitted;
+    static List<LogEvent>? _emitted;
 
     [ThreadStatic]
-    static IConfiguration _configuration;
+    static IConfiguration? _configuration;
 
     [ThreadStatic]
-    static IConfigurationSection _configSection;
+    static IConfigurationSection? _configSection;
 
     public static List<LogEvent> Emitted => _emitted ?? (_emitted = new List<LogEvent>());
 
-    public static IConfiguration Configuration => _configuration;
+    public static IConfiguration? Configuration => _configuration;
 
-    public static IConfigurationSection ConfigSection => _configSection;
+    public static IConfigurationSection? ConfigSection => _configSection;
 
 
-    public DummyConfigurationSink(IConfiguration configuration, IConfigurationSection configSection)
+    public DummyConfigurationSink(IConfiguration? configuration, IConfigurationSection? configSection)
     {
         _configuration = configuration;
         _configSection = configSection;

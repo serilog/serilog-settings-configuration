@@ -17,9 +17,9 @@ public class DelegatingSink : ILogEventSink
         _write(logEvent);
     }
 
-    public static LogEvent GetLogEvent(Action<ILogger> writeAction)
+    public static LogEvent? GetLogEvent(Action<ILogger> writeAction)
     {
-        LogEvent result = null;
+        LogEvent? result = null;
         var l = new LoggerConfiguration()
             .MinimumLevel.Verbose()
             .WriteTo.Sink(new DelegatingSink(le => result = le))

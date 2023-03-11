@@ -85,7 +85,7 @@ public class DynamicLevelChangeTests
         Assert.Empty(DummyConsoleSink.Emitted);
     }
 
-    void UpdateConfig(LogEventLevel? minimumLevel = null, LogEventLevel? switchLevel = null, LogEventLevel? overrideLevel = null, string filterExpression = null)
+    void UpdateConfig(LogEventLevel? minimumLevel = null, LogEventLevel? switchLevel = null, LogEventLevel? overrideLevel = null, string? filterExpression = null)
     {
         if (minimumLevel.HasValue)
         {
