@@ -17,6 +17,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "assets", "assets", "{62D0B9
 		LICENSE = LICENSE
 		README.md = README.md
 		serilog-settings-configuration.sln.DotSettings = serilog-settings-configuration.sln.DotSettings
+		global.json = global.json
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "test", "test", "{D551DCB0-7771-4D01-BEBD-F7B57D1CF0E3}"
