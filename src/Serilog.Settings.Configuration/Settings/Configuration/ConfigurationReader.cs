@@ -22,11 +22,11 @@ class ConfigurationReader : IConfigurationReader
     readonly ResolutionContext _resolutionContext;
     readonly IConfigurationRoot _configurationRoot;
 
-    public ConfigurationReader(IConfigurationSection configSection, AssemblyFinder assemblyFinder, IFormatProvider formatProvider, IConfiguration configuration = null)
+    public ConfigurationReader(IConfigurationSection configSection, AssemblyFinder assemblyFinder, ConfigurationReaderOptions readerOptions, IConfiguration configuration = null)
     {
         _section = configSection ?? throw new ArgumentNullException(nameof(configSection));
         _configurationAssemblies = LoadConfigurationAssemblies(_section, assemblyFinder);
-        _resolutionContext = new ResolutionContext(configuration, formatProvider);
+        _resolutionContext = new ResolutionContext(configuration, readerOptions);
         _configurationRoot = configuration as IConfigurationRoot;
     }
 
@@ -136,7 +136,8 @@ class ConfigurationReader : IConfigurationReader
             SubscribeToLoggingLevelChanges(levelSwitchDeclaration, newSwitch);
 
             // make them available later on when resolving argument values
-            _resolutionContext.AddLevelSwitch(switchName, newSwitch);
+            var referenceName = _resolutionContext.AddLevelSwitch(switchName, newSwitch);
+            _resolutionContext.ReaderOptions.OnLevelSwitchCreated?.Invoke(referenceName, newSwitch);
         }
     }
 
@@ -164,7 +165,11 @@ class ConfigurationReader : IConfigurationReader
             var overridenLevelOrSwitch = overrideDirective.Value;
             if (Enum.TryParse(overridenLevelOrSwitch, out LogEventLevel _))
             {
-                ApplyMinimumLevelConfiguration(overrideDirective, (configuration, levelSwitch) => configuration.Override(overridePrefix, levelSwitch));
+                ApplyMinimumLevelConfiguration(overrideDirective, (configuration, levelSwitch) =>
+                {
+                    configuration.Override(overridePrefix, levelSwitch);
+                    _resolutionContext.ReaderOptions.OnLevelSwitchCreated?.Invoke(overridePrefix, levelSwitch);
+                });
             }
             else
             {

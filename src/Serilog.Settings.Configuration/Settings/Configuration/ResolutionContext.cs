@@ -13,15 +13,15 @@ sealed class ResolutionContext
     readonly IDictionary<string, LoggingFilterSwitchProxy> _declaredFilterSwitches;
     readonly IConfiguration _appConfiguration;
 
-    public ResolutionContext(IConfiguration appConfiguration = null, IFormatProvider formatProvider = null)
+    public ResolutionContext(IConfiguration appConfiguration = null, ConfigurationReaderOptions readerOptions = null)
     {
         _declaredLevelSwitches = new Dictionary<string, LoggingLevelSwitch>();
         _declaredFilterSwitches = new Dictionary<string, LoggingFilterSwitchProxy>();
         _appConfiguration = appConfiguration;
-        FormatProvider = formatProvider;
+        ReaderOptions = readerOptions ?? new ConfigurationReaderOptions();
     }
 
-    public IFormatProvider FormatProvider { get; }
+    public ConfigurationReaderOptions ReaderOptions { get; }
 
     /// <summary>
     /// Looks up a switch in the declared LoggingLevelSwitches
@@ -64,18 +64,22 @@ sealed class ResolutionContext
         }
     }
 
-    public void AddLevelSwitch(string levelSwitchName, LoggingLevelSwitch levelSwitch)
+    public string AddLevelSwitch(string levelSwitchName, LoggingLevelSwitch levelSwitch)
     {
         if (levelSwitchName == null) throw new ArgumentNullException(nameof(levelSwitchName));
         if (levelSwitch == null) throw new ArgumentNullException(nameof(levelSwitch));
-        _declaredLevelSwitches[ToSwitchReference(levelSwitchName)] = levelSwitch;
+        var referenceName = ToSwitchReference(levelSwitchName);
+        _declaredLevelSwitches[referenceName] = levelSwitch;
+        return referenceName;
     }
 
-    public void AddFilterSwitch(string filterSwitchName, LoggingFilterSwitchProxy filterSwitch)
+    public string AddFilterSwitch(string filterSwitchName, LoggingFilterSwitchProxy filterSwitch)
     {
         if (filterSwitchName == null) throw new ArgumentNullException(nameof(filterSwitchName));
         if (filterSwitch == null) throw new ArgumentNullException(nameof(filterSwitch));
-        _declaredFilterSwitches[ToSwitchReference(filterSwitchName)] = filterSwitch;
+        var referenceName = ToSwitchReference(filterSwitchName);
+        _declaredFilterSwitches[referenceName] = filterSwitch;
+        return referenceName;
     }
 
     string ToSwitchReference(string switchName)

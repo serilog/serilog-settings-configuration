@@ -1,6 +1,7 @@
 using System.Globalization;
 using System.Reflection;
 using Microsoft.Extensions.DependencyModel;
+using Serilog.Core;
 
 namespace Serilog.Settings.Configuration;
 
@@ -55,6 +56,16 @@ public sealed class ConfigurationReaderOptions
     /// The <see cref="IFormatProvider"/> used when converting strings to other object types. Defaults to the invariant culture.
     /// </summary>
     public IFormatProvider FormatProvider { get; init; } = CultureInfo.InvariantCulture;
+
+    /// <summary>
+    /// Called when a log level switch is created while reading the configuration.
+    /// Log level switches are created either from the <c>Serilog:LevelSwitches</c> section (declared switches) or the <c>Serilog:MinimumLevel:Override</c> section (minimum level override switches).
+    /// <list type="bullet">
+    ///   <item>For declared switches, the switch name includes the leading <c>$</c> character.</item>
+    ///   <item>For minimum level override switches, the switch name is the (partial) namespace or type name of the override.</item>
+    /// </list>
+    /// </summary>
+    public Action<string, LoggingLevelSwitch> OnLevelSwitchCreated { get; init; }
 
     internal Assembly[] Assemblies { get; }
     internal DependencyContext DependencyContext { get; }

@@ -100,8 +100,8 @@ public static class ConfigurationLoggerConfigurationExtensions
             new ConfigurationReader(
                 configSection,
                 assemblyFinder,
-                configuration: null,
-                formatProvider: null));
+                new ConfigurationReaderOptions { FormatProvider = null },
+                configuration: null));
     }
 
     /// <summary>
@@ -164,7 +164,7 @@ public static class ConfigurationLoggerConfigurationExtensions
 
         var assemblyFinder = AssemblyFinder.ForSource(configurationAssemblySource);
 
-        return settingConfiguration.Settings(new ConfigurationReader(configSection, assemblyFinder, configuration: null, formatProvider: null));
+        return settingConfiguration.Settings(new ConfigurationReader(configSection, assemblyFinder, new ConfigurationReaderOptions { FormatProvider = null }, configuration: null));
     }
 
     /// <summary>
@@ -229,19 +229,19 @@ public static class ConfigurationLoggerConfigurationExtensions
     {
         var assemblyFinder = dependencyContext == null ? AssemblyFinder.Auto() : AssemblyFinder.ForDependencyContext(dependencyContext);
         var section = configuration.GetSection(readerOptions.SectionName);
-        return new ConfigurationReader(section, assemblyFinder, readerOptions.FormatProvider, configuration);
+        return new ConfigurationReader(section, assemblyFinder, readerOptions, configuration);
     }
 
     static ConfigurationReader GetConfigurationReader(IConfiguration configuration, ConfigurationReaderOptions readerOptions, ConfigurationAssemblySource source)
     {
         var assemblyFinder = AssemblyFinder.ForSource(source);
         var section = configuration.GetSection(readerOptions.SectionName);
-        return new ConfigurationReader(section, assemblyFinder, readerOptions.FormatProvider, configuration);
+        return new ConfigurationReader(section, assemblyFinder, readerOptions, configuration);
     }
 
     static ConfigurationReader GetConfigurationReader(IConfiguration configuration, ConfigurationReaderOptions readerOptions, IReadOnlyCollection<Assembly> assemblies)
     {
         var section = configuration.GetSection(readerOptions.SectionName);
-        return new ConfigurationReader(section, assemblies, new ResolutionContext(configuration, readerOptions.FormatProvider));
+        return new ConfigurationReader(section, assemblies, new ResolutionContext(configuration, readerOptions));
     }
 }

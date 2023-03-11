@@ -11,24 +11,24 @@ namespace Serilog.Settings.Configuration.Tests;
 
 public class ConfigurationSettingsTests
 {
-    static LoggerConfiguration ConfigFromJson(string jsonString, string secondJsonSource = null)
+    static LoggerConfiguration ConfigFromJson(string jsonString, string secondJsonSource = null, ConfigurationReaderOptions options = null)
     {
-        return ConfigFromJson(jsonString, secondJsonSource, out _);
+        return ConfigFromJson(jsonString, secondJsonSource, out _, options);
     }
 
-    static LoggerConfiguration ConfigFromJson(string jsonString, out IConfiguration configuration)
+    static LoggerConfiguration ConfigFromJson(string jsonString, out IConfiguration configuration, ConfigurationReaderOptions options = null)
     {
-        return ConfigFromJson(jsonString, null, out configuration);
+        return ConfigFromJson(jsonString, null, out configuration, options);
     }
 
-    static LoggerConfiguration ConfigFromJson(string jsonString, string secondJsonSource, out IConfiguration configuration)
+    static LoggerConfiguration ConfigFromJson(string jsonString, string secondJsonSource, out IConfiguration configuration, ConfigurationReaderOptions options)
     {
         var builder = new ConfigurationBuilder().AddJsonString(jsonString);
         if (secondJsonSource != null)
             builder.AddJsonString(secondJsonSource);
         configuration = builder.Build();
         return new LoggerConfiguration()
-            .ReadFrom.Configuration(configuration);
+            .ReadFrom.Configuration(configuration, options);
     }
 
     [Fact]
@@ -1344,5 +1344,38 @@ public class ConfigurationSettingsTests
         Assert.Null(evt);
         log.ForContext("User", "the user").Write(Some.InformationEvent());
         Assert.NotNull(evt);
+    }
+
+    [Theory]
+    [InlineData("$switch1")]
+    [InlineData("switch1")]
+    public void TestLogLevelSwitchesCallback(string switchName)
+    {
+        var json = $@"{{
+                'Serilog': {{
+                    'LevelSwitches': {{ '{switchName}': 'Information' }},
+                    'MinimumLevel': {{
+                        'Override': {{
+                            'System': 'Warning',
+                            'System.Threading': 'Debug'
+                        }}
+                    }}
+                }}
+            }}";
+
+        IDictionary<string, LoggingLevelSwitch> switches = new Dictionary<string, LoggingLevelSwitch>();
+        var readerOptions = new ConfigurationReaderOptions { OnLevelSwitchCreated = (name, levelSwitch) => switches[name] = levelSwitch };
+        ConfigFromJson(json, options: readerOptions);
+
+        Assert.Equal(3, switches.Count);
+
+        var switch1 = Assert.Contains("$switch1", switches);
+        Assert.Equal(LogEventLevel.Information, switch1.MinimumLevel);
+
+        var system = Assert.Contains("System", switches);
+        Assert.Equal(LogEventLevel.Warning, system.MinimumLevel);
+
+        var systemThreading = Assert.Contains("System.Threading", switches);
+        Assert.Equal(LogEventLevel.Debug, systemThreading.MinimumLevel);
     }
 }
