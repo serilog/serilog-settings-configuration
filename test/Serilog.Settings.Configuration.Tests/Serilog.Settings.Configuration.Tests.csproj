@@ -4,9 +4,6 @@
     <TargetFrameworks>net6.0;netcoreapp3.1;net462</TargetFrameworks>
     <LangVersion>latest</LangVersion>
     <AssemblyName>Serilog.Settings.Configuration.Tests</AssemblyName>
-    <AssemblyOriginatorKeyFile>../../assets/Serilog.snk</AssemblyOriginatorKeyFile>
-    <SignAssembly>true</SignAssembly>
-    <PublicSign Condition=" '$(OS)' != 'Windows_NT' ">true</PublicSign>
   </PropertyGroup>
 
   <ItemGroup>
