@@ -2,8 +2,6 @@
 
   <PropertyGroup>
     <TargetFrameworks>net7.0;netcoreapp3.1;net48</TargetFrameworks>
-    <LangVersion>latest</LangVersion>
-    <AssemblyName>Serilog.Settings.Configuration.Tests</AssemblyName>
   </PropertyGroup>
 
   <ItemGroup>
