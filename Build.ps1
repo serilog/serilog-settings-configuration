@@ -21,15 +21,15 @@ echo "build: Build version suffix is $buildSuffix"
 if($LASTEXITCODE -ne 0) { exit 1 }
 
 if($suffix) {
-    & dotnet pack src\Serilog --configuration Release --no-build --no-restore -o artifacts --version-suffix=$suffix
+    & dotnet pack src\Serilog.Settings.Configuration --configuration Release --no-build --no-restore -o artifacts --version-suffix=$suffix
 } else {
-    & dotnet pack src\Serilog --configuration Release --no-build --no-restore -o artifacts
+    & dotnet pack src\Serilog.Settings.Configuration --configuration Release --no-build --no-restore -o artifacts
 }
 
 if($LASTEXITCODE -ne 0) { exit 2 }
 
 Write-Output "build: Testing"
 
-& dotnet test  test\Serilog.Tests --configuration Release --no-build --no-restore
+& dotnet test  test\Serilog.Settings.Configuration.Tests --configuration Release --no-build --no-restore
 
 if($LASTEXITCODE -ne 0) { exit 3 }
