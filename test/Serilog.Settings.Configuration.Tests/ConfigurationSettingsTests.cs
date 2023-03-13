@@ -57,6 +57,31 @@ public class ConfigurationSettingsTests
     }
 
     [Theory]
+    [InlineData(null)]
+    [InlineData("")]
+    public void CanReadWithoutSerilogSection(string sectionName)
+    {
+        LogEvent evt = null;
+
+        var json = """
+            {
+                "Properties": {
+                    "App": "Test"
+                }
+            }
+            """;
+
+        var log = ConfigFromJson(json, options: new ConfigurationReaderOptions { SectionName = sectionName })
+            .WriteTo.Sink(new DelegatingSink(e => evt = e))
+            .CreateLogger();
+
+        log.Information("Has a test property");
+
+        Assert.NotNull(evt);
+        Assert.Equal("Test", evt.Properties["App"].LiteralValue());
+    }
+
+    [Theory]
     [InlineData("extended syntax", """
     {
         "Serilog": {
