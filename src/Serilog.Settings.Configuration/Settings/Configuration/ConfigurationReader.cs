@@ -17,12 +17,12 @@ class ConfigurationReader : IConfigurationReader
 {
     const string LevelSwitchNameRegex = @"^\${0,1}[A-Za-z]+[A-Za-z0-9]*$";
 
-    readonly IConfigurationSection _section;
+    readonly IConfiguration _section;
     readonly IReadOnlyCollection<Assembly> _configurationAssemblies;
     readonly ResolutionContext _resolutionContext;
     readonly IConfigurationRoot _configurationRoot;
 
-    public ConfigurationReader(IConfigurationSection configSection, AssemblyFinder assemblyFinder, ConfigurationReaderOptions readerOptions, IConfiguration configuration = null)
+    public ConfigurationReader(IConfiguration configSection, AssemblyFinder assemblyFinder, ConfigurationReaderOptions readerOptions, IConfiguration configuration = null)
     {
         _section = configSection ?? throw new ArgumentNullException(nameof(configSection));
         _configurationAssemblies = LoadConfigurationAssemblies(_section, assemblyFinder);
@@ -31,7 +31,7 @@ class ConfigurationReader : IConfigurationReader
     }
 
     // Used internally for processing nested configuration sections -- see GetMethodCalls below.
-    internal ConfigurationReader(IConfigurationSection configSection, IReadOnlyCollection<Assembly> configurationAssemblies, ResolutionContext resolutionContext)
+    internal ConfigurationReader(IConfiguration configSection, IReadOnlyCollection<Assembly> configurationAssemblies, ResolutionContext resolutionContext)
     {
         _section = configSection ?? throw new ArgumentNullException(nameof(configSection));
         _configurationAssemblies = configurationAssemblies ?? throw new ArgumentNullException(nameof(configurationAssemblies));
@@ -298,7 +298,7 @@ class ConfigurationReader : IConfigurationReader
         }
     }
 
-    internal ILookup<string, Dictionary<string, IConfigurationArgumentValue>> GetMethodCalls(IConfigurationSection directive)
+    internal ILookup<string, Dictionary<string, IConfigurationArgumentValue>> GetMethodCalls(IConfiguration directive)
     {
         var children = directive.GetChildren().ToList();
 
@@ -356,7 +356,7 @@ class ConfigurationReader : IConfigurationReader
         return argumentValue;
     }
 
-    static IReadOnlyCollection<Assembly> LoadConfigurationAssemblies(IConfigurationSection section, AssemblyFinder assemblyFinder)
+    static IReadOnlyCollection<Assembly> LoadConfigurationAssemblies(IConfiguration section, AssemblyFinder assemblyFinder)
     {
         var serilogAssembly = typeof(ILogger).Assembly;
         var assemblies = new Dictionary<string, Assembly> { [serilogAssembly.FullName] = serilogAssembly };
