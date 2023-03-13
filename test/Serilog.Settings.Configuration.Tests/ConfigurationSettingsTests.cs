@@ -120,6 +120,87 @@ public class ConfigurationSettingsTests
     }
 
     [Fact]
+    public void ConfigurationAssembliesFromDllScanningWithInternalMethodInPublicClass()
+    {
+        var json = """
+            {
+                "Serilog": {
+                    "Using": ["TestDummies"],
+                    "WriteTo": ["DummyConsoleInternal"]
+                }
+            }
+            """;
+
+        var builder = new ConfigurationBuilder().AddJsonString(json);
+        var config = builder.Build();
+        var log = new LoggerConfiguration()
+            .ReadFrom.Configuration(
+                configuration: config,
+                readerOptions: new ConfigurationReaderOptions(ConfigurationAssemblySource.AlwaysScanDllFiles) { AllowInternalMethods = true })
+            .CreateLogger();
+
+        DummyConsoleSink.Emitted.Clear();
+
+        log.Write(Some.InformationEvent());
+
+        Assert.Single(DummyConsoleSink.Emitted);
+    }
+
+    [Fact]
+    public void ConfigurationAssembliesFromDllScanningWithPublicMethodInInternalClass()
+    {
+        var json = """
+            {
+                "Serilog": {
+                    "Using": ["TestDummies"],
+                    "WriteTo": ["DummyConsolePublicInInternal"]
+                }
+            }
+            """;
+
+        var builder = new ConfigurationBuilder().AddJsonString(json);
+        var config = builder.Build();
+        var log = new LoggerConfiguration()
+            .ReadFrom.Configuration(
+                configuration: config,
+                readerOptions: new ConfigurationReaderOptions(ConfigurationAssemblySource.AlwaysScanDllFiles) { AllowInternalTypes = true })
+            .CreateLogger();
+
+        DummyConsoleSink.Emitted.Clear();
+
+        log.Write(Some.InformationEvent());
+
+        Assert.Single(DummyConsoleSink.Emitted);
+    }
+
+    [Fact]
+    public void ConfigurationAssembliesFromDllScanningWithInternalMethodInInternalClass()
+    {
+        var json = """
+            {
+                "Serilog": {
+                    "Using": ["TestDummies"],
+                    "WriteTo": ["DummyConsoleInternalInInternal"]
+                }
+            }
+            """;
+
+        var builder = new ConfigurationBuilder().AddJsonString(json);
+        var config = builder.Build();
+        var log = new LoggerConfiguration()
+            .ReadFrom.Configuration(
+                configuration: config,
+                readerOptions: new ConfigurationReaderOptions(ConfigurationAssemblySource.AlwaysScanDllFiles) { AllowInternalTypes = true, AllowInternalMethods = true })
+            .CreateLogger();
+
+        DummyConsoleSink.Emitted.Clear();
+
+        log.Write(Some.InformationEvent());
+
+        Assert.Single(DummyConsoleSink.Emitted);
+    }
+
+    [Fact]
     public void SinksAreConfigured()
     {
         var json = """

@@ -58,6 +58,16 @@ public sealed class ConfigurationReaderOptions
     public IFormatProvider FormatProvider { get; init; } = CultureInfo.InvariantCulture;
 
     /// <summary>
+    /// Allows to use internal types for extension methods for sink configuration. Defaults to <see langword="false"/>.
+    /// </summary>
+    public bool AllowInternalTypes { get; set; }
+
+    /// <summary>
+    /// Allows to use internal extension methods for sink configuration. Defaults to <see langword="false"/>.
+    /// </summary>
+    public bool AllowInternalMethods { get; set; }
+
+    /// <summary>
     /// Called when a log level switch is created while reading the configuration.
     /// Log level switches are created either from the <c>Serilog:LevelSwitches</c> section (declared switches) or the <c>Serilog:MinimumLevel:Override</c> section (minimum level override switches).
     /// <list type="bullet">

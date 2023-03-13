@@ -43,6 +43,8 @@ namespace Serilog.Settings.Configuration
         public ConfigurationReaderOptions(Microsoft.Extensions.DependencyModel.DependencyContext dependencyContext) { }
         public ConfigurationReaderOptions(Serilog.Settings.Configuration.ConfigurationAssemblySource configurationAssemblySource) { }
         public ConfigurationReaderOptions(params System.Reflection.Assembly[] assemblies) { }
+        public bool AllowInternalMethods { get; set; }
+        public bool AllowInternalTypes { get; set; }
         public System.IFormatProvider FormatProvider { get; init; }
         public System.Action<string, Serilog.Core.LoggingLevelSwitch> OnLevelSwitchCreated { get; init; }
         public string SectionName { get; init; }
