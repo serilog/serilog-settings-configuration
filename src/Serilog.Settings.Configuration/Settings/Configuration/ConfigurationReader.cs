@@ -413,7 +413,7 @@ class ConfigurationReader : IConfigurationReader
            || paramInfo.ParameterType == typeof(IConfiguration);
     }
 
-    object GetImplicitValueForNotSpecifiedKey(ParameterInfo parameter, MethodInfo methodToInvoke)
+    object? GetImplicitValueForNotSpecifiedKey(ParameterInfo parameter, MethodInfo methodToInvoke)
     {
         if (!HasImplicitValueWhenNotSpecified(parameter))
         {
