@@ -110,8 +110,8 @@ public class StringArgumentValueTests
         var actual = stringArgumentValue.ConvertTo(targetType, new ResolutionContext());
 
         Assert.IsAssignableFrom(targetType, actual);
-        var parser = (Delegate)actual;
-        Assert.Equal(100, parser.DynamicInvoke("100"));
+        var parser = (Delegate?)actual;
+        Assert.Equal(100, parser?.DynamicInvoke("100"));
     }
 
     [Theory]
@@ -216,7 +216,7 @@ public class StringArgumentValueTests
         var shortTypeName = "System.Version";
         var stringArgumentValue = new StringArgumentValue(shortTypeName);
 
-        var actual = (Type)stringArgumentValue.ConvertTo(typeof(Type), new ResolutionContext());
+        var actual = (Type?)stringArgumentValue.ConvertTo(typeof(Type), new ResolutionContext());
 
         Assert.Equal(typeof(Version), actual);
     }
@@ -224,10 +224,10 @@ public class StringArgumentValueTests
     [Fact]
     public void StringValuesConvertToTypeFromAssemblyQualifiedName()
     {
-        var assemblyQualifiedName = typeof(Version).AssemblyQualifiedName;
+        var assemblyQualifiedName = typeof(Version).AssemblyQualifiedName!;
         var stringArgumentValue = new StringArgumentValue(assemblyQualifiedName);
 
-        var actual = (Type)stringArgumentValue.ConvertTo(typeof(Type), new ResolutionContext());
+        var actual = (Type?)stringArgumentValue.ConvertTo(typeof(Type), new ResolutionContext());
 
         Assert.Equal(typeof(Version), actual);
     }

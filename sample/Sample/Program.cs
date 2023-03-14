@@ -73,14 +73,14 @@ public class CustomFilter : ILogEventFilter
 
 public class LoginData
 {
-    public string Username;
+    public string? Username;
     // ReSharper disable once NotAccessedField.Global
-    public string Password;
+    public string? Password;
 }
 
 public class CustomPolicy : IDestructuringPolicy
 {
-    public bool TryDestructure(object value, ILogEventPropertyValueFactory propertyValueFactory, out LogEventPropertyValue result)
+    public bool TryDestructure(object value, ILogEventPropertyValueFactory propertyValueFactory, out LogEventPropertyValue? result)
     {
         result = null;
 

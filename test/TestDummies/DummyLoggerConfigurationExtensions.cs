@@ -20,8 +20,8 @@ public static class DummyLoggerConfigurationExtensions
         this LoggerSinkConfiguration loggerSinkConfiguration,
         string pathFormat,
         LogEventLevel restrictedToMinimumLevel = LevelAlias.Minimum,
-        string outputTemplate = null,
-        IFormatProvider formatProvider = null)
+        string? outputTemplate = null,
+        IFormatProvider? formatProvider = null)
     {
         return loggerSinkConfiguration.Sink(new DummyRollingFileSink(), restrictedToMinimumLevel);
     }
@@ -45,7 +45,7 @@ public static class DummyLoggerConfigurationExtensions
 
     public static LoggerConfiguration DummyWithOptionalConfiguration(
         this LoggerSinkConfiguration loggerSinkConfiguration,
-        IConfiguration appConfiguration = null,
+        IConfiguration? appConfiguration = null,
         LogEventLevel restrictedToMinimumLevel = LevelAlias.Minimum)
     {
         return loggerSinkConfiguration.Sink(new DummyConfigurationSink(appConfiguration, null), restrictedToMinimumLevel);
@@ -70,9 +70,9 @@ public static class DummyLoggerConfigurationExtensions
 
     public class Binding
     {
-        public string Foo { get; set; }
+        public string? Foo { get; set; }
 
-        public string Abc { get; set; }
+        public string? Abc { get; set; }
     }
 
     public static LoggerConfiguration DummyRollingFile(
@@ -97,8 +97,8 @@ public static class DummyLoggerConfigurationExtensions
         this LoggerAuditSinkConfiguration loggerSinkConfiguration,
         string pathFormat,
         LogEventLevel restrictedToMinimumLevel = LevelAlias.Minimum,
-        string outputTemplate = null,
-        IFormatProvider formatProvider = null)
+        string? outputTemplate = null,
+        IFormatProvider? formatProvider = null)
     {
         return loggerSinkConfiguration.Sink(new DummyRollingFileAuditSink(), restrictedToMinimumLevel);
     }
@@ -106,7 +106,7 @@ public static class DummyLoggerConfigurationExtensions
     public static LoggerConfiguration DummyWithLevelSwitch(
         this LoggerSinkConfiguration loggerSinkConfiguration,
         LogEventLevel restrictedToMinimumLevel = LevelAlias.Minimum,
-        LoggingLevelSwitch controlLevelSwitch = null)
+        LoggingLevelSwitch? controlLevelSwitch = null)
     {
         return loggerSinkConfiguration.Sink(new DummyWithLevelSwitchSink(controlLevelSwitch), restrictedToMinimumLevel);
     }
@@ -114,8 +114,8 @@ public static class DummyLoggerConfigurationExtensions
     public static LoggerConfiguration DummyConsole(
         this LoggerSinkConfiguration loggerSinkConfiguration,
         LogEventLevel restrictedToMinimumLevel = LevelAlias.Minimum,
-        LoggingLevelSwitch levelSwitch = null,
-        ConsoleTheme theme = null)
+        LoggingLevelSwitch? levelSwitch = null,
+        ConsoleTheme? theme = null)
     {
         return loggerSinkConfiguration.Sink(new DummyConsoleSink(theme), restrictedToMinimumLevel, levelSwitch);
     }
@@ -142,10 +142,10 @@ public static class DummyLoggerConfigurationExtensions
 
     public static LoggerConfiguration DummyArrayOfType(this LoggerDestructuringConfiguration loggerSinkConfiguration,
         List<Type> list,
-        Type[] array = null,
-        Type type = null,
-        CustomCollection<Type> custom = null,
-        CustomCollection<string> customString = null)
+        Type[]? array = null,
+        Type? type = null,
+        CustomCollection<Type>? custom = null,
+        CustomCollection<string>? customString = null)
     {
         return loggerSinkConfiguration.With(DummyPolicy.Current = new DummyPolicy
         {

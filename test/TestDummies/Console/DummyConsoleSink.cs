@@ -6,18 +6,18 @@ namespace TestDummies.Console;
 
 public class DummyConsoleSink : ILogEventSink
 {
-    public DummyConsoleSink(ConsoleTheme theme = null)
+    public DummyConsoleSink(ConsoleTheme? theme = null)
     {
         Theme = theme ?? ConsoleTheme.None;
     }
 
     [ThreadStatic]
-    public static ConsoleTheme Theme;
+    public static ConsoleTheme? Theme;
 
     [ThreadStatic]
-    static List<LogEvent> EmittedList;
+    static List<LogEvent>? EmittedList;
 
-    public static List<LogEvent> Emitted => EmittedList ?? (EmittedList = new List<LogEvent>());
+    public static List<LogEvent> Emitted => EmittedList ??= new List<LogEvent>();
 
     public void Emit(LogEvent logEvent)
     {

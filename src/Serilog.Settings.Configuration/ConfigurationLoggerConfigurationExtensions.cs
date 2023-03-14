@@ -47,7 +47,7 @@ public static class ConfigurationLoggerConfigurationExtensions
         this LoggerSettingsConfiguration settingConfiguration,
         IConfiguration configuration,
         string sectionName,
-        DependencyContext dependencyContext = null)
+        DependencyContext? dependencyContext = null)
     {
         if (settingConfiguration == null) throw new ArgumentNullException(nameof(settingConfiguration));
         if (configuration == null) throw new ArgumentNullException(nameof(configuration));
@@ -87,7 +87,7 @@ public static class ConfigurationLoggerConfigurationExtensions
     public static LoggerConfiguration ConfigurationSection(
         this LoggerSettingsConfiguration settingConfiguration,
         IConfigurationSection configSection,
-        DependencyContext dependencyContext = null)
+        DependencyContext? dependencyContext = null)
     {
         if (settingConfiguration == null) throw new ArgumentNullException(nameof(settingConfiguration));
         if (configSection == null) throw new ArgumentNullException(nameof(configSection));
@@ -214,7 +214,7 @@ public static class ConfigurationLoggerConfigurationExtensions
     public static LoggerConfiguration Configuration(
         this LoggerSettingsConfiguration settingConfiguration,
         IConfiguration configuration,
-        ConfigurationReaderOptions readerOptions = null)
+        ConfigurationReaderOptions? readerOptions = null)
     {
         var configurationReader = readerOptions switch
         {
@@ -225,7 +225,7 @@ public static class ConfigurationLoggerConfigurationExtensions
         return settingConfiguration.Settings(configurationReader);
     }
 
-    static ConfigurationReader GetConfigurationReader(IConfiguration configuration, ConfigurationReaderOptions readerOptions, DependencyContext dependencyContext)
+    static ConfigurationReader GetConfigurationReader(IConfiguration configuration, ConfigurationReaderOptions readerOptions, DependencyContext? dependencyContext)
     {
         var assemblyFinder = dependencyContext == null ? AssemblyFinder.Auto() : AssemblyFinder.ForDependencyContext(dependencyContext);
         var section = string.IsNullOrWhiteSpace(readerOptions.SectionName) ? configuration : configuration.GetSection(readerOptions.SectionName);

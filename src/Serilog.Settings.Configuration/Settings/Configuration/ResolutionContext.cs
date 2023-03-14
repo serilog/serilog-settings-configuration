@@ -11,9 +11,9 @@ sealed class ResolutionContext
 {
     readonly IDictionary<string, LoggingLevelSwitch> _declaredLevelSwitches;
     readonly IDictionary<string, LoggingFilterSwitchProxy> _declaredFilterSwitches;
-    readonly IConfiguration _appConfiguration;
+    readonly IConfiguration? _appConfiguration;
 
-    public ResolutionContext(IConfiguration appConfiguration = null, ConfigurationReaderOptions readerOptions = null)
+    public ResolutionContext(IConfiguration? appConfiguration = null, ConfigurationReaderOptions? readerOptions = null)
     {
         _declaredLevelSwitches = new Dictionary<string, LoggingLevelSwitch>();
         _declaredFilterSwitches = new Dictionary<string, LoggingFilterSwitchProxy>();
@@ -51,18 +51,7 @@ sealed class ResolutionContext
 
     public bool HasAppConfiguration => _appConfiguration != null;
 
-    public IConfiguration AppConfiguration
-    {
-        get
-        {
-            if (!HasAppConfiguration)
-            {
-                throw new InvalidOperationException("AppConfiguration is not available");
-            }
-
-            return _appConfiguration;
-        }
-    }
+    public IConfiguration AppConfiguration => _appConfiguration ?? throw new InvalidOperationException("AppConfiguration is not available");
 
     public string AddLevelSwitch(string levelSwitchName, LoggingLevelSwitch levelSwitch)
     {

@@ -45,14 +45,14 @@ static class SurrogateConfigurationMethods
         LoggerSinkConfiguration loggerSinkConfiguration,
         ILogEventSink sink,
         LogEventLevel restrictedToMinimumLevel = LevelAlias.Minimum,
-        LoggingLevelSwitch levelSwitch = null)
+        LoggingLevelSwitch? levelSwitch = null)
         => loggerSinkConfiguration.Sink(sink, restrictedToMinimumLevel, levelSwitch);
 
     static LoggerConfiguration Logger(
         LoggerSinkConfiguration loggerSinkConfiguration,
         Action<LoggerConfiguration> configureLogger,
         LogEventLevel restrictedToMinimumLevel = LevelAlias.Minimum,
-        LoggingLevelSwitch levelSwitch = null)
+        LoggingLevelSwitch? levelSwitch = null)
         => loggerSinkConfiguration.Logger(configureLogger, restrictedToMinimumLevel, levelSwitch);
 
     // .AuditTo...
@@ -61,14 +61,14 @@ static class SurrogateConfigurationMethods
         LoggerAuditSinkConfiguration auditSinkConfiguration,
         ILogEventSink sink,
         LogEventLevel restrictedToMinimumLevel = LevelAlias.Minimum,
-        LoggingLevelSwitch levelSwitch = null)
+        LoggingLevelSwitch? levelSwitch = null)
         => auditSinkConfiguration.Sink(sink, restrictedToMinimumLevel, levelSwitch);
 
     static LoggerConfiguration Logger(
         LoggerAuditSinkConfiguration auditSinkConfiguration,
         Action<LoggerConfiguration> configureLogger,
         LogEventLevel restrictedToMinimumLevel = LevelAlias.Minimum,
-        LoggingLevelSwitch levelSwitch = null)
+        LoggingLevelSwitch? levelSwitch = null)
         => auditSinkConfiguration.Logger(configureLogger, restrictedToMinimumLevel, levelSwitch);
 
     // .Filter...
@@ -109,7 +109,7 @@ static class SurrogateConfigurationMethods
         LoggerEnrichmentConfiguration loggerEnrichmentConfiguration,
         Action<LoggerEnrichmentConfiguration> configureEnricher,
         LogEventLevel enrichFromLevel = LevelAlias.Minimum,
-        LoggingLevelSwitch levelSwitch = null)
+        LoggingLevelSwitch? levelSwitch = null)
         => levelSwitch != null ? loggerEnrichmentConfiguration.AtLevel(levelSwitch, configureEnricher)
                                : loggerEnrichmentConfiguration.AtLevel(enrichFromLevel, configureEnricher);
 

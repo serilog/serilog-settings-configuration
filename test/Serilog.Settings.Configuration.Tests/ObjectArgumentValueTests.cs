@@ -29,7 +29,7 @@ public class ObjectArgumentValueTests
         var testSection = _config.GetSection(caseSection);
 
         Assert.True(ObjectArgumentValue.TryBuildCtorExpression(testSection, targetType, new(), out var ctorExpression));
-        Assert.Equal(expectedExpression, ctorExpression.ToString());
+        Assert.Equal(expectedExpression, ctorExpression?.ToString());
     }
 
     class A
