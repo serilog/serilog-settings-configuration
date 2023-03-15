@@ -173,7 +173,7 @@ class StringArgumentValue : IConfigurationArgumentValue
         return type;
     }
 
-    internal static bool TryParseStaticMemberAccessor(string input, [NotNullWhen(true)] out string? accessorTypeName, [NotNullWhen(true)] out string? memberName)
+    internal static bool TryParseStaticMemberAccessor(string? input, [NotNullWhen(true)] out string? accessorTypeName, [NotNullWhen(true)] out string? memberName)
     {
         if (input == null)
         {
