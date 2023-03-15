@@ -275,6 +275,22 @@ Using this package you can also declare `LoggingFilterSwitch`-es in custom secti
 
 Level updates to switches are also respected for a dynamic update.
 
+Since version 4.0.0, filter switches are exposed through a callback on the reader options so that a reference can be kept:
+
+```csharp
+var filterSwitches = new Dictionary<string, ILoggingFilterSwitch>();
+var options = new ConfigurationReaderOptions
+{
+    OnFilterSwitchCreated = (switchName, filterSwitch) => filterSwitches[switchName] = filterSwitch
+};
+
+var logger = new LoggerConfiguration()
+    .ReadFrom.Configuration(configuration, options)
+    .CreateLogger();
+
+ILoggingFilterSwitch filterSwitch = filterSwitches["$filterSwitch"];
+```
+
 ### Nested configuration sections
 
 Some Serilog packages require a reference to a logger configuration object. The sample program in this project illustrates this with the following entry configuring the _[Serilog.Sinks.Async](https://github.com/serilog/serilog-sinks-async)_ package to wrap the _[Serilog.Sinks.File](https://github.com/serilog/serilog-sinks-file)_ package. The `configure` parameter references the File sink configuration:
