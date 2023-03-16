@@ -1,17 +1,21 @@
-﻿using System.Text;
+﻿using System.Diagnostics;
+using System.Text;
 using CliWrap;
 using FluentAssertions;
 using FluentAssertions.Execution;
+using Xunit.Abstractions;
 
 namespace Serilog.Settings.Configuration.Tests;
 
 public sealed class PublishSingleFileTests : IDisposable, IClassFixture<TestApp>
 {
+    readonly ITestOutputHelper _outputHelper;
     readonly TestApp _testApp;
     readonly AssertionScope _scope;
 
-    public PublishSingleFileTests(TestApp testApp)
+    public PublishSingleFileTests(ITestOutputHelper outputHelper, TestApp testApp)
     {
+        _outputHelper = outputHelper;
         _testApp = testApp;
         _scope = new AssertionScope();
     }
@@ -93,21 +97,34 @@ public sealed class PublishSingleFileTests : IDisposable, IClassFixture<TestApp>
 
     async Task<(string StdOut, string StdErr)> RunTestAppInternalAsync(bool singleExe, params string[] args)
     {
-        var stdout = new StringBuilder();
-        var stderr = new StringBuilder();
-        var testAppPath = singleExe ? _testApp.SingleFileExe.FullName : _testApp.StandardExe.FullName;
-        var result = await Cli.Wrap(testAppPath)
+        var stdOutBuilder = new StringBuilder();
+        var stdErrBuilder = new StringBuilder();
+
+        var command = Cli.Wrap(singleExe ? _testApp.SingleFileExe.FullName : _testApp.StandardExe.FullName)
             .WithArguments(args)
             .WithValidation(CommandResultValidation.None)
-            .WithStandardOutputPipe(PipeTarget.ToStringBuilder(stdout))
-            .WithStandardErrorPipe(PipeTarget.ToStringBuilder(stderr))
-            .ExecuteAsync();
+            .WithStandardOutputPipe(PipeTarget.ToStringBuilder(stdOutBuilder))
+            .WithStandardErrorPipe(PipeTarget.ToStringBuilder(stdErrBuilder));
+
+        _outputHelper.WriteLine(command.ToString());
+
+        var stopwatch = Stopwatch.StartNew();
+        var result = await command.ExecuteAsync();
+        var executionTime = stopwatch.ElapsedMilliseconds;
+
+        var stdOut = stdOutBuilder.ToString().Trim();
+        var stdErr = stdErrBuilder.ToString().Trim();
+
+        _outputHelper.WriteLine($"Executed in {executionTime} ms");
+        _outputHelper.WriteLine(stdOut.Length > 0 ? $"stdout: {stdOut}" : "nothing on stdout");
+        _outputHelper.WriteLine(stdErr.Length > 0 ? $"stderr: {stdErr}" : "nothing on stderr");
+        _outputHelper.WriteLine("");
 
         if (result.ExitCode != 0)
         {
-            throw new Exception($"An unexpected exception has occurred while running {testAppPath}. {stderr}");
+            throw new Exception($"An unexpected exception has occurred while running {command}. {stdErr}".Trim());
         }
 
-        return (stdout.ToString().Trim(), stderr.ToString().Trim());
+        return (stdOut, stdErr);
     }
 }
