@@ -21,6 +21,7 @@ public class LoggerConfigurationExtensionsTests
     {
         LogEvent? evt = null;
 
+        // language=json
         var json = """
             {
                 "NotSerilog": {
@@ -52,6 +53,7 @@ public class LoggerConfigurationExtensionsTests
     [Trait("BugFix", "https://github.com/serilog/serilog-settings-configuration/issues/143")]
     public void ReadFromConfigurationSectionThrowsWhenTryingToCallConfigurationMethodWithIConfigurationParam()
     {
+        // language=json
         var json = """
             {
                 "NotSerilog": {
@@ -85,6 +87,7 @@ public class LoggerConfigurationExtensionsTests
     [Fact]
     public void ReadFromConfigurationDoesNotThrowWhenTryingToCallConfigurationMethodWithIConfigurationParam()
     {
+        // language=json
         var json = """
             {
                 "NotSerilog": {
@@ -111,6 +114,7 @@ public class LoggerConfigurationExtensionsTests
     [Trait("BugFix", "https://github.com/serilog/serilog-settings-configuration/issues/143")]
     public void ReadFromConfigurationSectionDoesNotThrowWhenTryingToCallConfigurationMethodWithOptionalIConfigurationParam()
     {
+        // language=json
         var json = """
             {
                 "NotSerilog": {

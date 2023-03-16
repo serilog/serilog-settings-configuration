@@ -9,6 +9,7 @@ namespace Serilog.Settings.Configuration.Tests;
 
 public class DynamicLevelChangeTests
 {
+    // language=json
     const string DefaultConfig = """
         {
             "Serilog": {

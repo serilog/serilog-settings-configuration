@@ -36,6 +36,7 @@ public class ConfigurationSettingsTests
     {
         LogEvent? evt = null;
 
+        // language=json
         var json = """
             {
                 "Serilog": {
@@ -63,6 +64,7 @@ public class ConfigurationSettingsTests
     {
         LogEvent? evt = null;
 
+        // language=json
         var json = """
             {
                 "Properties": {
@@ -120,6 +122,7 @@ public class ConfigurationSettingsTests
     [Fact]
     public void ConfigurationAssembliesFromDllScanning()
     {
+        // language=json
         var json = """
             {
                 "Serilog": {
@@ -147,6 +150,7 @@ public class ConfigurationSettingsTests
     [Fact]
     public void SinksAreConfigured()
     {
+        // language=json
         var json = """
             {
                 "Serilog": {
@@ -174,6 +178,7 @@ public class ConfigurationSettingsTests
     [Fact]
     public void AuditSinksAreConfigured()
     {
+        // language=json
         var json = """
             {
                 "Serilog": {
@@ -201,6 +206,7 @@ public class ConfigurationSettingsTests
     [Fact]
     public void AuditToSubLoggersAreConfigured()
     {
+        // language=json
         var json = """
             {
                 "Serilog": {
@@ -234,6 +240,7 @@ public class ConfigurationSettingsTests
     [Fact]
     public void TestMinimumLevelOverrides()
     {
+        // language=json
         var json = """
             {
                 "Serilog": {
@@ -268,6 +275,7 @@ public class ConfigurationSettingsTests
     [Fact]
     public void TestMinimumLevelOverridesForChildContext()
     {
+        // language=json
         var json = """
             {
                 "Serilog": {
@@ -304,6 +312,7 @@ public class ConfigurationSettingsTests
     [Fact]
     public void SinksWithAbstractParamsAreConfiguredWithTypeName()
     {
+        // language=json
         var json = """
             {
                 "Serilog": {
@@ -328,6 +337,7 @@ public class ConfigurationSettingsTests
     [Fact]
     public void SinksAreConfiguredWithStaticMember()
     {
+        // language=json
         var json = """
             {
                 "Serilog": {
@@ -373,6 +383,7 @@ public class ConfigurationSettingsTests
     [Fact]
     public void LoggingLevelSwitchWithInvalidNameThrowsFormatException()
     {
+        // language=json
         var json = """
             {
                 "Serilog": {
@@ -393,6 +404,7 @@ public class ConfigurationSettingsTests
     [InlineData("mySwitch")]
     public void LoggingFilterSwitchIsConfigured(string switchName)
     {
+        // language=json
         var json = $$"""
             {
                 "Serilog": {
@@ -424,6 +436,7 @@ public class ConfigurationSettingsTests
     [InlineData("switch1")]
     public void LoggingLevelSwitchIsConfigured(string switchName)
     {
+        // language=json
         var json = $$"""
             {
                 "Serilog": {
@@ -451,6 +464,7 @@ public class ConfigurationSettingsTests
     [Fact]
     public void SettingMinimumLevelControlledByToAnUndeclaredSwitchThrows()
     {
+        // language=json
         var json = """
             {
                 "Serilog": {
@@ -473,6 +487,7 @@ public class ConfigurationSettingsTests
     [Fact]
     public void LoggingLevelSwitchIsPassedToSinks()
     {
+        // language=json
         var json = """
             {
                 "Serilog": {
@@ -511,6 +526,7 @@ public class ConfigurationSettingsTests
     [Fact]
     public void ReferencingAnUndeclaredSwitchInSinkThrows()
     {
+        // language=json
         var json = """
             {
                 "Serilog": {
@@ -538,6 +554,7 @@ public class ConfigurationSettingsTests
     [Fact]
     public void LoggingLevelSwitchCanBeUsedForMinimumLevelOverrides()
     {
+        // language=json
         var json = """
             {
                 "Serilog": {
@@ -592,6 +609,7 @@ public class ConfigurationSettingsTests
     [Trait("BugFix", "https://github.com/serilog/serilog-settings-configuration/issues/142")]
     public void SinkWithIConfigurationArguments()
     {
+        // language=json
         var json = """
             {
                 "Serilog": {
@@ -618,6 +636,7 @@ public class ConfigurationSettingsTests
     [Trait("BugFix", "https://github.com/serilog/serilog-settings-configuration/issues/142")]
     public void SinkWithOptionalIConfigurationArguments()
     {
+        // language=json
         var json = """
             {
                 "Serilog": {
@@ -644,6 +663,7 @@ public class ConfigurationSettingsTests
     [Fact]
     public void SinkWithIConfigSectionArguments()
     {
+        // language=json
         var json = """
             {
                 "Serilog": {
@@ -670,6 +690,7 @@ public class ConfigurationSettingsTests
     [Fact]
     public void SinkWithConfigurationBindingArgument()
     {
+        // language=json
         var json = """
             {
                 "Serilog": {
@@ -696,6 +717,7 @@ public class ConfigurationSettingsTests
     [Fact]
     public void SinkWithStringArrayArgument()
     {
+        // language=json
         var json = """
             {
                 "Serilog": {
@@ -734,6 +756,7 @@ public class ConfigurationSettingsTests
 
         try
         {
+            // language=json
             var json = """
             {
                 "Serilog": {
@@ -768,6 +791,7 @@ public class ConfigurationSettingsTests
     [Fact]
     public void DestructureWithCollectionsOfTypeArgument()
     {
+        // language=json
         var json = """
             {
                 "Serilog": {
@@ -811,6 +835,7 @@ public class ConfigurationSettingsTests
     [Fact]
     public void SinkWithIntArrayArgument()
     {
+        // language=json
         var json = """
             {
                 "Serilog": {
@@ -838,6 +863,7 @@ public class ConfigurationSettingsTests
     [Fact]
     public void CaseInsensitiveArgumentNameMatching()
     {
+        // language=json
         var json = """
             {
                 "Serilog": {
@@ -864,6 +890,7 @@ public class ConfigurationSettingsTests
     [Fact]
     public void WriteToLoggerWithRestrictedToMinimumLevelIsSupported()
     {
+        // language=json
         var json = """
         {
             "Serilog": {
@@ -898,6 +925,7 @@ public class ConfigurationSettingsTests
     [Fact]
     public void WriteToSubLoggerWithLevelSwitchIsSupported()
     {
+        // language=json
         var json = """
         {
             "Serilog": {
@@ -935,6 +963,7 @@ public class ConfigurationSettingsTests
     [Fact]
     public void InconsistentComplexVsScalarArgumentValuesThrowsIOE()
     {
+        // language=json
         var jsonDiscreteValue = """
             {
                 "Serilog": {
@@ -947,6 +976,7 @@ public class ConfigurationSettingsTests
             }
             """;
 
+        // language=json
         var jsonComplexValue = """
             {
                 "Serilog": {
@@ -976,6 +1006,7 @@ public class ConfigurationSettingsTests
     [Fact]
     public void DestructureLimitsNestingDepth()
     {
+        // language=json
         var json = """
             {
                 "Serilog": {
@@ -1011,6 +1042,7 @@ public class ConfigurationSettingsTests
     [Fact]
     public void DestructureLimitsStringLength()
     {
+        // language=json
         var json = """
             {
                 "Serilog": {
@@ -1032,6 +1064,7 @@ public class ConfigurationSettingsTests
     [Fact]
     public void DestructureLimitsCollectionCount()
     {
+        // language=json
         var json = """
             {
                 "Serilog": {
@@ -1065,6 +1098,7 @@ public class ConfigurationSettingsTests
     [Fact]
     public void DestructuringWithCustomExtensionMethodIsApplied()
     {
+        // language=json
         var json = """
             {
                 "Serilog": {
@@ -1091,6 +1125,7 @@ public class ConfigurationSettingsTests
     [Fact]
     public void DestructuringAsScalarIsAppliedWithShortTypeName()
     {
+        // language=json
         var json = """
             {
                 "Serilog": {
@@ -1117,6 +1152,7 @@ public class ConfigurationSettingsTests
     [Fact]
     public void DestructuringAsScalarIsAppliedWithAssemblyQualifiedName()
     {
+        // language=json
         var json = $$"""
             {
                 "Serilog": {
@@ -1143,6 +1179,7 @@ public class ConfigurationSettingsTests
     [Fact]
     public void WriteToSinkIsAppliedWithCustomSink()
     {
+        // language=json
         var json = $$"""
             {
                 "Serilog": {
@@ -1170,6 +1207,7 @@ public class ConfigurationSettingsTests
     [Fact]
     public void WriteToSinkIsAppliedWithCustomSinkAndMinimumLevel()
     {
+        // language=json
         var json = $$"""
             {
                 "Serilog": {
@@ -1199,6 +1237,7 @@ public class ConfigurationSettingsTests
     [Fact]
     public void WriteToSinkIsAppliedWithCustomSinkAndLevelSwitch()
     {
+        // language=json
         var json = $$"""
             {
                 "Serilog": {
@@ -1229,6 +1268,7 @@ public class ConfigurationSettingsTests
     [Fact]
     public void AuditToSinkIsAppliedWithCustomSink()
     {
+        // language=json
         var json = $$"""
             {
                 "Serilog": {
@@ -1256,6 +1296,7 @@ public class ConfigurationSettingsTests
     [Fact]
     public void AuditToSinkIsAppliedWithCustomSinkAndMinimumLevel()
     {
+        // language=json
         var json = $$"""
             {
                 "Serilog": {
@@ -1285,6 +1326,7 @@ public class ConfigurationSettingsTests
     [Fact]
     public void AuditToSinkIsAppliedWithCustomSinkAndLevelSwitch()
     {
+        // language=json
         var json = $$"""
             {
                 "Serilog": {
@@ -1317,6 +1359,7 @@ public class ConfigurationSettingsTests
     {
         LogEvent? evt = null;
 
+        // language=json
         var json = $$"""
             {
                 "Serilog": {
@@ -1347,6 +1390,7 @@ public class ConfigurationSettingsTests
     {
         LogEvent? evt = null;
 
+        // language=json
         var json = $$"""
             {
                 "Serilog": {
@@ -1377,6 +1421,7 @@ public class ConfigurationSettingsTests
     [InlineData("switch1")]
     public void TestLogLevelSwitchesCallback(string switchName)
     {
+        // language=json
         var json = $$"""
             {
                 "Serilog": {

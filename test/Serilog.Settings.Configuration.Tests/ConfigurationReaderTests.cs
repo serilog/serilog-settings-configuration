@@ -23,6 +23,7 @@ public class ConfigurationReaderTests
     [Fact]
     public void WriteToSupportSimplifiedSyntax()
     {
+        // language=json
         var json = """
         {
             "WriteTo": [ "LiterateConsole", "DiagnosticTrace" ]
@@ -41,6 +42,7 @@ public class ConfigurationReaderTests
     [Fact]
     public void WriteToSupportExpandedSyntaxWithoutArgs()
     {
+        // language=json
         var json = """
         {
             "WriteTo": [ {
@@ -59,13 +61,14 @@ public class ConfigurationReaderTests
     [Fact]
     public void WriteToSupportExpandedSyntaxWithArgs()
     {
+        // language=json
         var json = """
         {
             "WriteTo": [ {
                 "Name": "LiterateConsole",
                 "Args": {
                     "outputTemplate": "{Message}"
-                },
+                }
             }]
         }
         """;
@@ -87,6 +90,7 @@ public class ConfigurationReaderTests
     [Fact]
     public void WriteToSupportMultipleSinksOfTheSameKind()
     {
+        // language=json
         var json = """
         {
             "WriteTo": [
@@ -94,7 +98,7 @@ public class ConfigurationReaderTests
                 "Name": "LiterateConsole",
                 "Args": {
                     "outputTemplate": "{Message}"
-                  },
+                  }
               },
               "DiagnosticTrace"
             ],
@@ -102,13 +106,13 @@ public class ConfigurationReaderTests
                 "Name": "File",
                 "Args": {
                     "outputTemplate": "{Message}"
-                },
+                }
             },
             "WriteTo:File2": {
                 "Name": "File",
                 "Args": {
                     "outputTemplate": "{Message}"
-                },
+                }
             }
         }
         """;
@@ -128,6 +132,7 @@ public class ConfigurationReaderTests
     [Fact]
     public void Enrich_SupportSimplifiedSyntax()
     {
+        // language=json
         var json = """
         {
             "Enrich": [ "FromLogContext", "WithMachineName", "WithThreadId" ]
@@ -273,6 +278,7 @@ public class ConfigurationReaderTests
     [Fact]
     public void NoConfigurationRootUsedStillValid()
     {
+        // language=json
         var json = """
         {
             "Nest": {
