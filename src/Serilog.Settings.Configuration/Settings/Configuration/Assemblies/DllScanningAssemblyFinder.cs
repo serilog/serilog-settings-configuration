@@ -48,7 +48,7 @@ sealed class DllScanningAssemblyFinder : AssemblyFinder
                     where assemblyName != null
                     select assemblyName;
 
-        return query.ToList().AsReadOnly();
+        return query.ToList();
 
         static AssemblyName? TryGetAssemblyNameFrom(string path)
         {
