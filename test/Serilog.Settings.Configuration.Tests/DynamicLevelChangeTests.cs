@@ -9,28 +9,29 @@ namespace Serilog.Settings.Configuration.Tests;
 
 public class DynamicLevelChangeTests
 {
+    // language=json
     const string DefaultConfig = """
         {
-            'Serilog': {
-                'Using': [ 'TestDummies' ],
-                'MinimumLevel': {
-                    'Default': 'Information',
-                    'Override': {
-                        'Root.Test': 'Information'
+            "Serilog": {
+                "Using": [ "TestDummies" ],
+                "MinimumLevel": {
+                    "Default": "Information",
+                    "Override": {
+                        "Root.Test": "Information"
                     }
                 },
-                'LevelSwitches': { '$mySwitch': 'Information' },
-                'FilterSwitches': { '$myFilter': null },
-                'Filter:Dummy': {
-                    'Name': 'ControlledBy',
-                    'Args': {
-                        'switch': '$myFilter'
+                "LevelSwitches": { "$mySwitch": "Information" },
+                "FilterSwitches": { "$myFilter": null },
+                "Filter:Dummy": {
+                    "Name": "ControlledBy",
+                    "Args": {
+                        "switch": "$myFilter"
                     }
                 },
-                'WriteTo:Dummy': {
-                    'Name': 'DummyConsole',
-                    'Args': {
-                        'levelSwitch': '$mySwitch'
+                "WriteTo:Dummy": {
+                    "Name": "DummyConsole",
+                    "Args": {
+                        "levelSwitch": "$mySwitch"
                     }
                 }
             }

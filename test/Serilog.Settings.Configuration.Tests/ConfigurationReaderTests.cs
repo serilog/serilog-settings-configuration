@@ -1,4 +1,3 @@
-using System.Globalization;
 using System.Reflection;
 using Microsoft.Extensions.Configuration;
 using Serilog.Events;
@@ -16,7 +15,7 @@ public class ConfigurationReaderTests
     public ConfigurationReaderTests()
     {
         _configurationReader = new ConfigurationReader(
-            JsonStringConfigSource.LoadSection("{ 'Serilog': {  } }", "Serilog"),
+            JsonStringConfigSource.LoadSection("{ \"Serilog\": {  } }", "Serilog"),
             AssemblyFinder.ForSource(ConfigurationAssemblySource.UseLoadedAssemblies),
             new ConfigurationReaderOptions());
     }
@@ -24,9 +23,10 @@ public class ConfigurationReaderTests
     [Fact]
     public void WriteToSupportSimplifiedSyntax()
     {
+        // language=json
         var json = """
         {
-            'WriteTo': [ 'LiterateConsole', 'DiagnosticTrace' ]
+            "WriteTo": [ "LiterateConsole", "DiagnosticTrace" ]
         }
         """;
 
@@ -42,10 +42,11 @@ public class ConfigurationReaderTests
     [Fact]
     public void WriteToSupportExpandedSyntaxWithoutArgs()
     {
+        // language=json
         var json = """
         {
-            'WriteTo': [ {
-                'Name': 'LiterateConsole'
+            "WriteTo": [ {
+                "Name": "LiterateConsole"
             }]
         }
         """;
@@ -60,13 +61,14 @@ public class ConfigurationReaderTests
     [Fact]
     public void WriteToSupportExpandedSyntaxWithArgs()
     {
+        // language=json
         var json = """
         {
-            'WriteTo': [ {
-                'Name': 'LiterateConsole',
-                'Args': {
-                    'outputTemplate': '{Message}'
-                },
+            "WriteTo": [ {
+                "Name": "LiterateConsole",
+                "Args": {
+                    "outputTemplate": "{Message}"
+                }
             }]
         }
         """;
@@ -88,28 +90,29 @@ public class ConfigurationReaderTests
     [Fact]
     public void WriteToSupportMultipleSinksOfTheSameKind()
     {
+        // language=json
         var json = """
         {
-            'WriteTo': [
+            "WriteTo": [
               {
-                'Name': 'LiterateConsole',
-                'Args': {
-                    'outputTemplate': '{Message}'
-                  },
+                "Name": "LiterateConsole",
+                "Args": {
+                    "outputTemplate": "{Message}"
+                  }
               },
-              'DiagnosticTrace'
+              "DiagnosticTrace"
             ],
-            'WriteTo:File1': {
-                'Name': 'File',
-                'Args': {
-                    'outputTemplate': '{Message}'
-                },
+            "WriteTo:File1": {
+                "Name": "File",
+                "Args": {
+                    "outputTemplate": "{Message}"
+                }
             },
-            'WriteTo:File2': {
-                'Name': 'File',
-                'Args': {
-                    'outputTemplate': '{Message}'
-                },
+            "WriteTo:File2": {
+                "Name": "File",
+                "Args": {
+                    "outputTemplate": "{Message}"
+                }
             }
         }
         """;
@@ -129,9 +132,10 @@ public class ConfigurationReaderTests
     [Fact]
     public void Enrich_SupportSimplifiedSyntax()
     {
+        // language=json
         var json = """
         {
-            'Enrich': [ 'FromLogContext', 'WithMachineName', 'WithThreadId' ]
+            "Enrich": [ "FromLogContext", "WithMachineName", "WithThreadId" ]
         }
         """;
 
@@ -274,7 +278,18 @@ public class ConfigurationReaderTests
     [Fact]
     public void NoConfigurationRootUsedStillValid()
     {
-        var section = JsonStringConfigSource.LoadSection("{ 'Nest': { 'Serilog': { 'MinimumLevel': 'Error' } } }", "Nest");
+        // language=json
+        var json = """
+        {
+            "Nest": {
+                "Serilog": {
+                    "MinimumLevel": "Error"
+                }
+            }
+        }
+        """;
+
+        var section = JsonStringConfigSource.LoadSection(json, "Nest");
         var reader = new ConfigurationReader(section.GetSection("Serilog"), AssemblyFinder.ForSource(ConfigurationAssemblySource.UseLoadedAssemblies), new ConfigurationReaderOptions(), section);
         var loggerConfig = new LoggerConfiguration();
 

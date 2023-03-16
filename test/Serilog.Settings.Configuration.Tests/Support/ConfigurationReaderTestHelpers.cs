@@ -7,16 +7,16 @@ static class ConfigurationReaderTestHelpers
 {
     public const string minimumLevelFlatTemplate = """
     {{
-        'Serilog': {{
-            'MinimumLevel': '{0}'
+        "Serilog": {{
+            "MinimumLevel": "{0}"
         }}
     }}
     """;
     public const string minimumLevelObjectTemplate = """
     {{
-        'Serilog': {{
-            'MinimumLevel': {{
-                'Default': '{0}'
+        "Serilog": {{
+            "MinimumLevel": {{
+                "Default": "{0}"
             }}
         }}
     }}

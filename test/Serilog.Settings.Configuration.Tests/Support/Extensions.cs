@@ -9,11 +9,5 @@ public static class Extensions
         return ((ScalarValue)@this).Value;
     }
 
-    public static string ToValidJson(this string str)
-    {
-        str = str.Replace('\'', '"');
-        return str;
-    }
-
     public static string Format(this string template, params object[] paramObjects) => string.Format(template, paramObjects);
 }
