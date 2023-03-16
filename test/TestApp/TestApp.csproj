@@ -8,7 +8,6 @@
     <GenerateSupportedRuntime>false</GenerateSupportedRuntime>
     <PublishReferencesDocumentationFiles>false</PublishReferencesDocumentationFiles>
     <AllowedReferenceRelatedFileExtensions>none</AllowedReferenceRelatedFileExtensions>
-    <SelfContained>false</SelfContained>
     <UseCurrentRuntimeIdentifier>true</UseCurrentRuntimeIdentifier>
   </PropertyGroup>
 

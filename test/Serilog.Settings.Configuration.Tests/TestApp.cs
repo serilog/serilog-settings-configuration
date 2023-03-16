@@ -1,16 +1,14 @@
-using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
-using System.Runtime.Versioning;
 using System.Xml.Linq;
 using System.Xml.XPath;
 using CliWrap;
 using FluentAssertions;
 using Medallion.Threading;
 using Medallion.Threading.FileSystem;
-using NuGet.Frameworks;
 using Xunit.Abstractions;
 using Xunit.Sdk;
+using static Serilog.Settings.Configuration.Tests.PublishModeExtensions;
 
 namespace Serilog.Settings.Configuration.Tests;
 
@@ -19,6 +17,7 @@ public class TestApp : IAsyncLifetime
     readonly IMessageSink _messageSink;
     readonly DirectoryInfo _workingDirectory;
     readonly List<DirectoryInfo> _directoriesToCleanup;
+    readonly Dictionary<PublishMode, FileInfo> _executables;
     readonly IDistributedLock _lock;
     IDistributedSynchronizationHandle? _lockHandle;
 
@@ -27,6 +26,7 @@ public class TestApp : IAsyncLifetime
         _messageSink = messageSink;
         _workingDirectory = GetDirectory("test", "TestApp");
         _directoriesToCleanup = new List<DirectoryInfo>();
+        _executables = new Dictionary<PublishMode, FileInfo>();
         _lock = new FileDistributedLock(new FileInfo(Path.Combine(_workingDirectory.FullName, "dotnet-restore.lock")));
     }
 
@@ -34,44 +34,35 @@ public class TestApp : IAsyncLifetime
     {
         _lockHandle = await _lock.AcquireAsync();
 
-        var targetFrameworkAttribute = typeof(TestApp).Assembly.GetCustomAttribute<TargetFrameworkAttribute>();
-        if (targetFrameworkAttribute == null)
+        foreach (var publishMode in GetPublishModes())
         {
-            throw new Exception($"Assembly {typeof(TestApp).Assembly} does not have a {nameof(TargetFrameworkAttribute)}");
-        }
-
-        var targetFramework = NuGetFramework.Parse(targetFrameworkAttribute.FrameworkName);
-        foreach (var singleFile in new[] { true, false })
-        {
-            var framework = targetFramework.GetShortFolderName();
-            var isDesktop = targetFramework.IsDesktop();
-
-            var outputDirectory = new DirectoryInfo(Path.Combine(_workingDirectory.FullName, framework, singleFile ? "publish-single-file" : "publish-standard"));
+            var outputDirectory = new DirectoryInfo(Path.Combine(_workingDirectory.FullName, TargetFramework, publishMode.ToString()));
             _directoriesToCleanup.Add(outputDirectory.Parent!);
 
-            var restoreArgs = new[] { "restore", "--no-dependencies", $"-p:TargetFrameworks={string.Join("%3B", GetProjectTargetFrameworks().Append(framework).Distinct())}" };
+            var restoreArgs = new[] { "restore", $"-p:TargetFrameworks={string.Join("%3B", GetProjectTargetFrameworks().Append(TargetFramework).Distinct())}" };
             await RunDotnetAsync(_workingDirectory, restoreArgs);
 
-            File.WriteAllText(Path.Combine(_workingDirectory.FullName, "FodyWeavers.xml"), singleFile && isDesktop ? "<Weavers><Costura/></Weavers>" : "<Weavers/>");
+            File.WriteAllText(Path.Combine(_workingDirectory.FullName, "FodyWeavers.xml"), publishMode == PublishMode.SingleFile && IsDesktop ? "<Weavers><Costura/></Weavers>" : "<Weavers/>");
 
-            var args = new[] { "publish", "--no-restore", "--configuration", "Release", "--output", outputDirectory.FullName, $"-p:TargetFramework={framework}" };
-            await RunDotnetAsync(_workingDirectory, isDesktop ? args : args.Append($"-p:PublishSingleFile={singleFile}").ToArray());
+            var args = new[] { "publish", "--no-restore", "--configuration", "Release", "--output", outputDirectory.FullName, $"-p:TargetFramework={TargetFramework}" };
+            var publishSingleFile = $"-p:PublishSingleFile={publishMode is PublishMode.SingleFile or PublishMode.SelfContained}";
+            var selfContained = $"-p:SelfContained={publishMode is PublishMode.SelfContained}";
+            await RunDotnetAsync(_workingDirectory, IsDesktop ? args : args.Append(publishSingleFile).Append(selfContained).ToArray());
 
             var executableFileName = RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? "TestApp.exe" : "TestApp";
             var executableFile = new FileInfo(Path.Combine(outputDirectory.FullName, executableFileName));
             executableFile.Exists.Should().BeTrue();
             var dlls = executableFile.Directory!.EnumerateFiles("*.dll");
-            if (singleFile)
+            if (publishMode == PublishMode.Standard)
             {
-                dlls.Should().BeEmpty(because: "the test app was published as single-file");
-                executableFile.Directory.EnumerateFiles().Should().ContainSingle().Which.FullName.Should().Be(executableFile.FullName);
-                SingleFileExe = executableFile;
+                dlls.Should().NotBeEmpty(because: $"the test app was _not_ published as single-file ({publishMode})");
             }
             else
             {
-                dlls.Should().NotBeEmpty(because: "the test app was _not_ published as single-file");
-                StandardExe = executableFile;
+                dlls.Should().BeEmpty(because: $"the test app was published as single-file ({publishMode})");
+                executableFile.Directory.EnumerateFiles().Should().ContainSingle().Which.FullName.Should().Be(executableFile.FullName);
             }
+            _executables[publishMode] = executableFile;
         }
     }
 
@@ -90,8 +81,7 @@ public class TestApp : IAsyncLifetime
         }
     }
 
-    public FileInfo SingleFileExe { get; private set; } = null!;
-    public FileInfo StandardExe { get; private set; } = null!;
+    public string GetExecutablePath(PublishMode publishMode) => _executables[publishMode].FullName;
 
     async Task RunDotnetAsync(DirectoryInfo workingDirectory, params string[] arguments)
     {
