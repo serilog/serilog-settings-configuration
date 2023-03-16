@@ -42,7 +42,7 @@ class JsonStringConfigSource : IConfigurationSource
 
         public override void Load()
         {
-            Load(StringToStream(_json.ToValidJson()));
+            Load(StringToStream(_json));
         }
 
         static Stream StringToStream(string str)

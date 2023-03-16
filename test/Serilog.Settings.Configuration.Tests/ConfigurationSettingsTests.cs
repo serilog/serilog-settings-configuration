@@ -395,12 +395,12 @@ public class ConfigurationSettingsTests
     {
         var json = $$"""
             {
-                'Serilog': {
-                    'FilterSwitches': { '{{switchName}}': 'Prop = 42' },
-                    'Filter:BySwitch': {
-                        'Name': 'ControlledBy',
-                        'Args': {
-                            'switch': '$mySwitch'
+                "Serilog": {
+                    "FilterSwitches": { "{{switchName}}": "Prop = 42" },
+                    "Filter:BySwitch": {
+                        "Name": "ControlledBy",
+                        "Args": {
+                            "switch": "$mySwitch"
                         }
                     }
                 }
@@ -426,10 +426,10 @@ public class ConfigurationSettingsTests
     {
         var json = $$"""
             {
-                'Serilog': {
-                    'LevelSwitches': { '{{switchName}}' : 'Warning' },
-                    'MinimumLevel' : {
-                        'ControlledBy' : '$switch1'
+                "Serilog": {
+                    "LevelSwitches": { "{{switchName}}" : "Warning" },
+                    "MinimumLevel" : {
+                        "ControlledBy" : "$switch1"
                     }
                 }
             }
@@ -1379,12 +1379,12 @@ public class ConfigurationSettingsTests
     {
         var json = $$"""
             {
-                'Serilog': {
-                    'LevelSwitches': { '{{switchName}}': 'Information' },
-                    'MinimumLevel': {
-                        'Override': {
-                            'System': 'Warning',
-                            'System.Threading': 'Debug'
+                "Serilog": {
+                    "LevelSwitches": { "{{switchName}}": "Information" },
+                    "MinimumLevel": {
+                        "Override": {
+                            "System": "Warning",
+                            "System.Threading": "Debug"
                         }
                     }
                 }
