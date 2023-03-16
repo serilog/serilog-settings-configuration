@@ -14,7 +14,7 @@ abstract class AssemblyFinder
 
     public static AssemblyFinder Auto()
     {
-        return new AutoAssemblyFinder(new DependencyContextAssemblyFinder(DependencyContext.Default), new DllScanningAssemblyFinder());
+        return new CompositeAssemblyFinder(new DependencyContextAssemblyFinder(DependencyContext.Default), new DllScanningAssemblyFinder());
     }
 
     public static AssemblyFinder ForSource(ConfigurationAssemblySource configurationAssemblySource)

@@ -2,11 +2,11 @@
 
 namespace Serilog.Settings.Configuration.Assemblies;
 
-class AutoAssemblyFinder : AssemblyFinder
+class CompositeAssemblyFinder : AssemblyFinder
 {
     readonly AssemblyFinder[] _assemblyFinders;
 
-    public AutoAssemblyFinder(params AssemblyFinder[] assemblyFinders)
+    public CompositeAssemblyFinder(params AssemblyFinder[] assemblyFinders)
     {
         _assemblyFinders = assemblyFinders;
     }
