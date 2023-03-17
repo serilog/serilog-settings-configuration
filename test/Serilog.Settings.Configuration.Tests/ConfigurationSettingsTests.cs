@@ -11,17 +11,17 @@ namespace Serilog.Settings.Configuration.Tests;
 
 public class ConfigurationSettingsTests
 {
-    static LoggerConfiguration ConfigFromJson(string jsonString, string secondJsonSource = null, ConfigurationReaderOptions options = null)
+    static LoggerConfiguration ConfigFromJson(string jsonString, string? secondJsonSource = null, ConfigurationReaderOptions? options = null)
     {
         return ConfigFromJson(jsonString, secondJsonSource, out _, options);
     }
 
-    static LoggerConfiguration ConfigFromJson(string jsonString, out IConfiguration configuration, ConfigurationReaderOptions options = null)
+    static LoggerConfiguration ConfigFromJson(string jsonString, out IConfiguration configuration, ConfigurationReaderOptions? options = null)
     {
         return ConfigFromJson(jsonString, null, out configuration, options);
     }
 
-    static LoggerConfiguration ConfigFromJson(string jsonString, string secondJsonSource, out IConfiguration configuration, ConfigurationReaderOptions options)
+    static LoggerConfiguration ConfigFromJson(string jsonString, string? secondJsonSource, out IConfiguration configuration, ConfigurationReaderOptions? options)
     {
         var builder = new ConfigurationBuilder().AddJsonString(jsonString);
         if (secondJsonSource != null)
@@ -34,7 +34,7 @@ public class ConfigurationSettingsTests
     [Fact]
     public void PropertyEnrichmentIsApplied()
     {
-        LogEvent evt = null;
+        LogEvent? evt = null;
 
         var json = """
             {
@@ -47,6 +47,31 @@ public class ConfigurationSettingsTests
             """;
 
         var log = ConfigFromJson(json)
+            .WriteTo.Sink(new DelegatingSink(e => evt = e))
+            .CreateLogger();
+
+        log.Information("Has a test property");
+
+        Assert.NotNull(evt);
+        Assert.Equal("Test", evt.Properties["App"].LiteralValue());
+    }
+
+    [Theory]
+    [InlineData(null)]
+    [InlineData("")]
+    public void CanReadWithoutSerilogSection(string sectionName)
+    {
+        LogEvent? evt = null;
+
+        var json = """
+            {
+                "Properties": {
+                    "App": "Test"
+                }
+            }
+            """;
+
+        var log = ConfigFromJson(json, options: new ConfigurationReaderOptions { SectionName = sectionName })
             .WriteTo.Sink(new DelegatingSink(e => evt = e))
             .CreateLogger();
 
@@ -120,7 +145,7 @@ public class ConfigurationSettingsTests
     }
 
     [Fact]
-    public void ConfigurationAssembliesFromDllScanningWithInternalMethodInPublicClass()
+    public void ConfigurationAssembliesWithInternalMethodInPublicClass()
     {
         var json = """
             {
@@ -147,7 +172,7 @@ public class ConfigurationSettingsTests
     }
 
     [Fact]
-    public void ConfigurationAssembliesFromDllScanningWithPublicMethodInInternalClass()
+    public void ConfigurationAssembliesWithPublicMethodInInternalClass()
     {
         var json = """
             {
@@ -174,7 +199,7 @@ public class ConfigurationSettingsTests
     }
 
     [Fact]
-    public void ConfigurationAssembliesFromDllScanningWithInternalMethodInInternalClass()
+    public void ConfigurationAssembliesWithInternalMethodInInternalClass()
     {
         var json = """
             {
@@ -302,7 +327,7 @@ public class ConfigurationSettingsTests
             }
             """;
 
-        LogEvent evt = null;
+        LogEvent? evt = null;
 
         var log = ConfigFromJson(json)
             .WriteTo.Sink(new DelegatingSink(e => evt = e))
@@ -338,7 +363,7 @@ public class ConfigurationSettingsTests
             }
             """;
 
-        LogEvent evt = null;
+        LogEvent? evt = null;
 
         var log = ConfigFromJson(json)
             .WriteTo.Sink(new DelegatingSink(e => evt = e))
@@ -462,7 +487,7 @@ public class ConfigurationSettingsTests
                 }
             }
             """;
-        LogEvent evt = null;
+        LogEvent? evt = null;
 
         var log = ConfigFromJson(json)
             .WriteTo.Sink(new DelegatingSink(e => evt = e))
@@ -490,7 +515,7 @@ public class ConfigurationSettingsTests
                 }
             }
             """;
-        LogEvent evt = null;
+        LogEvent? evt = null;
 
         var log = ConfigFromJson(json)
             .WriteTo.Sink(new DelegatingSink(e => evt = e))
@@ -545,7 +570,7 @@ public class ConfigurationSettingsTests
             }
             """;
 
-        LogEvent evt = null;
+        LogEvent? evt = null;
 
         var log = ConfigFromJson(json)
             .WriteTo.Sink(new DelegatingSink(e => evt = e))
@@ -613,7 +638,7 @@ public class ConfigurationSettingsTests
             }
             """;
 
-        LogEvent evt = null;
+        LogEvent? evt = null;
 
         var log = ConfigFromJson(json)
             .WriteTo.Sink(new DelegatingSink(e => evt = e))
@@ -635,6 +660,7 @@ public class ConfigurationSettingsTests
 
         evt = null;
         var controlSwitch = DummyWithLevelSwitchSink.ControlLevelSwitch;
+        Assert.NotNull(controlSwitch);
 
         controlSwitch.MinimumLevel = LogEventLevel.Information;
         systemLogger.Write(Some.InformationEvent());
@@ -858,9 +884,9 @@ public class ConfigurationSettingsTests
         Assert.NotNull(DummyPolicy.Current);
         Assert.Equal(typeof(TimeSpan), DummyPolicy.Current.Type);
         Assert.Equal(new[] { typeof(int), typeof(string) }, DummyPolicy.Current.Array);
-        Assert.Equal(new[] { typeof(byte), typeof(short) }, DummyPolicy.Current.List);
-        Assert.Equal(typeof(long), DummyPolicy.Current.Custom.First);
-        Assert.Equal("System.UInt32", DummyPolicy.Current.CustomStrings.First);
+        Assert.Equal(new[] { typeof(byte), typeof(short) }, DummyPolicy.Current.List!);
+        Assert.Equal(typeof(long), DummyPolicy.Current.Custom?.First);
+        Assert.Equal("System.UInt32", DummyPolicy.Current.CustomStrings?.First);
     }
 
     [Fact]
@@ -1108,12 +1134,12 @@ public class ConfigurationSettingsTests
 
     private static string GetDestructuredProperty(object x, string json)
     {
-        LogEvent evt = null;
+        LogEvent? evt = null;
         var log = ConfigFromJson(json)
             .WriteTo.Sink(new DelegatingSink(e => evt = e))
             .CreateLogger();
         log.Information("{@X}", x);
-        var result = evt.Properties["X"].ToString();
+        var result = evt!.Properties["X"].ToString();
         return result;
     }
 
@@ -1133,12 +1159,12 @@ public class ConfigurationSettingsTests
             }
             """;
 
-        LogEvent evt = null;
+        LogEvent? evt = null;
         var log = ConfigFromJson(json)
             .WriteTo.Sink(new DelegatingSink(e => evt = e))
             .CreateLogger();
         log.Information("Destructuring with hard-coded policy {@Input}", new { Foo = "Bar" });
-        var formattedProperty = evt.Properties["Input"].ToString();
+        var formattedProperty = evt?.Properties["Input"].ToString();
 
         Assert.Equal("\"hardcoded\"", formattedProperty);
     }
@@ -1158,13 +1184,13 @@ public class ConfigurationSettingsTests
             }
             """;
 
-        LogEvent evt = null;
+        LogEvent? evt = null;
         var log = ConfigFromJson(json)
             .WriteTo.Sink(new DelegatingSink(e => evt = e))
             .CreateLogger();
 
         log.Information("Destructuring as scalar {@Scalarized}", new Version(2, 3));
-        var prop = evt.Properties["Scalarized"];
+        var prop = evt?.Properties["Scalarized"];
 
         Assert.IsType<ScalarValue>(prop);
     }
@@ -1184,13 +1210,13 @@ public class ConfigurationSettingsTests
             }
             """;
 
-        LogEvent evt = null;
+        LogEvent? evt = null;
         var log = ConfigFromJson(json)
             .WriteTo.Sink(new DelegatingSink(e => evt = e))
             .CreateLogger();
 
         log.Information("Destructuring as scalar {@Scalarized}", new Version(2, 3));
-        var prop = evt.Properties["Scalarized"];
+        var prop = evt?.Properties["Scalarized"];
 
         Assert.IsType<ScalarValue>(prop);
     }
@@ -1370,7 +1396,7 @@ public class ConfigurationSettingsTests
     [Fact]
     public void EnrichWithIsAppliedWithCustomEnricher()
     {
-        LogEvent evt = null;
+        LogEvent? evt = null;
 
         var json = $$"""
             {
@@ -1400,7 +1426,7 @@ public class ConfigurationSettingsTests
     [Fact]
     public void FilterWithIsAppliedWithCustomFilter()
     {
-        LogEvent evt = null;
+        LogEvent? evt = null;
 
         var json = $$"""
             {

@@ -154,7 +154,7 @@ public class ConfigurationReaderTests
         var suppliedArgumentNames = new[] { "pathFormat" };
 
         var selected = ConfigurationReader.SelectConfigurationMethod(options, "DummyRollingFile", suppliedArgumentNames);
-        Assert.Equal(typeof(string), selected.GetParameters()[1].ParameterType);
+        Assert.Equal(typeof(string), selected?.GetParameters()[1].ParameterType);
     }
 
     [Fact]
@@ -166,7 +166,7 @@ public class ConfigurationReaderTests
         var suppliedArgumentNames = new[] { "pathFormat", "formatter" };
 
         var selected = ConfigurationReader.SelectConfigurationMethod(options, "DummyRollingFile", suppliedArgumentNames);
-        Assert.Equal(typeof(ITextFormatter), selected.GetParameters()[1].ParameterType);
+        Assert.Equal(typeof(ITextFormatter), selected?.GetParameters()[1].ParameterType);
     }
 
     [Fact]
@@ -178,7 +178,7 @@ public class ConfigurationReaderTests
         var suppliedArgumentNames = new[] { "pathFormat", "formatter" };
 
         var selected = ConfigurationReader.SelectConfigurationMethod(options, "DummyRollingFile", suppliedArgumentNames);
-        Assert.Equal(typeof(string), selected.GetParameters()[2].ParameterType);
+        Assert.Equal(typeof(string), selected?.GetParameters()[2].ParameterType);
     }
 
     public static IEnumerable<object[]> FlatMinimumLevel => new List<object[]>

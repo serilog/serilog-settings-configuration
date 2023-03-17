@@ -7,7 +7,7 @@ abstract class AssemblyFinder
 {
     public abstract IReadOnlyList<AssemblyName> FindAssembliesContainingName(string nameToFind);
 
-    protected static bool IsCaseInsensitiveMatch(string text, string textToFind)
+    protected static bool IsCaseInsensitiveMatch(string? text, string textToFind)
     {
         return text != null && text.ToLowerInvariant().Contains(textToFind.ToLowerInvariant());
     }

@@ -1,4 +1,5 @@
-﻿using System.Reflection;
+﻿using System.Diagnostics.CodeAnalysis;
+using System.Reflection;
 using System.Text.RegularExpressions;
 
 using Serilog.Core;
@@ -23,7 +24,7 @@ class StringArgumentValue : IConfigurationArgumentValue
             { typeof(Type), s => Type.GetType(s, throwOnError:true) },
         };
 
-    public object ConvertTo(Type toType, ResolutionContext resolutionContext)
+    public object? ConvertTo(Type toType, ResolutionContext resolutionContext)
     {
         var argumentValue = Environment.ExpandEnvironmentVariables(_providedValue);
 
@@ -158,7 +159,7 @@ class StringArgumentValue : IConfigurationArgumentValue
         return Convert.ChangeType(argumentValue, toType, resolutionContext.ReaderOptions.FormatProvider);
     }
 
-    internal static Type FindType(string typeName)
+    internal static Type? FindType(string typeName)
     {
         var type = Type.GetType(typeName);
         if (type == null)
@@ -172,7 +173,7 @@ class StringArgumentValue : IConfigurationArgumentValue
         return type;
     }
 
-    internal static bool TryParseStaticMemberAccessor(string input, out string accessorTypeName, out string memberName)
+    internal static bool TryParseStaticMemberAccessor(string? input, [NotNullWhen(true)] out string? accessorTypeName, [NotNullWhen(true)] out string? memberName)
     {
         if (input == null)
         {

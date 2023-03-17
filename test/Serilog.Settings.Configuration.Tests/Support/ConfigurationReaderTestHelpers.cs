@@ -47,9 +47,9 @@ static class ConfigurationReaderTestHelpers
 
     // the naming is only to show priority as providers
     public static IConfigurationRoot GetConfigRoot(
-        string appsettingsJsonLevel = null,
-        string appsettingsDevelopmentJsonLevel = null,
-        Dictionary<string, string> envVariables = null)
+        string? appsettingsJsonLevel = null,
+        string? appsettingsDevelopmentJsonLevel = null,
+        Dictionary<string, string>? envVariables = null)
     {
         var configBuilder = new ConfigurationBuilder();
 

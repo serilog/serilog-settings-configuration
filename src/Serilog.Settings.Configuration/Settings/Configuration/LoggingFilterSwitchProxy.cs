@@ -2,8 +2,8 @@
 
 class LoggingFilterSwitchProxy
 {
-    readonly Action<string> _setProxy;
-    readonly Func<string> _getProxy;
+    readonly Action<string?> _setProxy;
+    readonly Func<string?> _getProxy;
 
     LoggingFilterSwitchProxy(object realSwitch)
     {
@@ -12,26 +12,26 @@ class LoggingFilterSwitchProxy
         var type = realSwitch.GetType();
         var expressionProperty = type.GetProperty("Expression") ?? throw new MissingMemberException(type.FullName, "Expression");
 
-        _setProxy = (Action<string>)Delegate.CreateDelegate(
-            typeof(Action<string>),
+        _setProxy = (Action<string?>)Delegate.CreateDelegate(
+            typeof(Action<string?>),
             realSwitch,
             expressionProperty.GetSetMethod());
 
-        _getProxy = (Func<string>)Delegate.CreateDelegate(
-            typeof(Func<string>),
+        _getProxy = (Func<string?>)Delegate.CreateDelegate(
+            typeof(Func<string?>),
             realSwitch,
             expressionProperty.GetGetMethod());
     }
 
     public object RealSwitch { get; }
 
-    public string Expression
+    public string? Expression
     {
         get => _getProxy();
         set => _setProxy(value);
     }
 
-    public static LoggingFilterSwitchProxy Create(string expression = null)
+    public static LoggingFilterSwitchProxy? Create(string? expression = null)
     {
         var filterSwitchType =
             Type.GetType("Serilog.Expressions.LoggingFilterSwitch, Serilog.Expressions") ??

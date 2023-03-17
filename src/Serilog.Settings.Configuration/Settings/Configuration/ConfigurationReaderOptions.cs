@@ -38,7 +38,7 @@ public sealed class ConfigurationReaderOptions
     /// The dependency context from which sink/enricher packages can be located. If <see langword="null"/>, the platform default will be used.
     /// </param>
     /// <remarks>Prefer the constructor taking explicit assemblies: <see cref="ConfigurationReaderOptions(System.Reflection.Assembly[])"/>. It's the only one supporting single-file publishing.</remarks>
-    public ConfigurationReaderOptions(DependencyContext dependencyContext) => DependencyContext = dependencyContext;
+    public ConfigurationReaderOptions(DependencyContext? dependencyContext) => DependencyContext = dependencyContext;
 
     /// <summary>
     /// Initialize a new instance of the <see cref="ConfigurationReaderOptions"/> class.
@@ -50,22 +50,22 @@ public sealed class ConfigurationReaderOptions
     /// <summary>
     /// The section name for section which contains a Serilog section. Defaults to <c>Serilog</c>.
     /// </summary>
-    public string SectionName { get; init; } = ConfigurationLoggerConfigurationExtensions.DefaultSectionName;
+    public string? SectionName { get; init; } = ConfigurationLoggerConfigurationExtensions.DefaultSectionName;
 
     /// <summary>
     /// The <see cref="IFormatProvider"/> used when converting strings to other object types. Defaults to the invariant culture.
     /// </summary>
-    public IFormatProvider FormatProvider { get; init; } = CultureInfo.InvariantCulture;
+    public IFormatProvider? FormatProvider { get; init; } = CultureInfo.InvariantCulture;
 
     /// <summary>
     /// Allows to use internal types for extension methods for sink configuration. Defaults to <see langword="false"/>.
     /// </summary>
-    public bool AllowInternalTypes { get; set; }
+    public bool AllowInternalTypes { get; init; }
 
     /// <summary>
     /// Allows to use internal extension methods for sink configuration. Defaults to <see langword="false"/>.
     /// </summary>
-    public bool AllowInternalMethods { get; set; }
+    public bool AllowInternalMethods { get; init; }
 
     /// <summary>
     /// Called when a log level switch is created while reading the configuration.
@@ -75,9 +75,9 @@ public sealed class ConfigurationReaderOptions
     ///   <item>For minimum level override switches, the switch name is the (partial) namespace or type name of the override.</item>
     /// </list>
     /// </summary>
-    public Action<string, LoggingLevelSwitch> OnLevelSwitchCreated { get; init; }
+    public Action<string, LoggingLevelSwitch>? OnLevelSwitchCreated { get; init; }
 
-    internal Assembly[] Assemblies { get; }
-    internal DependencyContext DependencyContext { get; }
+    internal Assembly[]? Assemblies { get; }
+    internal DependencyContext? DependencyContext { get; }
     internal ConfigurationAssemblySource? ConfigurationAssemblySource { get; }
 }
