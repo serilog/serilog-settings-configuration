@@ -144,8 +144,10 @@ public class ConfigurationSettingsTests
         Assert.Single(DummyConsoleSink.Emitted);
     }
 
-    [Fact]
-    public void ConfigurationAssembliesWithInternalMethodInPublicClass()
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public void ConfigurationAssembliesWithInternalMethodInPublicClass(bool allowInternalMethods)
     {
         var json = """
             {
@@ -161,18 +163,23 @@ public class ConfigurationSettingsTests
         var log = new LoggerConfiguration()
             .ReadFrom.Configuration(
                 configuration: config,
-                readerOptions: new ConfigurationReaderOptions(ConfigurationAssemblySource.AlwaysScanDllFiles) { AllowInternalMethods = true })
+                readerOptions: new ConfigurationReaderOptions(ConfigurationAssemblySource.AlwaysScanDllFiles) { AllowInternalMethods = allowInternalMethods })
             .CreateLogger();
 
         DummyConsoleSink.Emitted.Clear();
 
         log.Write(Some.InformationEvent());
 
-        Assert.Single(DummyConsoleSink.Emitted);
+        if (allowInternalMethods)
+            Assert.Single(DummyConsoleSink.Emitted);
+        else
+            Assert.Empty(DummyConsoleSink.Emitted);
     }
 
-    [Fact]
-    public void ConfigurationAssembliesWithPublicMethodInInternalClass()
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public void ConfigurationAssembliesWithPublicMethodInInternalClass(bool allowInternalTypes)
     {
         var json = """
             {
@@ -188,18 +195,23 @@ public class ConfigurationSettingsTests
         var log = new LoggerConfiguration()
             .ReadFrom.Configuration(
                 configuration: config,
-                readerOptions: new ConfigurationReaderOptions(ConfigurationAssemblySource.AlwaysScanDllFiles) { AllowInternalTypes = true })
+                readerOptions: new ConfigurationReaderOptions(ConfigurationAssemblySource.AlwaysScanDllFiles) { AllowInternalTypes = allowInternalTypes })
             .CreateLogger();
 
         DummyConsoleSink.Emitted.Clear();
 
         log.Write(Some.InformationEvent());
 
-        Assert.Single(DummyConsoleSink.Emitted);
+        if (allowInternalTypes)
+            Assert.Single(DummyConsoleSink.Emitted);
+        else
+            Assert.Empty(DummyConsoleSink.Emitted);
     }
 
-    [Fact]
-    public void ConfigurationAssembliesWithInternalMethodInInternalClass()
+    [Theory]
+    [InlineData(false, false)]
+    [InlineData(true, true)]
+    public void ConfigurationAssembliesWithInternalMethodInInternalClass(bool allowInternalTypes, bool allowInternalMethods)
     {
         var json = """
             {
@@ -215,14 +227,17 @@ public class ConfigurationSettingsTests
         var log = new LoggerConfiguration()
             .ReadFrom.Configuration(
                 configuration: config,
-                readerOptions: new ConfigurationReaderOptions(ConfigurationAssemblySource.AlwaysScanDllFiles) { AllowInternalTypes = true, AllowInternalMethods = true })
+                readerOptions: new ConfigurationReaderOptions(ConfigurationAssemblySource.AlwaysScanDllFiles) { AllowInternalTypes = allowInternalTypes, AllowInternalMethods = allowInternalMethods })
             .CreateLogger();
 
         DummyConsoleSink.Emitted.Clear();
 
         log.Write(Some.InformationEvent());
 
-        Assert.Single(DummyConsoleSink.Emitted);
+        if (allowInternalTypes && allowInternalMethods)
+            Assert.Single(DummyConsoleSink.Emitted);
+        else
+            Assert.Empty(DummyConsoleSink.Emitted);
     }
 
     [Fact]
