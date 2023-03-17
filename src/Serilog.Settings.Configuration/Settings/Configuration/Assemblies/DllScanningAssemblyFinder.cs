@@ -32,7 +32,11 @@ sealed class DllScanningAssemblyFinder : AssemblyFinder
         }
         else
         {
-            probeDirs.Add(Path.GetDirectoryName(typeof(AssemblyFinder).Assembly.Location));
+            var assemblyLocation = Path.GetDirectoryName(typeof(AssemblyFinder).Assembly.Location);
+            if (assemblyLocation != null)
+            {
+                probeDirs.Add(assemblyLocation);
+            }
         }
 
         var query = from probeDir in probeDirs

@@ -15,12 +15,12 @@ class LoggingFilterSwitchProxy
         _setProxy = (Action<string?>)Delegate.CreateDelegate(
             typeof(Action<string?>),
             realSwitch,
-            expressionProperty.GetSetMethod());
+            expressionProperty.GetSetMethod() ?? throw new MissingMethodException(type.FullName, "set_Expression"));
 
         _getProxy = (Func<string?>)Delegate.CreateDelegate(
             typeof(Func<string?>),
             realSwitch,
-            expressionProperty.GetGetMethod());
+            expressionProperty.GetGetMethod() ?? throw new MissingMethodException(type.FullName, "get_Expression"));
     }
 
     public object RealSwitch { get; }
@@ -42,6 +42,7 @@ class LoggingFilterSwitchProxy
             return null;
         }
 
-        return new LoggingFilterSwitchProxy(Activator.CreateInstance(filterSwitchType, expression));
+        var realSwitch = Activator.CreateInstance(filterSwitchType, expression) ?? throw new InvalidOperationException($"Activator.CreateInstance returned null for {filterSwitchType}");
+        return new LoggingFilterSwitchProxy(realSwitch);
     }
 }

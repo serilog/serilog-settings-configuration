@@ -21,7 +21,7 @@ class StringArgumentValue : IConfigurationArgumentValue
         {
             { typeof(Uri), s => new Uri(s) },
             { typeof(TimeSpan), s => TimeSpan.Parse(s) },
-            { typeof(Type), s => Type.GetType(s, throwOnError:true) },
+            { typeof(Type), s => Type.GetType(s, throwOnError:true)! },
         };
 
     public object? ConvertTo(Type toType, ResolutionContext resolutionContext)
@@ -68,7 +68,7 @@ class StringArgumentValue : IConfigurationArgumentValue
             if (toType != typeof(string) &&
                 TryParseStaticMemberAccessor(argumentValue, out var accessorTypeName, out var memberName))
             {
-                var accessorType = Type.GetType(accessorTypeName, throwOnError: true);
+                var accessorType = Type.GetType(accessorTypeName, throwOnError: true)!;
 
                 // if delegate, look for a method and then construct a delegate
                 if (typeof(Delegate).IsAssignableFrom(toType) || typeof(MethodInfo) == toType)
@@ -109,9 +109,7 @@ class StringArgumentValue : IConfigurationArgumentValue
                 // is there a public static property with that name ?
                 var publicStaticPropertyInfo = accessorType.GetTypeInfo().DeclaredProperties
                     .Where(x => x.Name == memberName)
-                    .Where(x => x.GetMethod != null)
-                    .Where(x => x.GetMethod.IsPublic)
-                    .FirstOrDefault(x => x.GetMethod.IsStatic);
+                    .FirstOrDefault(x => x.GetMethod != null && x.GetMethod.IsPublic && x.GetMethod.IsStatic);
 
                 if (publicStaticPropertyInfo != null)
                 {

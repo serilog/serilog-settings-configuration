@@ -85,7 +85,7 @@ class ObjectArgumentValue : IConfigurationArgumentValue
                 return false;
 
             var configurationElements = _section.GetChildren().ToArray();
-            result = Activator.CreateInstance(toType);
+            result = Activator.CreateInstance(toType) ?? throw new InvalidOperationException($"Activator.CreateInstance returned null for {toType}");
 
             for (int i = 0; i < configurationElements.Length; ++i)
             {
@@ -137,7 +137,7 @@ class ObjectArgumentValue : IConfigurationArgumentValue
         var ctor =
             (from c in type.GetConstructors()
              from p in c.GetParameters()
-             let argumentBindResult = suppliedArguments.TryGetValue(p.Name, out var argValue) switch
+             let argumentBindResult = suppliedArguments.TryGetValue(p.Name ?? "", out var argValue) switch
              {
                  true => new { success = true, hasMatch = true, value = (object?)argValue },
                  false => p.HasDefaultValue switch
