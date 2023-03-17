@@ -471,10 +471,13 @@ class ConfigurationReader : IConfigurationReader
 
             if (!methodsByName.Any())
             {
-                SelfLog.WriteLine($"Unable to find a method called {name}.");
                 if (candidateMethods.Any())
                 {
-                    SelfLog.WriteLine($"Candidate methods are:{Environment.NewLine}{string.Join(Environment.NewLine, candidateMethods)}");
+                    SelfLog.WriteLine($"Unable to find a method called {name}. Candidate methods are:{Environment.NewLine}{string.Join(Environment.NewLine, candidateMethods)}");
+                }
+                else
+                {
+                    SelfLog.WriteLine($"Unable to find a method called {name}. No candidates found.");
                 }
             }
             else
