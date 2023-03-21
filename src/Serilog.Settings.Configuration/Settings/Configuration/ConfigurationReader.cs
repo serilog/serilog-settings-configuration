@@ -470,8 +470,18 @@ class ConfigurationReader : IConfigurationReader
                 .ToList();
 
             if (!methodsByName.Any())
-                SelfLog.WriteLine($"Unable to find a method called {name}. Candidate methods are:{Environment.NewLine}{string.Join(Environment.NewLine, candidateMethods)}");
+            {
+                if (candidateMethods.Any())
+                {
+                    SelfLog.WriteLine($"Unable to find a method called {name}. Candidate methods are:{Environment.NewLine}{string.Join(Environment.NewLine, candidateMethods)}");
+                }
+                else
+                {
+                    SelfLog.WriteLine($"Unable to find a method called {name}. No candidates found.");
+                }
+            }
             else
+            {
                 SelfLog.WriteLine($"Unable to find a method called {name} "
                 + (suppliedArgumentNames.Any()
                     ? "for supplied arguments: " + string.Join(", ", suppliedArgumentNames)
@@ -479,8 +489,8 @@ class ConfigurationReader : IConfigurationReader
                 + ". Candidate methods are:"
                 + Environment.NewLine
                 + string.Join(Environment.NewLine, methodsByName));
+            }
         }
-
         return selectedMethod;
     }
 
