@@ -233,7 +233,7 @@ class ConfigurationReader : IConfigurationReader
         if (filterDirective.GetChildren().Any())
         {
             var methodCalls = GetMethodCalls(filterDirective);
-            CallConfigurationMethods(methodCalls, FindFilterConfigurationMethods(_configurationAssemblies), loggerConfiguration.Filter);
+            CallConfigurationMethods(methodCalls, FindFilterConfigurationMethods(_configurationAssemblies, _resolutionContext.ReaderOptions.AllowInternalTypes, _resolutionContext.ReaderOptions.AllowInternalMethods), loggerConfiguration.Filter);
         }
     }
 
@@ -243,7 +243,7 @@ class ConfigurationReader : IConfigurationReader
         if (destructureDirective.GetChildren().Any())
         {
             var methodCalls = GetMethodCalls(destructureDirective);
-            CallConfigurationMethods(methodCalls, FindDestructureConfigurationMethods(_configurationAssemblies), loggerConfiguration.Destructure);
+            CallConfigurationMethods(methodCalls, FindDestructureConfigurationMethods(_configurationAssemblies, _resolutionContext.ReaderOptions.AllowInternalTypes, _resolutionContext.ReaderOptions.AllowInternalMethods), loggerConfiguration.Destructure);
         }
     }
 
@@ -253,7 +253,7 @@ class ConfigurationReader : IConfigurationReader
         if (writeToDirective.GetChildren().Any())
         {
             var methodCalls = GetMethodCalls(writeToDirective);
-            CallConfigurationMethods(methodCalls, FindSinkConfigurationMethods(_configurationAssemblies), loggerConfiguration.WriteTo);
+            CallConfigurationMethods(methodCalls, FindSinkConfigurationMethods(_configurationAssemblies, _resolutionContext.ReaderOptions.AllowInternalTypes, _resolutionContext.ReaderOptions.AllowInternalMethods), loggerConfiguration.WriteTo);
         }
     }
 
@@ -263,20 +263,20 @@ class ConfigurationReader : IConfigurationReader
         if (auditToDirective.GetChildren().Any())
         {
             var methodCalls = GetMethodCalls(auditToDirective);
-            CallConfigurationMethods(methodCalls, FindAuditSinkConfigurationMethods(_configurationAssemblies), loggerConfiguration.AuditTo);
+            CallConfigurationMethods(methodCalls, FindAuditSinkConfigurationMethods(_configurationAssemblies, _resolutionContext.ReaderOptions.AllowInternalTypes, _resolutionContext.ReaderOptions.AllowInternalMethods), loggerConfiguration.AuditTo);
         }
     }
 
     void IConfigurationReader.ApplySinks(LoggerSinkConfiguration loggerSinkConfiguration)
     {
         var methodCalls = GetMethodCalls(_section);
-        CallConfigurationMethods(methodCalls, FindSinkConfigurationMethods(_configurationAssemblies), loggerSinkConfiguration);
+        CallConfigurationMethods(methodCalls, FindSinkConfigurationMethods(_configurationAssemblies, _resolutionContext.ReaderOptions.AllowInternalTypes, _resolutionContext.ReaderOptions.AllowInternalMethods), loggerSinkConfiguration);
     }
 
     void IConfigurationReader.ApplyEnrichment(LoggerEnrichmentConfiguration loggerEnrichmentConfiguration)
     {
         var methodCalls = GetMethodCalls(_section);
-        CallConfigurationMethods(methodCalls, FindEventEnricherConfigurationMethods(_configurationAssemblies), loggerEnrichmentConfiguration);
+        CallConfigurationMethods(methodCalls, FindEventEnricherConfigurationMethods(_configurationAssemblies, _resolutionContext.ReaderOptions.AllowInternalTypes, _resolutionContext.ReaderOptions.AllowInternalMethods), loggerEnrichmentConfiguration);
     }
 
     void ApplyEnrichment(LoggerConfiguration loggerConfiguration)
@@ -285,7 +285,7 @@ class ConfigurationReader : IConfigurationReader
         if (enrichDirective.GetChildren().Any())
         {
             var methodCalls = GetMethodCalls(enrichDirective);
-            CallConfigurationMethods(methodCalls, FindEventEnricherConfigurationMethods(_configurationAssemblies), loggerConfiguration.Enrich);
+            CallConfigurationMethods(methodCalls, FindEventEnricherConfigurationMethods(_configurationAssemblies, _resolutionContext.ReaderOptions.AllowInternalTypes, _resolutionContext.ReaderOptions.AllowInternalMethods), loggerConfiguration.Enrich);
         }
 
         var propertiesDirective = _section.GetSection("Properties");
@@ -494,51 +494,51 @@ class ConfigurationReader : IConfigurationReader
         return suppliedNames.Any(s => ParameterNameMatches(actualParameterName, s));
     }
 
-    static IReadOnlyCollection<MethodInfo> FindSinkConfigurationMethods(IReadOnlyCollection<Assembly> configurationAssemblies)
+    static IReadOnlyCollection<MethodInfo> FindSinkConfigurationMethods(IReadOnlyCollection<Assembly> configurationAssemblies, bool allowInternalTypes, bool allowInternalMethods)
     {
-        var found = FindConfigurationExtensionMethods(configurationAssemblies, typeof(LoggerSinkConfiguration));
+        var found = FindConfigurationExtensionMethods(configurationAssemblies, typeof(LoggerSinkConfiguration), allowInternalTypes, allowInternalMethods);
         if (configurationAssemblies.Contains(typeof(LoggerSinkConfiguration).GetTypeInfo().Assembly))
             found.AddRange(SurrogateConfigurationMethods.WriteTo);
 
         return found;
     }
 
-    static IReadOnlyCollection<MethodInfo> FindAuditSinkConfigurationMethods(IReadOnlyCollection<Assembly> configurationAssemblies)
+    static IReadOnlyCollection<MethodInfo> FindAuditSinkConfigurationMethods(IReadOnlyCollection<Assembly> configurationAssemblies, bool allowInternalTypes, bool allowInternalMethods)
     {
-        var found = FindConfigurationExtensionMethods(configurationAssemblies, typeof(LoggerAuditSinkConfiguration));
+        var found = FindConfigurationExtensionMethods(configurationAssemblies, typeof(LoggerAuditSinkConfiguration), allowInternalTypes, allowInternalMethods);
         if (configurationAssemblies.Contains(typeof(LoggerAuditSinkConfiguration).GetTypeInfo().Assembly))
             found.AddRange(SurrogateConfigurationMethods.AuditTo);
         return found;
     }
 
-    static IReadOnlyCollection<MethodInfo> FindFilterConfigurationMethods(IReadOnlyCollection<Assembly> configurationAssemblies)
+    static IReadOnlyCollection<MethodInfo> FindFilterConfigurationMethods(IReadOnlyCollection<Assembly> configurationAssemblies, bool allowInternalTypes, bool allowInternalMethods)
     {
-        var found = FindConfigurationExtensionMethods(configurationAssemblies, typeof(LoggerFilterConfiguration));
+        var found = FindConfigurationExtensionMethods(configurationAssemblies, typeof(LoggerFilterConfiguration), allowInternalTypes, allowInternalMethods);
         if (configurationAssemblies.Contains(typeof(LoggerFilterConfiguration).GetTypeInfo().Assembly))
             found.AddRange(SurrogateConfigurationMethods.Filter);
 
         return found;
     }
 
-    static IReadOnlyCollection<MethodInfo> FindDestructureConfigurationMethods(IReadOnlyCollection<Assembly> configurationAssemblies)
+    static IReadOnlyCollection<MethodInfo> FindDestructureConfigurationMethods(IReadOnlyCollection<Assembly> configurationAssemblies, bool allowInternalTypes, bool allowInternalMethods)
     {
-        var found = FindConfigurationExtensionMethods(configurationAssemblies, typeof(LoggerDestructuringConfiguration));
+        var found = FindConfigurationExtensionMethods(configurationAssemblies, typeof(LoggerDestructuringConfiguration), allowInternalTypes, allowInternalMethods);
         if (configurationAssemblies.Contains(typeof(LoggerDestructuringConfiguration).GetTypeInfo().Assembly))
             found.AddRange(SurrogateConfigurationMethods.Destructure);
 
         return found;
     }
 
-    static IReadOnlyCollection<MethodInfo> FindEventEnricherConfigurationMethods(IReadOnlyCollection<Assembly> configurationAssemblies)
+    static IReadOnlyCollection<MethodInfo> FindEventEnricherConfigurationMethods(IReadOnlyCollection<Assembly> configurationAssemblies, bool allowInternalTypes, bool allowInternalMethods)
     {
-        var found = FindConfigurationExtensionMethods(configurationAssemblies, typeof(LoggerEnrichmentConfiguration));
+        var found = FindConfigurationExtensionMethods(configurationAssemblies, typeof(LoggerEnrichmentConfiguration), allowInternalTypes, allowInternalMethods);
         if (configurationAssemblies.Contains(typeof(LoggerEnrichmentConfiguration).GetTypeInfo().Assembly))
             found.AddRange(SurrogateConfigurationMethods.Enrich);
 
         return found;
     }
 
-    static List<MethodInfo> FindConfigurationExtensionMethods(IReadOnlyCollection<Assembly> configurationAssemblies, Type configType)
+    static List<MethodInfo> FindConfigurationExtensionMethods(IReadOnlyCollection<Assembly> configurationAssemblies, Type configType, bool allowInternalTypes, bool allowInternalMethods)
     {
         // ExtensionAttribute can be polyfilled to support extension methods
         static bool HasCustomExtensionAttribute(MethodInfo m)
@@ -554,11 +554,11 @@ class ConfigurationReader : IConfigurationReader
         }
 
         return configurationAssemblies
-            .SelectMany(a => a.ExportedTypes
+            .SelectMany(a => (allowInternalTypes ? a.GetTypes() : a.ExportedTypes)
                 .Select(t => t.GetTypeInfo())
-                .Where(t => t.IsSealed && t.IsAbstract && !t.IsNested))
+                .Where(t => t.IsSealed && t.IsAbstract && !t.IsNested && (t.IsPublic || allowInternalTypes && !t.IsVisible)))
             .SelectMany(t => t.DeclaredMethods)
-            .Where(m => m.IsStatic && m.IsPublic && (m.IsDefined(typeof(ExtensionAttribute), false) || HasCustomExtensionAttribute(m)))
+            .Where(m => m.IsStatic && (m.IsPublic || allowInternalMethods && m.IsAssembly) && (m.IsDefined(typeof(ExtensionAttribute), false) || HasCustomExtensionAttribute(m)))
             .Where(m => m.GetParameters()[0].ParameterType == configType)
             .ToList();
     }

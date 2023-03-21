@@ -147,6 +147,102 @@ public class ConfigurationSettingsTests
         Assert.Single(DummyConsoleSink.Emitted);
     }
 
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public void ConfigurationAssembliesWithInternalMethodInPublicClass(bool allowInternalMethods)
+    {
+        var json = """
+            {
+                "Serilog": {
+                    "Using": ["TestDummies"],
+                    "WriteTo": ["DummyConsoleInternal"]
+                }
+            }
+            """;
+
+        var builder = new ConfigurationBuilder().AddJsonString(json);
+        var config = builder.Build();
+        var log = new LoggerConfiguration()
+            .ReadFrom.Configuration(
+                configuration: config,
+                readerOptions: new ConfigurationReaderOptions(ConfigurationAssemblySource.AlwaysScanDllFiles) { AllowInternalMethods = allowInternalMethods })
+            .CreateLogger();
+
+        DummyConsoleSink.Emitted.Clear();
+
+        log.Write(Some.InformationEvent());
+
+        if (allowInternalMethods)
+            Assert.Single(DummyConsoleSink.Emitted);
+        else
+            Assert.Empty(DummyConsoleSink.Emitted);
+    }
+
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public void ConfigurationAssembliesWithPublicMethodInInternalClass(bool allowInternalTypes)
+    {
+        var json = """
+            {
+                "Serilog": {
+                    "Using": ["TestDummies"],
+                    "WriteTo": ["DummyConsolePublicInInternal"]
+                }
+            }
+            """;
+
+        var builder = new ConfigurationBuilder().AddJsonString(json);
+        var config = builder.Build();
+        var log = new LoggerConfiguration()
+            .ReadFrom.Configuration(
+                configuration: config,
+                readerOptions: new ConfigurationReaderOptions(ConfigurationAssemblySource.AlwaysScanDllFiles) { AllowInternalTypes = allowInternalTypes })
+            .CreateLogger();
+
+        DummyConsoleSink.Emitted.Clear();
+
+        log.Write(Some.InformationEvent());
+
+        if (allowInternalTypes)
+            Assert.Single(DummyConsoleSink.Emitted);
+        else
+            Assert.Empty(DummyConsoleSink.Emitted);
+    }
+
+    [Theory]
+    [InlineData(false, false)]
+    [InlineData(true, true)]
+    public void ConfigurationAssembliesWithInternalMethodInInternalClass(bool allowInternalTypes, bool allowInternalMethods)
+    {
+        var json = """
+            {
+                "Serilog": {
+                    "Using": ["TestDummies"],
+                    "WriteTo": ["DummyConsoleInternalInInternal"]
+                }
+            }
+            """;
+
+        var builder = new ConfigurationBuilder().AddJsonString(json);
+        var config = builder.Build();
+        var log = new LoggerConfiguration()
+            .ReadFrom.Configuration(
+                configuration: config,
+                readerOptions: new ConfigurationReaderOptions(ConfigurationAssemblySource.AlwaysScanDllFiles) { AllowInternalTypes = allowInternalTypes, AllowInternalMethods = allowInternalMethods })
+            .CreateLogger();
+
+        DummyConsoleSink.Emitted.Clear();
+
+        log.Write(Some.InformationEvent());
+
+        if (allowInternalTypes && allowInternalMethods)
+            Assert.Single(DummyConsoleSink.Emitted);
+        else
+            Assert.Empty(DummyConsoleSink.Emitted);
+    }
+
     [Fact]
     public void SinksAreConfigured()
     {

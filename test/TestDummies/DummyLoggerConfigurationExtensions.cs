@@ -120,6 +120,15 @@ public static class DummyLoggerConfigurationExtensions
         return loggerSinkConfiguration.Sink(new DummyConsoleSink(theme), restrictedToMinimumLevel, levelSwitch);
     }
 
+    internal static LoggerConfiguration DummyConsoleInternal(
+      this LoggerSinkConfiguration loggerSinkConfiguration,
+      LogEventLevel restrictedToMinimumLevel = LevelAlias.Minimum,
+      LoggingLevelSwitch? levelSwitch = null,
+      ConsoleTheme? theme = null)
+    {
+        return loggerSinkConfiguration.Sink(new DummyConsoleSink(theme), restrictedToMinimumLevel, levelSwitch);
+    }
+
     public static LoggerConfiguration Dummy(
         this LoggerSinkConfiguration loggerSinkConfiguration,
         Action<LoggerSinkConfiguration> wrappedSinkAction)
@@ -168,5 +177,26 @@ public static class DummyLoggerConfigurationExtensions
             Double = doubleValue,
             Decimal = decimalValue,
         });
+    }
+}
+
+internal static class DummyLoggerConfigurationExtensionsInternal
+{
+    public static LoggerConfiguration DummyConsolePublicInInternal(
+        this LoggerSinkConfiguration loggerSinkConfiguration,
+        LogEventLevel restrictedToMinimumLevel = LevelAlias.Minimum,
+        LoggingLevelSwitch? levelSwitch = null,
+        ConsoleTheme? theme = null)
+    {
+        return loggerSinkConfiguration.Sink(new DummyConsoleSink(theme), restrictedToMinimumLevel, levelSwitch);
+    }
+
+    internal static LoggerConfiguration DummyConsoleInternalInInternal(
+      this LoggerSinkConfiguration loggerSinkConfiguration,
+      LogEventLevel restrictedToMinimumLevel = LevelAlias.Minimum,
+      LoggingLevelSwitch? levelSwitch = null,
+      ConsoleTheme? theme = null)
+    {
+        return loggerSinkConfiguration.Sink(new DummyConsoleSink(theme), restrictedToMinimumLevel, levelSwitch);
     }
 }
