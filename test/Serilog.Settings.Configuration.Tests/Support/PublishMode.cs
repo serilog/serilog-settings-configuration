@@ -1,4 +1,4 @@
-namespace Serilog.Settings.Configuration.Tests;
+namespace Serilog.Settings.Configuration.Tests.Support;
 
 /// <summary>
 /// The possible application publish modes for the TestApp.

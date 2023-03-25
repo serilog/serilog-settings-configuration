@@ -1,8 +1,10 @@
 ﻿using System.Diagnostics;
 using System.Text;
 using CliWrap;
+using CliWrap.Exceptions;
 using FluentAssertions;
 using FluentAssertions.Execution;
+using Serilog.Settings.Configuration.Tests.Support;
 using Xunit.Abstractions;
 
 namespace Serilog.Settings.Configuration.Tests;
@@ -122,7 +124,7 @@ public sealed class PublishSingleFileTests : IDisposable, IClassFixture<TestApp>
 
         if (result.ExitCode != 0)
         {
-            throw new Exception($"An unexpected exception has occurred while running {command}{Environment.NewLine}{stdErr}".Trim());
+            throw new CommandExecutionException(command, result.ExitCode, $"An unexpected exception has occurred while running {command}{Environment.NewLine}{stdErr}".Trim());
         }
 
         return (stdOut, stdErr);

@@ -11,8 +11,12 @@
     <UseCurrentRuntimeIdentifier>true</UseCurrentRuntimeIdentifier>
   </PropertyGroup>
 
-  <ItemGroup>
+  <ItemGroup Condition="$(Configuration) == 'Debug'">
     <ProjectReference Include="..\..\src\Serilog.Settings.Configuration\Serilog.Settings.Configuration.csproj" />
+  </ItemGroup>
+  
+  <ItemGroup Condition="$(Configuration) == 'Release'">
+    <PackageReference Include="Serilog.Settings.Configuration" Version="[0.0.0-IntegrationTest.0]" />
   </ItemGroup>
 
   <ItemGroup>

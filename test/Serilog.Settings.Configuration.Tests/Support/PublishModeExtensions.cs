@@ -2,7 +2,7 @@ using System.Reflection;
 using System.Runtime.Versioning;
 using NuGet.Frameworks;
 
-namespace Serilog.Settings.Configuration.Tests;
+namespace Serilog.Settings.Configuration.Tests.Support;
 
 public static class PublishModeExtensions
 {
