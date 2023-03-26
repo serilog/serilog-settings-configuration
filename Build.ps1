@@ -30,6 +30,9 @@ if($LASTEXITCODE -ne 0) { exit 2 }
 
 Write-Output "build: Testing"
 
-& dotnet test  test\Serilog.Settings.Configuration.Tests --configuration Release --no-build --no-restore
+# Dotnet test doesn't run separate TargetFrameworks in parallel: https://github.com/dotnet/sdk/issues/19147
+# Workaround: use `dotnet test` on dlls directly in order to pass the `--parallel` option to vstest.
+# The _reported_ runtime is wrong but the _actual_ used runtime is correct, see https://github.com/microsoft/vstest/issues/2037#issuecomment-720549173
+& dotnet test test\Serilog.Settings.Configuration.Tests\bin\Release\*\Serilog.Settings.Configuration.Tests.dll --parallel
 
 if($LASTEXITCODE -ne 0) { exit 3 }
