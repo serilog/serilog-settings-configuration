@@ -101,14 +101,13 @@ public class TestApp : IAsyncLifetime
 
     async Task RestoreAsync()
     {
-        var packagesDirectory = _workingDirectory.SubDirectory("packages");
+        // Can't use "--source . --source https://api.nuget.org/v3/index.json" because of https://github.com/dotnet/sdk/issues/27202 => a nuget.config file is used instead.
+        // It also has the benefit of using settings _only_ from the specified config file, ignoring the global nuget.config where package source mapping could interfere with the local source.
         var restoreArgs = new[] {
             "restore",
-            "--packages", packagesDirectory.FullName,
-            "--source", ".",
-            "--source", "https://api.nuget.org/v3/index.json",
+            "--configfile", "nuget.config",
             "-p:Configuration=Release",
-            $"-p:TargetFramework={TargetFramework}"
+            $"-p:TargetFramework={TargetFramework}",
         };
         await RunDotnetAsync(_workingDirectory, restoreArgs);
     }
