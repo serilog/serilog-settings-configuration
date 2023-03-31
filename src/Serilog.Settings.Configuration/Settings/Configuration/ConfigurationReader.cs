@@ -1,3 +1,4 @@
+using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Text.RegularExpressions;
@@ -13,6 +14,8 @@ using Serilog.Settings.Configuration.Assemblies;
 
 namespace Serilog.Settings.Configuration;
 
+[RequiresUnreferencedCode(TrimWarningMessages.UnboundedReflection)]
+[RequiresDynamicCode(TrimWarningMessages.CreatesArraysOfArbitraryTypes)]
 class ConfigurationReader : IConfigurationReader
 {
     const string LevelSwitchNameRegex = @"^\${0,1}[A-Za-z]+[A-Za-z0-9]*$";
@@ -298,6 +301,7 @@ class ConfigurationReader : IConfigurationReader
         }
     }
 
+    [RequiresDynamicCode(TrimWarningMessages.CreatesArraysOfArbitraryTypes)]
     internal ILookup<string, Dictionary<string, IConfigurationArgumentValue>> GetMethodCalls(IConfiguration directive)
     {
         var children = directive.GetChildren().ToList();
@@ -331,6 +335,7 @@ class ConfigurationReader : IConfigurationReader
         }
     }
 
+    [RequiresDynamicCode(TrimWarningMessages.CreatesArraysOfArbitraryTypes)]
     internal static IConfigurationArgumentValue GetArgumentValue(IConfigurationSection argumentSection, IReadOnlyCollection<Assembly> configurationAssemblies)
     {
         IConfigurationArgumentValue argumentValue;
@@ -359,7 +364,7 @@ class ConfigurationReader : IConfigurationReader
     static IReadOnlyCollection<Assembly> LoadConfigurationAssemblies(IConfiguration section, AssemblyFinder assemblyFinder)
     {
         var serilogAssembly = typeof(ILogger).Assembly;
-        var assemblies = new Dictionary<string, Assembly> { [serilogAssembly.FullName] = serilogAssembly };
+        var assemblies = new Dictionary<string, Assembly> { [serilogAssembly.FullName!] = serilogAssembly };
 
         var usingSection = section.GetSection("Using");
         if (usingSection.GetChildren().Any())
@@ -371,16 +376,16 @@ class ConfigurationReader : IConfigurationReader
                         "A zero-length or whitespace assembly name was supplied to a Serilog.Using configuration statement.");
 
                 var assembly = Assembly.Load(new AssemblyName(simpleName));
-                if (!assemblies.ContainsKey(assembly.FullName))
-                    assemblies.Add(assembly.FullName, assembly);
+                if (!assemblies.ContainsKey(assembly.FullName!))
+                    assemblies.Add(assembly.FullName!, assembly);
             }
         }
 
         foreach (var assemblyName in assemblyFinder.FindAssembliesContainingName("serilog"))
         {
             var assumed = Assembly.Load(assemblyName);
-            if (assumed != null && !assemblies.ContainsKey(assumed.FullName))
-                assemblies.Add(assumed.FullName, assumed);
+            if (assumed != null && !assemblies.ContainsKey(assumed.FullName!))
+                assemblies.Add(assumed.FullName!, assumed);
         }
 
         return assemblies.Values.ToList().AsReadOnly();
@@ -504,6 +509,7 @@ class ConfigurationReader : IConfigurationReader
         return suppliedNames.Any(s => ParameterNameMatches(actualParameterName, s));
     }
 
+    [RequiresUnreferencedCode(TrimWarningMessages.UnboundedReflection)]
     static IReadOnlyCollection<MethodInfo> FindSinkConfigurationMethods(IReadOnlyCollection<Assembly> configurationAssemblies, bool allowInternalTypes, bool allowInternalMethods)
     {
         var found = FindConfigurationExtensionMethods(configurationAssemblies, typeof(LoggerSinkConfiguration), allowInternalTypes, allowInternalMethods);
@@ -513,6 +519,7 @@ class ConfigurationReader : IConfigurationReader
         return found;
     }
 
+    [RequiresUnreferencedCode(TrimWarningMessages.UnboundedReflection)]
     static IReadOnlyCollection<MethodInfo> FindAuditSinkConfigurationMethods(IReadOnlyCollection<Assembly> configurationAssemblies, bool allowInternalTypes, bool allowInternalMethods)
     {
         var found = FindConfigurationExtensionMethods(configurationAssemblies, typeof(LoggerAuditSinkConfiguration), allowInternalTypes, allowInternalMethods);
@@ -521,6 +528,7 @@ class ConfigurationReader : IConfigurationReader
         return found;
     }
 
+    [RequiresUnreferencedCode(TrimWarningMessages.UnboundedReflection)]
     static IReadOnlyCollection<MethodInfo> FindFilterConfigurationMethods(IReadOnlyCollection<Assembly> configurationAssemblies, bool allowInternalTypes, bool allowInternalMethods)
     {
         var found = FindConfigurationExtensionMethods(configurationAssemblies, typeof(LoggerFilterConfiguration), allowInternalTypes, allowInternalMethods);
@@ -530,6 +538,7 @@ class ConfigurationReader : IConfigurationReader
         return found;
     }
 
+    [RequiresUnreferencedCode(TrimWarningMessages.UnboundedReflection)]
     static IReadOnlyCollection<MethodInfo> FindDestructureConfigurationMethods(IReadOnlyCollection<Assembly> configurationAssemblies, bool allowInternalTypes, bool allowInternalMethods)
     {
         var found = FindConfigurationExtensionMethods(configurationAssemblies, typeof(LoggerDestructuringConfiguration), allowInternalTypes, allowInternalMethods);
@@ -539,6 +548,7 @@ class ConfigurationReader : IConfigurationReader
         return found;
     }
 
+    [RequiresUnreferencedCode(TrimWarningMessages.UnboundedReflection)]
     static IReadOnlyCollection<MethodInfo> FindEventEnricherConfigurationMethods(IReadOnlyCollection<Assembly> configurationAssemblies, bool allowInternalTypes, bool allowInternalMethods)
     {
         var found = FindConfigurationExtensionMethods(configurationAssemblies, typeof(LoggerEnrichmentConfiguration), allowInternalTypes, allowInternalMethods);
@@ -548,6 +558,7 @@ class ConfigurationReader : IConfigurationReader
         return found;
     }
 
+    [RequiresUnreferencedCode(TrimWarningMessages.UnboundedReflection)]
     static List<MethodInfo> FindConfigurationExtensionMethods(IReadOnlyCollection<Assembly> configurationAssemblies, Type configType, bool allowInternalTypes, bool allowInternalMethods)
     {
         // ExtensionAttribute can be polyfilled to support extension methods

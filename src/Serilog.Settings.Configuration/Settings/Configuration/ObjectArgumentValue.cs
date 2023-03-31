@@ -8,6 +8,8 @@ using Serilog.Configuration;
 
 namespace Serilog.Settings.Configuration;
 
+[RequiresUnreferencedCode(TrimWarningMessages.UnboundedReflection)]
+[RequiresDynamicCode(TrimWarningMessages.CreatesArraysOfArbitraryTypes)]
 class ObjectArgumentValue : IConfigurationArgumentValue
 {
     readonly IConfigurationSection _section;
@@ -98,6 +100,7 @@ class ObjectArgumentValue : IConfigurationArgumentValue
         }
     }
 
+    [RequiresUnreferencedCode(TrimWarningMessages.UnboundedReflection)]
     internal static bool TryBuildCtorExpression(
         IConfigurationSection section, Type parameterType, ResolutionContext resolutionContext, [NotNullWhen(true)] out NewExpression? ctorExpression)
     {
@@ -218,7 +221,9 @@ class ObjectArgumentValue : IConfigurationArgumentValue
         }
     }
 
-    static bool IsContainer(Type type, [NotNullWhen(true)] out Type? elementType)
+    static bool IsContainer(
+        [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.Interfaces)] Type type,
+        [NotNullWhen(true)] out Type? elementType)
     {
         elementType = null;
         foreach (var iface in type.GetInterfaces())
