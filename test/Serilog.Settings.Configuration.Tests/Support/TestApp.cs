@@ -47,43 +47,15 @@ public class TestApp : IAsyncLifetime
 
     async Task CreateTestAppAsync()
     {
+        // It might be tempting to do pack -> restore -> build --no-restore -> publish --no-build (and parallelize over publish modes)
+        // But this would fail because of https://github.com/dotnet/sdk/issues/17526 and probably because of other unforeseen bugs
+        // preventing from running multiple `dotnet publish` commands with different parameters.
+
         await PackAsync();
         await RestoreAsync();
-
-        var publishDirectory = _workingDirectory.SubDirectory("publish");
-        var fodyWeaversXml = _workingDirectory.File("FodyWeavers.xml");
-
         foreach (var publishMode in GetPublishModes())
         {
-            var outputDirectory = publishDirectory.SubDirectory(publishMode.ToString());
-
-            File.WriteAllText(fodyWeaversXml.FullName, publishMode == PublishMode.SingleFile && IsDesktop ? "<Weavers><Costura/></Weavers>" : "<Weavers/>");
-
-            var publishArgs = new[] {
-                "publish",
-                "--no-restore",
-                "--configuration", "Release",
-                "--output", outputDirectory.FullName,
-                $"-p:TargetFramework={TargetFramework}"
-            };
-            var publishSingleFile = $"-p:PublishSingleFile={publishMode is PublishMode.SingleFile or PublishMode.SelfContained}";
-            var selfContained = $"-p:SelfContained={publishMode is PublishMode.SelfContained}";
-            await RunDotnetAsync(_workingDirectory, IsDesktop ? publishArgs : publishArgs.Append(publishSingleFile).Append(selfContained).ToArray());
-
-            var executableFileName = RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? "TestApp.exe" : "TestApp";
-            var executableFile = new FileInfo(Path.Combine(outputDirectory.FullName, executableFileName));
-            executableFile.Exists.Should().BeTrue();
-            var dlls = executableFile.Directory!.EnumerateFiles("*.dll");
-            if (publishMode == PublishMode.Standard)
-            {
-                dlls.Should().NotBeEmpty(because: $"the test app was _not_ published as single-file ({publishMode})");
-            }
-            else
-            {
-                dlls.Should().BeEmpty(because: $"the test app was published as single-file ({publishMode})");
-                executableFile.Directory.EnumerateFiles().Should().ContainSingle().Which.FullName.Should().Be(executableFile.FullName);
-            }
-            _executables[publishMode] = executableFile;
+            await PublishAsync(publishMode);
         }
     }
 
@@ -110,6 +82,43 @@ public class TestApp : IAsyncLifetime
             $"-p:TargetFramework={TargetFramework}",
         };
         await RunDotnetAsync(_workingDirectory, restoreArgs);
+    }
+
+    async Task PublishAsync(PublishMode publishMode)
+    {
+        var publishDirectory = _workingDirectory.SubDirectory("publish");
+        var fodyWeaversXml = _workingDirectory.File("FodyWeavers.xml");
+
+        var outputDirectory = publishDirectory.SubDirectory(publishMode.ToString());
+
+        File.WriteAllText(fodyWeaversXml.FullName, publishMode == PublishMode.SingleFile && IsDesktop ? "<Weavers><Costura/></Weavers>" : "<Weavers/>");
+
+        var publishArgs = new[] {
+            "publish",
+            "--no-restore",
+            "--configuration", "Release",
+            "--output", outputDirectory.FullName,
+            $"-p:TargetFramework={TargetFramework}"
+        };
+        var publishSingleFile = $"-p:PublishSingleFile={publishMode is PublishMode.SingleFile or PublishMode.SelfContained}";
+        var selfContained = $"-p:SelfContained={publishMode is PublishMode.SelfContained}";
+        await RunDotnetAsync(_workingDirectory, IsDesktop ? publishArgs : publishArgs.Append(publishSingleFile).Append(selfContained).ToArray());
+
+        var executableFileName = RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? "TestApp.exe" : "TestApp";
+        var executableFile = new FileInfo(Path.Combine(outputDirectory.FullName, executableFileName));
+        executableFile.Exists.Should().BeTrue();
+        var dlls = executableFile.Directory!.EnumerateFiles("*.dll");
+        if (publishMode == PublishMode.Standard)
+        {
+            dlls.Should().NotBeEmpty(because: $"the test app was _not_ published as single-file ({publishMode})");
+        }
+        else
+        {
+            dlls.Should().BeEmpty(because: $"the test app was published as single-file ({publishMode})");
+            executableFile.Directory.EnumerateFiles().Should().ContainSingle().Which.FullName.Should().Be(executableFile.FullName);
+        }
+
+        _executables[publishMode] = executableFile;
     }
 
     async Task RunDotnetAsync(DirectoryInfo workingDirectory, params string[] arguments)
