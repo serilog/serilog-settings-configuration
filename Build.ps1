@@ -3,7 +3,7 @@ echo "build: Build started"
 Push-Location $PSScriptRoot
 
 if(Test-Path .\artifacts) {
-	echo "build: Cleaning .\artifacts"
+	Write-Output "build: Cleaning .\artifacts"
 	Remove-Item .\artifacts -Force -Recurse
 }
 
@@ -13,12 +13,12 @@ $suffix = @{ $true = ""; $false = "$($branch.Substring(0, [math]::Min(10,$branch
 $commitHash = $(git rev-parse --short HEAD)
 $buildSuffix = @{ $true = "$($suffix)-$($commitHash)"; $false = "$($branch)-$($commitHash)" }[$suffix -ne ""]
 
-echo "build: Package version suffix is $suffix"
-echo "build: Build version suffix is $buildSuffix"
+Write-Output "build: Package version suffix is $suffix"
+Write-Output "build: Build version suffix is $buildSuffix"
 
 & dotnet build --configuration Release --version-suffix=$buildSuffix /p:ContinuousIntegrationBuild=true
 
-if($LASTEXITCODE -ne 0) { exit 1 }
+if($LASTEXITCODE -ne 0) { throw 'build failed' }
 
 if($suffix) {
     & dotnet pack src\Serilog.Settings.Configuration --configuration Release --no-build --no-restore -o artifacts --version-suffix=$suffix
@@ -26,10 +26,14 @@ if($suffix) {
     & dotnet pack src\Serilog.Settings.Configuration --configuration Release --no-build --no-restore -o artifacts
 }
 
-if($LASTEXITCODE -ne 0) { exit 2 }
+if($LASTEXITCODE -ne 0) { throw 'pack failed' }
 
 Write-Output "build: Testing"
 
 & dotnet test  test\Serilog.Settings.Configuration.Tests --configuration Release --no-build --no-restore
 
-if($LASTEXITCODE -ne 0) { exit 3 }
+if($LASTEXITCODE -ne 0) { throw 'unit tests failed' }
+
+& dotnet test  test\Serilog.Settings.Configuration.ApprovalTests --configuration Release --no-build --no-restore
+
+if($LASTEXITCODE -ne 0) { throw 'approval tests failed' }
