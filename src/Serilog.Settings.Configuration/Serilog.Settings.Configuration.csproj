@@ -17,6 +17,7 @@
     <SymbolPackageFormat>snupkg</SymbolPackageFormat>
     <IsTrimmable>true</IsTrimmable>
     <EnableAotAnalyzer>true</EnableAotAnalyzer>
+    <EnableSingleFileAnalyzer>true</EnableSingleFileAnalyzer>
     <PolySharpIncludeRuntimeSupportedAttributes>true</PolySharpIncludeRuntimeSupportedAttributes>
   </PropertyGroup>
 
