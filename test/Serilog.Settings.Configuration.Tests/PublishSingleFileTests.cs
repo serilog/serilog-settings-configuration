@@ -9,6 +9,7 @@ using Xunit.Abstractions;
 
 namespace Serilog.Settings.Configuration.Tests;
 
+[Trait("Category", "Integration")]
 public sealed class PublishSingleFileTests : IDisposable, IClassFixture<TestApp>
 {
     readonly ITestOutputHelper _outputHelper;
