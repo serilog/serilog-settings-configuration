@@ -9,5 +9,6 @@ namespace Serilog
         public const string NotSupportedInAot = "Automatic configuration is not supported when AOT compiling.";
         public const string UnboundedReflection = "Uses unbounded reflection to load types";
         public const string CreatesArraysOfArbitraryTypes = "Creates arrays of arbitrary types";
+        public const string IncompatibleWithSingleFile = "Incompatible with single-file publishing";
     }
 }

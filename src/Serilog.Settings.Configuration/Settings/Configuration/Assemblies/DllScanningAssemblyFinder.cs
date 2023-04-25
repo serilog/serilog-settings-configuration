@@ -1,9 +1,11 @@
+using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
 
 namespace Serilog.Settings.Configuration.Assemblies;
 
 sealed class DllScanningAssemblyFinder : AssemblyFinder
 {
+    [RequiresAssemblyFiles(TrimWarningMessages.IncompatibleWithSingleFile)]
     public override IReadOnlyList<AssemblyName> FindAssembliesContainingName(string nameToFind)
     {
         var probeDirs = new List<string>();

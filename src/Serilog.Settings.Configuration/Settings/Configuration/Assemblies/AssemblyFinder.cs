@@ -1,4 +1,5 @@
-﻿using System.Reflection;
+﻿using System.Diagnostics.CodeAnalysis;
+using System.Reflection;
 using Microsoft.Extensions.DependencyModel;
 
 namespace Serilog.Settings.Configuration.Assemblies;
@@ -12,6 +13,7 @@ abstract class AssemblyFinder
         return text != null && text.ToLowerInvariant().Contains(textToFind.ToLowerInvariant());
     }
 
+    [RequiresAssemblyFiles(TrimWarningMessages.IncompatibleWithSingleFile)]
     public static AssemblyFinder Auto()
     {
         try

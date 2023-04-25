@@ -91,6 +91,7 @@ public static class ConfigurationLoggerConfigurationExtensions
     [Obsolete("Use ReadFrom.Configuration(IConfiguration configuration, string sectionName, DependencyContext dependencyContext) instead.")]
     [RequiresUnreferencedCode(TrimWarningMessages.NotSupportedWhenTrimming)]
     [RequiresDynamicCode(TrimWarningMessages.NotSupportedInAot)]
+    [RequiresAssemblyFiles(TrimWarningMessages.IncompatibleWithSingleFile)]
     public static LoggerConfiguration ConfigurationSection(
         this LoggerSettingsConfiguration settingConfiguration,
         IConfigurationSection configSection,
