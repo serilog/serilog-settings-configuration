@@ -1,4 +1,4 @@
-﻿using System.Diagnostics.CodeAnalysis;
+﻿﻿using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
 using System.Text.RegularExpressions;
 
@@ -6,6 +6,7 @@ using Serilog.Core;
 
 namespace Serilog.Settings.Configuration;
 
+[RequiresUnreferencedCode(TrimWarningMessages.UnboundedReflection)]
 class StringArgumentValue : IConfigurationArgumentValue
 {
     readonly string _providedValue;
@@ -157,6 +158,7 @@ class StringArgumentValue : IConfigurationArgumentValue
         return Convert.ChangeType(argumentValue, toType, resolutionContext.ReaderOptions.FormatProvider);
     }
 
+    [RequiresUnreferencedCode(TrimWarningMessages.UnboundedReflection)]
     internal static Type? FindType(string typeName)
     {
         var type = Type.GetType(typeName);

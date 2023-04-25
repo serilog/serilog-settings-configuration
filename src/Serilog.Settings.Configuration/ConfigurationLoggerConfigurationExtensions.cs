@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyModel;
@@ -43,6 +44,8 @@ public static class ConfigurationLoggerConfigurationExtensions
     /// default will be used.</param>
     /// <returns>An object allowing configuration to continue.</returns>
     [Obsolete("Use ReadFrom.Configuration(IConfiguration configuration, ConfigurationReaderOptions readerOptions) instead.")]
+    [RequiresUnreferencedCode(TrimWarningMessages.NotSupportedWhenTrimming)]
+    [RequiresDynamicCode(TrimWarningMessages.NotSupportedInAot)]
     public static LoggerConfiguration Configuration(
         this LoggerSettingsConfiguration settingConfiguration,
         IConfiguration configuration,
@@ -68,6 +71,8 @@ public static class ConfigurationLoggerConfigurationExtensions
     /// default will be used.</param>
     /// <returns>An object allowing configuration to continue.</returns>
     [Obsolete("Use ReadFrom.Configuration(IConfiguration configuration, ConfigurationReaderOptions readerOptions) instead.")]
+    [RequiresUnreferencedCode(TrimWarningMessages.NotSupportedWhenTrimming)]
+    [RequiresDynamicCode(TrimWarningMessages.NotSupportedInAot)]
     public static LoggerConfiguration Configuration(
         this LoggerSettingsConfiguration settingConfiguration,
         IConfiguration configuration,
@@ -84,6 +89,9 @@ public static class ConfigurationLoggerConfigurationExtensions
     /// default will be used.</param>
     /// <returns>An object allowing configuration to continue.</returns>
     [Obsolete("Use ReadFrom.Configuration(IConfiguration configuration, string sectionName, DependencyContext dependencyContext) instead.")]
+    [RequiresUnreferencedCode(TrimWarningMessages.NotSupportedWhenTrimming)]
+    [RequiresDynamicCode(TrimWarningMessages.NotSupportedInAot)]
+    [RequiresAssemblyFiles(TrimWarningMessages.IncompatibleWithSingleFile)]
     public static LoggerConfiguration ConfigurationSection(
         this LoggerSettingsConfiguration settingConfiguration,
         IConfigurationSection configSection,
@@ -115,6 +123,8 @@ public static class ConfigurationLoggerConfigurationExtensions
     /// <param name="configurationAssemblySource">Defines how the package identifies assemblies to scan for sinks and other types.</param>
     /// <returns>An object allowing configuration to continue.</returns>
     [Obsolete("Use ReadFrom.Configuration(IConfiguration configuration, ConfigurationReaderOptions readerOptions) instead.")]
+    [RequiresUnreferencedCode(TrimWarningMessages.NotSupportedWhenTrimming)]
+    [RequiresDynamicCode(TrimWarningMessages.NotSupportedInAot)]
     public static LoggerConfiguration Configuration(
         this LoggerSettingsConfiguration settingConfiguration,
         IConfiguration configuration,
@@ -139,6 +149,8 @@ public static class ConfigurationLoggerConfigurationExtensions
     /// <param name="configurationAssemblySource">Defines how the package identifies assemblies to scan for sinks and other types.</param>
     /// <returns>An object allowing configuration to continue.</returns>
     [Obsolete("Use ReadFrom.Configuration(IConfiguration configuration, ConfigurationReaderOptions readerOptions) instead.")]
+    [RequiresUnreferencedCode(TrimWarningMessages.NotSupportedWhenTrimming)]
+    [RequiresDynamicCode(TrimWarningMessages.NotSupportedInAot)]
     public static LoggerConfiguration Configuration(
         this LoggerSettingsConfiguration settingConfiguration,
         IConfiguration configuration,
@@ -154,6 +166,8 @@ public static class ConfigurationLoggerConfigurationExtensions
     /// <param name="configurationAssemblySource">Defines how the package identifies assemblies to scan for sinks and other types.</param>
     /// <returns>An object allowing configuration to continue.</returns>
     [Obsolete("Use ReadFrom.Configuration(IConfiguration configuration, string sectionName, ConfigurationAssemblySource configurationAssemblySource) instead.")]
+    [RequiresUnreferencedCode(TrimWarningMessages.NotSupportedWhenTrimming)]
+    [RequiresDynamicCode(TrimWarningMessages.NotSupportedInAot)]
     public static LoggerConfiguration ConfigurationSection(
         this LoggerSettingsConfiguration settingConfiguration,
         IConfigurationSection configSection,
@@ -176,6 +190,8 @@ public static class ConfigurationLoggerConfigurationExtensions
     /// <param name="assemblies">A collection of assemblies that contains sinks and other types.</param>
     /// <returns>An object allowing configuration to continue.</returns>
     [Obsolete("Use ReadFrom.Configuration(IConfiguration configuration, ConfigurationReaderOptions readerOptions) instead.")]
+    [RequiresUnreferencedCode(TrimWarningMessages.NotSupportedWhenTrimming)]
+    [RequiresDynamicCode(TrimWarningMessages.NotSupportedInAot)]
     public static LoggerConfiguration Configuration(
         this LoggerSettingsConfiguration settingConfiguration,
         IConfiguration configuration,
@@ -198,6 +214,8 @@ public static class ConfigurationLoggerConfigurationExtensions
     /// <param name="assemblies">A collection of assemblies that contains sinks and other types.</param>
     /// <returns>An object allowing configuration to continue.</returns>
     [Obsolete("Use ReadFrom.Configuration(IConfiguration configuration, ConfigurationReaderOptions readerOptions) instead.")]
+    [RequiresUnreferencedCode(TrimWarningMessages.NotSupportedWhenTrimming)]
+    [RequiresDynamicCode(TrimWarningMessages.NotSupportedInAot)]
     public static LoggerConfiguration Configuration(
         this LoggerSettingsConfiguration settingConfiguration,
         IConfiguration configuration,
@@ -211,6 +229,8 @@ public static class ConfigurationLoggerConfigurationExtensions
     /// <param name="configuration">A configuration object which contains a Serilog section.</param>
     /// <param name="readerOptions">Options to adjust how the configuration object is processed.</param>
     /// <returns>An object allowing configuration to continue.</returns>
+    [RequiresUnreferencedCode(TrimWarningMessages.NotSupportedWhenTrimming)]
+    [RequiresDynamicCode(TrimWarningMessages.NotSupportedInAot)]
     public static LoggerConfiguration Configuration(
         this LoggerSettingsConfiguration settingConfiguration,
         IConfiguration configuration,
@@ -225,6 +245,8 @@ public static class ConfigurationLoggerConfigurationExtensions
         return settingConfiguration.Settings(configurationReader);
     }
 
+    [RequiresUnreferencedCode(TrimWarningMessages.UnboundedReflection)]
+    [RequiresDynamicCode(TrimWarningMessages.CreatesArraysOfArbitraryTypes)]
     static ConfigurationReader GetConfigurationReader(IConfiguration configuration, ConfigurationReaderOptions readerOptions, DependencyContext? dependencyContext)
     {
         var assemblyFinder = dependencyContext == null ? AssemblyFinder.Auto() : AssemblyFinder.ForDependencyContext(dependencyContext);
@@ -232,6 +254,8 @@ public static class ConfigurationLoggerConfigurationExtensions
         return new ConfigurationReader(section, assemblyFinder, readerOptions, configuration);
     }
 
+    [RequiresUnreferencedCode(TrimWarningMessages.UnboundedReflection)]
+    [RequiresDynamicCode(TrimWarningMessages.CreatesArraysOfArbitraryTypes)]
     static ConfigurationReader GetConfigurationReader(IConfiguration configuration, ConfigurationReaderOptions readerOptions, ConfigurationAssemblySource source)
     {
         var assemblyFinder = AssemblyFinder.ForSource(source);
@@ -239,6 +263,8 @@ public static class ConfigurationLoggerConfigurationExtensions
         return new ConfigurationReader(section, assemblyFinder, readerOptions, configuration);
     }
 
+    [RequiresUnreferencedCode(TrimWarningMessages.UnboundedReflection)]
+    [RequiresDynamicCode(TrimWarningMessages.CreatesArraysOfArbitraryTypes)]
     static ConfigurationReader GetConfigurationReader(IConfiguration configuration, ConfigurationReaderOptions readerOptions, IReadOnlyCollection<Assembly> assemblies)
     {
         var section = string.IsNullOrWhiteSpace(readerOptions.SectionName) ? configuration : configuration.GetSection(readerOptions.SectionName);

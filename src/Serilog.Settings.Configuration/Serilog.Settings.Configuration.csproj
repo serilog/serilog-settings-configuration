@@ -4,7 +4,7 @@
     <Description>Microsoft.Extensions.Configuration (appsettings.json) support for Serilog.</Description>
     <VersionPrefix>4.0.0</VersionPrefix>
     <Authors>Serilog Contributors</Authors>
-    <TargetFrameworks>netstandard2.0;net461</TargetFrameworks>
+    <TargetFrameworks>net7.0;netstandard2.0;net461</TargetFrameworks>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <AssemblyName>Serilog.Settings.Configuration</AssemblyName>
     <PackageTags>serilog;json</PackageTags>
@@ -15,6 +15,10 @@
     <EmbedUntrackedSources>true</EmbedUntrackedSources>
     <IncludeSymbols>true</IncludeSymbols>
     <SymbolPackageFormat>snupkg</SymbolPackageFormat>
+    <IsTrimmable>true</IsTrimmable>
+    <EnableAotAnalyzer>true</EnableAotAnalyzer>
+    <EnableSingleFileAnalyzer>true</EnableSingleFileAnalyzer>
+    <PolySharpIncludeRuntimeSupportedAttributes>true</PolySharpIncludeRuntimeSupportedAttributes>
   </PropertyGroup>
 
   <ItemGroup>
@@ -25,7 +29,7 @@
     <PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.1.1" PrivateAssets="All" />
     <PackageReference Include="Microsoft.Extensions.Configuration.Binder" Version="6.0.0" />
     <PackageReference Include="Microsoft.Extensions.DependencyModel" Version="6.0.0" />
-    <PackageReference Include="PolySharp" Version="1.12.1" PrivateAssets="All" />
+    <PackageReference Include="PolySharp" Version="1.13.1" PrivateAssets="All" />
     <PackageReference Include="Serilog" Version="2.10.0" />
     <None Include="..\..\assets\icon.png" Pack="true" PackagePath="" Visible="false" />
   </ItemGroup>
