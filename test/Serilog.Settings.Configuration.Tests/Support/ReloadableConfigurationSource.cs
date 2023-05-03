@@ -5,9 +5,9 @@ namespace Serilog.Settings.Configuration.Tests.Support;
 class ReloadableConfigurationSource : IConfigurationSource
 {
     readonly ReloadableConfigurationProvider _configProvider;
-    readonly IDictionary<string, string> _source;
+    readonly IDictionary<string, string?> _source;
 
-    public ReloadableConfigurationSource(IDictionary<string, string> source)
+    public ReloadableConfigurationSource(IDictionary<string, string?> source)
     {
         _source = source;
         _configProvider = new ReloadableConfigurationProvider(source);
@@ -21,9 +21,9 @@ class ReloadableConfigurationSource : IConfigurationSource
 
     class ReloadableConfigurationProvider : ConfigurationProvider
     {
-        readonly IDictionary<string, string> _source;
+        readonly IDictionary<string, string?> _source;
 
-        public ReloadableConfigurationProvider(IDictionary<string, string> source)
+        public ReloadableConfigurationProvider(IDictionary<string, string?> source)
         {
             _source = source;
         }

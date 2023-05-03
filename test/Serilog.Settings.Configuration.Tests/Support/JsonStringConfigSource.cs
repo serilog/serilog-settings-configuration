@@ -22,7 +22,7 @@ class JsonStringConfigSource : IConfigurationSource
         return new ConfigurationBuilder().Add(new JsonStringConfigSource(json)).Build().GetSection(section);
     }
 
-    public static IDictionary<string, string> LoadData(string json)
+    public static IDictionary<string, string?> LoadData(string json)
     {
         var provider = new JsonStringConfigProvider(json);
         provider.Load();
@@ -38,7 +38,7 @@ class JsonStringConfigSource : IConfigurationSource
             _json = json;
         }
 
-        public new IDictionary<string, string> Data => base.Data;
+        public new IDictionary<string, string?> Data => base.Data;
 
         public override void Load()
         {

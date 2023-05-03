@@ -129,7 +129,7 @@ class ConfigurationReader : IConfigurationReader
             }
             else
             {
-                var initialLevel = ParseLogEventLevel(switchInitialLevel);
+                var initialLevel = ParseLogEventLevel(switchInitialLevel!);
                 newSwitch = new LoggingLevelSwitch(initialLevel);
             }
 
@@ -171,9 +171,9 @@ class ConfigurationReader : IConfigurationReader
                     _resolutionContext.ReaderOptions.OnLevelSwitchCreated?.Invoke(overridePrefix, levelSwitch);
                 });
             }
-            else
+            else if (!string.IsNullOrEmpty(overridenLevelOrSwitch))
             {
-                var overrideSwitch = _resolutionContext.LookUpLevelSwitchByName(overridenLevelOrSwitch);
+                var overrideSwitch = _resolutionContext.LookUpLevelSwitchByName(overridenLevelOrSwitch!);
                 // not calling ApplyMinimumLevel local function because here we have a reference to a LogLevelSwitch already
                 loggerConfiguration.MinimumLevel.Override(overridePrefix, overrideSwitch);
             }
@@ -181,7 +181,7 @@ class ConfigurationReader : IConfigurationReader
 
         void ApplyMinimumLevelConfiguration(IConfigurationSection directive, Action<LoggerMinimumLevelConfiguration, LoggingLevelSwitch> applyConfigAction)
         {
-            var minimumLevel = ParseLogEventLevel(directive.Value);
+            var minimumLevel = ParseLogEventLevel(directive.Value!);
 
             var levelSwitch = new LoggingLevelSwitch(minimumLevel);
             applyConfigAction(loggerConfiguration.MinimumLevel, levelSwitch);
@@ -293,7 +293,8 @@ class ConfigurationReader : IConfigurationReader
         {
             foreach (var enrichPropertyDirective in propertiesDirective.GetChildren())
             {
-                loggerConfiguration.Enrich.WithProperty(enrichPropertyDirective.Key, enrichPropertyDirective.Value);
+                // Null is an acceptable value here; annotations on Serilog need updating.
+                loggerConfiguration.Enrich.WithProperty(enrichPropertyDirective.Key, enrichPropertyDirective.Value!);
             }
         }
     }
@@ -359,7 +360,7 @@ class ConfigurationReader : IConfigurationReader
     static IReadOnlyCollection<Assembly> LoadConfigurationAssemblies(IConfiguration section, AssemblyFinder assemblyFinder)
     {
         var serilogAssembly = typeof(ILogger).Assembly;
-        var assemblies = new Dictionary<string, Assembly> { [serilogAssembly.FullName] = serilogAssembly };
+        var assemblies = new Dictionary<string, Assembly> { [serilogAssembly.FullName!] = serilogAssembly };
 
         var usingSection = section.GetSection("Using");
         if (usingSection.GetChildren().Any())
@@ -371,16 +372,16 @@ class ConfigurationReader : IConfigurationReader
                         "A zero-length or whitespace assembly name was supplied to a Serilog.Using configuration statement.");
 
                 var assembly = Assembly.Load(new AssemblyName(simpleName));
-                if (!assemblies.ContainsKey(assembly.FullName))
-                    assemblies.Add(assembly.FullName, assembly);
+                if (!assemblies.ContainsKey(assembly.FullName!))
+                    assemblies.Add(assembly.FullName!, assembly);
             }
         }
 
         foreach (var assemblyName in assemblyFinder.FindAssembliesContainingName("serilog"))
         {
             var assumed = Assembly.Load(assemblyName);
-            if (assumed != null && !assemblies.ContainsKey(assumed.FullName))
-                assemblies.Add(assumed.FullName, assumed);
+            if (assumed != null && !assemblies.ContainsKey(assumed.FullName!))
+                assemblies.Add(assumed.FullName!, assumed);
         }
 
         return assemblies.Values.ToList().AsReadOnly();

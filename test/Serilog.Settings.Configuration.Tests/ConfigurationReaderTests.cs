@@ -189,10 +189,10 @@ public class ConfigurationReaderTests
     {
         new object[] { GetConfigRoot(appsettingsJsonLevel: minimumLevelFlatTemplate.Format(LogEventLevel.Error)), LogEventLevel.Error },
         new object[] { GetConfigRoot(appsettingsDevelopmentJsonLevel: minimumLevelFlatTemplate.Format(LogEventLevel.Error)), LogEventLevel.Error },
-        new object[] { GetConfigRoot(envVariables: new Dictionary<string, string>() {{minimumLevelFlatKey, LogEventLevel.Error.ToString()}}), LogEventLevel.Error},
+        new object[] { GetConfigRoot(envVariables: new Dictionary<string, string?> {{minimumLevelFlatKey, LogEventLevel.Error.ToString()}}), LogEventLevel.Error},
         new object[] { GetConfigRoot(
                 appsettingsJsonLevel: minimumLevelFlatTemplate.Format(LogEventLevel.Debug),
-                envVariables: new Dictionary<string, string>() {{minimumLevelFlatKey, LogEventLevel.Error.ToString()}}),
+                envVariables: new Dictionary<string, string?> {{minimumLevelFlatKey, LogEventLevel.Error.ToString()}}),
             LogEventLevel.Error
         }
     };
@@ -214,7 +214,7 @@ public class ConfigurationReaderTests
         new object[] { GetConfigRoot(appsettingsJsonLevel: minimumLevelObjectTemplate.Format(LogEventLevel.Error)), LogEventLevel.Error },
         new object[] { GetConfigRoot(appsettingsJsonLevel: minimumLevelObjectTemplate.Format(LogEventLevel.Error.ToString().ToUpper())), LogEventLevel.Error },
         new object[] { GetConfigRoot(appsettingsDevelopmentJsonLevel: minimumLevelObjectTemplate.Format(LogEventLevel.Error)), LogEventLevel.Error },
-        new object[] { GetConfigRoot(envVariables: new Dictionary<string, string>(){{minimumLevelObjectKey, LogEventLevel.Error.ToString() } }), LogEventLevel.Error },
+        new object[] { GetConfigRoot(envVariables: new Dictionary<string, string?>{{minimumLevelObjectKey, LogEventLevel.Error.ToString() } }), LogEventLevel.Error },
         new object[] { GetConfigRoot(
             appsettingsJsonLevel: minimumLevelObjectTemplate.Format(LogEventLevel.Error),
             appsettingsDevelopmentJsonLevel: minimumLevelObjectTemplate.Format(LogEventLevel.Debug)),
@@ -254,7 +254,7 @@ public class ConfigurationReaderTests
         new object[]
         {
             GetConfigRoot(
-                envVariables: new Dictionary<string, string>()
+                envVariables: new Dictionary<string, string?>()
                 {
                     {minimumLevelObjectKey, LogEventLevel.Error.ToString()},
                     {minimumLevelFlatKey, LogEventLevel.Debug.ToString()}

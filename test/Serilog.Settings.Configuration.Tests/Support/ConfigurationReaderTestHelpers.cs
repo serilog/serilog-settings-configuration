@@ -49,13 +49,13 @@ static class ConfigurationReaderTestHelpers
     public static IConfigurationRoot GetConfigRoot(
         string? appsettingsJsonLevel = null,
         string? appsettingsDevelopmentJsonLevel = null,
-        Dictionary<string, string>? envVariables = null)
+        Dictionary<string, string?>? envVariables = null)
     {
         var configBuilder = new ConfigurationBuilder();
 
         configBuilder.AddJsonString(appsettingsJsonLevel            ?? "{}");
         configBuilder.AddJsonString(appsettingsDevelopmentJsonLevel ?? "{}");
-        configBuilder.Add(new ReloadableConfigurationSource(envVariables ?? new Dictionary<string, string>()));
+        configBuilder.Add(new ReloadableConfigurationSource(envVariables ?? new Dictionary<string, string?>()));
 
         return configBuilder.Build();
     }
