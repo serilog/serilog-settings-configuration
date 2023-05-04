@@ -328,6 +328,7 @@ If the parameter value is not a discrete value, it will try to find a best match
       // `type` (or $type) is optional, must be specified for abstract declared parameter types
       "type": "Serilog.Templates.ExpressionTemplate, Serilog.Expressions",
       "template": "[{@t:HH:mm:ss} {@l:u3} {Coalesce(SourceContext, '<none>')}] {@m}\n{@x}"
+      }
   }
 }
 ```
@@ -427,3 +428,7 @@ In order to make auto-discovery of configuration assemblies work, modify Functio
 
 </Project>
 ```
+
+### Versioning
+
+This package tracks the versioning and target framework support of its [_Microsoft.Extensions.Configuration_](https://nuget.org/packages/Microsoft.Extensions.Configuration) dependency.
