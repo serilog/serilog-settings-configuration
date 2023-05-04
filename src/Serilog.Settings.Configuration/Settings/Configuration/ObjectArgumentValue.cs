@@ -115,7 +115,7 @@ class ObjectArgumentValue : IConfigurationArgumentValue
 
         var type = typeDirective switch
         {
-            not null => Type.GetType(section.GetValue<string>(typeDirective), throwOnError: false),
+            not null => Type.GetType(section.GetValue<string>(typeDirective)!, throwOnError: false),
             null => parameterType,
         };
 

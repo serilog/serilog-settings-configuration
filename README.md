@@ -428,3 +428,7 @@ In order to make auto-discovery of configuration assemblies work, modify Functio
 
 </Project>
 ```
+
+### Versioning
+
+This package tracks the versioning and target framework support of its [_Microsoft.Extensions.Configuration_](https://nuget.org/packages/Microsoft.Extensions.Configuration) dependency.

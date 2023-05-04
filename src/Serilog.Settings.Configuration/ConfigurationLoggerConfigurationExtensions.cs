@@ -228,20 +228,20 @@ public static class ConfigurationLoggerConfigurationExtensions
     static ConfigurationReader GetConfigurationReader(IConfiguration configuration, ConfigurationReaderOptions readerOptions, DependencyContext? dependencyContext)
     {
         var assemblyFinder = dependencyContext == null ? AssemblyFinder.Auto() : AssemblyFinder.ForDependencyContext(dependencyContext);
-        var section = string.IsNullOrWhiteSpace(readerOptions.SectionName) ? configuration : configuration.GetSection(readerOptions.SectionName);
+        var section = string.IsNullOrWhiteSpace(readerOptions.SectionName) ? configuration : configuration.GetSection(readerOptions.SectionName!);
         return new ConfigurationReader(section, assemblyFinder, readerOptions, configuration);
     }
 
     static ConfigurationReader GetConfigurationReader(IConfiguration configuration, ConfigurationReaderOptions readerOptions, ConfigurationAssemblySource source)
     {
         var assemblyFinder = AssemblyFinder.ForSource(source);
-        var section = string.IsNullOrWhiteSpace(readerOptions.SectionName) ? configuration : configuration.GetSection(readerOptions.SectionName);
+        var section = string.IsNullOrWhiteSpace(readerOptions.SectionName) ? configuration : configuration.GetSection(readerOptions.SectionName!);
         return new ConfigurationReader(section, assemblyFinder, readerOptions, configuration);
     }
 
     static ConfigurationReader GetConfigurationReader(IConfiguration configuration, ConfigurationReaderOptions readerOptions, IReadOnlyCollection<Assembly> assemblies)
     {
-        var section = string.IsNullOrWhiteSpace(readerOptions.SectionName) ? configuration : configuration.GetSection(readerOptions.SectionName);
+        var section = string.IsNullOrWhiteSpace(readerOptions.SectionName) ? configuration : configuration.GetSection(readerOptions.SectionName!);
         return new ConfigurationReader(section, assemblies, new ResolutionContext(configuration, readerOptions));
     }
 }
