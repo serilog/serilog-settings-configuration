@@ -396,7 +396,7 @@ class ConfigurationReader : IConfigurationReader
             throw new InvalidOperationException(message);
         }
 
-        return assemblies;
+        return assemblies.Values;
     }
 
     void CallConfigurationMethods(ILookup<string, Dictionary<string, IConfigurationArgumentValue>> methods, IReadOnlyCollection<MethodInfo> configurationMethods, object receiver)
