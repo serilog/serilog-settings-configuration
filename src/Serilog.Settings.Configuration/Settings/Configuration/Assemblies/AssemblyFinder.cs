@@ -14,20 +14,7 @@ abstract class AssemblyFinder
 
     public static AssemblyFinder Auto()
     {
-        try
-        {
-            // Need to check `Assembly.GetEntryAssembly()` first because
-            // `DependencyContext.Default` throws an exception when `Assembly.GetEntryAssembly()` returns null
-            if (Assembly.GetEntryAssembly() != null && DependencyContext.Default != null)
-            {
-                return new DependencyContextAssemblyFinder(DependencyContext.Default);
-            }
-        }
-        catch (NotSupportedException) when (typeof(object).Assembly.Location is "") // bundled mode detection
-        {
-        }
-
-        return new DllScanningAssemblyFinder();
+        return new CompositeAssemblyFinder(new DependencyContextAssemblyFinder(DependencyContext.Default), new DllScanningAssemblyFinder());
     }
 
     public static AssemblyFinder ForSource(ConfigurationAssemblySource configurationAssemblySource)

@@ -5,22 +5,25 @@ namespace Serilog.Settings.Configuration.Assemblies;
 
 sealed class DependencyContextAssemblyFinder : AssemblyFinder
 {
-    readonly DependencyContext _dependencyContext;
+    readonly DependencyContext? _dependencyContext;
 
-    public DependencyContextAssemblyFinder(DependencyContext dependencyContext)
+    public DependencyContextAssemblyFinder(DependencyContext? dependencyContext)
     {
-        _dependencyContext = dependencyContext ?? throw new ArgumentNullException(nameof(dependencyContext));
+        _dependencyContext = dependencyContext;
     }
 
     public override IReadOnlyList<AssemblyName> FindAssembliesContainingName(string nameToFind)
     {
+        if (_dependencyContext == null)
+            return Array.Empty<AssemblyName>();
+
         var query = from library in _dependencyContext.RuntimeLibraries
                     where IsReferencingSerilog(library)
                     from assemblyName in library.GetDefaultAssemblyNames(_dependencyContext)
                     where IsCaseInsensitiveMatch(assemblyName.Name, nameToFind)
                     select assemblyName;
 
-        return query.ToList().AsReadOnly();
+        return query.ToList();
 
         static bool IsReferencingSerilog(Library library)
         {

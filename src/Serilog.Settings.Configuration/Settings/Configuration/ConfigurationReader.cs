@@ -369,7 +369,7 @@ class ConfigurationReader : IConfigurationReader
             {
                 if (string.IsNullOrWhiteSpace(simpleName))
                     throw new InvalidOperationException(
-                        "A zero-length or whitespace assembly name was supplied to a Serilog.Using configuration statement.");
+                        $"A zero-length or whitespace assembly name was supplied to a {usingSection.Path} configuration statement.");
 
                 var assembly = Assembly.Load(new AssemblyName(simpleName));
                 if (!assemblies.ContainsKey(assembly.FullName!))
@@ -384,7 +384,19 @@ class ConfigurationReader : IConfigurationReader
                 assemblies.Add(assumed.FullName!, assumed);
         }
 
-        return assemblies.Values.ToList().AsReadOnly();
+        if (assemblies.Count == 1)
+        {
+            var message = $"""
+                No {usingSection.Path} configuration section is defined and no Serilog assemblies were found.
+                This is most likely because the application is published as single-file.
+                Either add a {usingSection.Path} section or explicitly specify assemblies that contains sinks and other types through the reader options. For example:
+                var options = new ConfigurationReaderOptions(typeof(ConsoleLoggerConfigurationExtensions).Assembly, typeof(SerilogExpression).Assembly);
+                new LoggerConfiguration().ReadFrom.Configuration(configuration, options);
+                """;
+            throw new InvalidOperationException(message);
+        }
+
+        return assemblies.Values;
     }
 
     void CallConfigurationMethods(ILookup<string, Dictionary<string, IConfigurationArgumentValue>> methods, IReadOnlyCollection<MethodInfo> configurationMethods, object receiver)
