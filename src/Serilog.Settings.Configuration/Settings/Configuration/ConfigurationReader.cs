@@ -360,7 +360,7 @@ class ConfigurationReader : IConfigurationReader
     static IReadOnlyCollection<Assembly> LoadConfigurationAssemblies(IConfiguration section, AssemblyFinder assemblyFinder)
     {
         var serilogAssembly = typeof(ILogger).Assembly;
-        var assemblies = new Dictionary<string, Assembly> { [serilogAssembly.FullName!] = serilogAssembly };
+        var assemblies = new HashSet<Assembly> { serilogAssembly };
 
         var usingSection = section.GetSection("Using");
         if (usingSection.GetChildren().Any())
@@ -372,16 +372,14 @@ class ConfigurationReader : IConfigurationReader
                         $"A zero-length or whitespace assembly name was supplied to a {usingSection.Path} configuration statement.");
 
                 var assembly = Assembly.Load(new AssemblyName(simpleName));
-                if (!assemblies.ContainsKey(assembly.FullName!))
-                    assemblies.Add(assembly.FullName!, assembly);
+                assemblies.Add(assembly);
             }
         }
 
         foreach (var assemblyName in assemblyFinder.FindAssembliesContainingName("serilog"))
         {
             var assumed = Assembly.Load(assemblyName);
-            if (assumed != null && !assemblies.ContainsKey(assumed.FullName!))
-                assemblies.Add(assumed.FullName!, assumed);
+            assemblies.Add(assumed);
         }
 
         if (assemblies.Count == 1)
@@ -396,7 +394,7 @@ class ConfigurationReader : IConfigurationReader
             throw new InvalidOperationException(message);
         }
 
-        return assemblies.Values;
+        return assemblies;
     }
 
     void CallConfigurationMethods(ILookup<string, Dictionary<string, IConfigurationArgumentValue>> methods, IReadOnlyCollection<MethodInfo> configurationMethods, object receiver)
