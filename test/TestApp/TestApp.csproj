@@ -14,14 +14,14 @@
   <ItemGroup Condition="$(Configuration) == 'Debug'">
     <ProjectReference Include="..\..\src\Serilog.Settings.Configuration\Serilog.Settings.Configuration.csproj" />
   </ItemGroup>
-  
+
   <ItemGroup Condition="$(Configuration) == 'Release'">
     <PackageReference Include="Serilog.Settings.Configuration" Version="[0.0.0-IntegrationTest.0]" />
   </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="Costura.Fody" Version="5.7.0" PrivateAssets="all" />
-    <PackageReference Include="Microsoft.Extensions.Configuration" Version="6.0.0" />
+    <PackageReference Include="Microsoft.Extensions.Configuration" Version="7.0.0" />
     <PackageReference Include="Serilog.Enrichers.Thread" Version="3.1.0" />
     <PackageReference Include="Serilog.Sinks.Console" Version="4.1.0" />
   </ItemGroup>
