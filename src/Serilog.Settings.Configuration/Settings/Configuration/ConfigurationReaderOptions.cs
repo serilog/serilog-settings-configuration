@@ -77,6 +77,11 @@ public sealed class ConfigurationReaderOptions
     /// </summary>
     public Action<string, LoggingLevelSwitch>? OnLevelSwitchCreated { get; init; }
 
+    /// <summary>
+    /// Called when a log filter switch is created while reading the <c>Serilog:FilterSwitches</c> section of the configuration.
+    /// </summary>
+    public Action<string, ILoggingFilterSwitch>? OnFilterSwitchCreated { get; init; }
+
     internal Assembly[]? Assemblies { get; }
     internal DependencyContext? DependencyContext { get; }
     internal ConfigurationAssemblySource? ConfigurationAssemblySource { get; }

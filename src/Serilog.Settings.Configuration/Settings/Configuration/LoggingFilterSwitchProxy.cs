@@ -1,6 +1,6 @@
 ﻿namespace Serilog.Settings.Configuration;
 
-class LoggingFilterSwitchProxy
+class LoggingFilterSwitchProxy : ILoggingFilterSwitch
 {
     readonly Action<string?> _setProxy;
     readonly Func<string?> _getProxy;

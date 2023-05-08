@@ -1547,4 +1547,32 @@ public class ConfigurationSettingsTests
         var systemThreading = Assert.Contains("System.Threading", switches);
         Assert.Equal(LogEventLevel.Debug, systemThreading.MinimumLevel);
     }
+
+    [Fact]
+    public void TestLogFilterSwitchesCallback()
+    {
+        // language=json
+        var json = """
+            {
+                "Serilog": {
+                    "FilterSwitches": {
+                        "switch1": "Prop = 1",
+                        "$switch2": "Prop = 2"
+                    }
+                }
+            }
+            """;
+
+        IDictionary<string, ILoggingFilterSwitch> switches = new Dictionary<string, ILoggingFilterSwitch>();
+        var readerOptions = new ConfigurationReaderOptions { OnFilterSwitchCreated = (name, filterSwitch) => switches[name] = filterSwitch };
+        ConfigFromJson(json, options: readerOptions);
+
+        Assert.Equal(2, switches.Count);
+
+        var switch1 = Assert.Contains("switch1", switches);
+        Assert.Equal("Prop = 1", switch1.Expression);
+
+        var switch2 = Assert.Contains("$switch2", switches);
+        Assert.Equal("Prop = 2", switch2.Expression);
+    }
 }

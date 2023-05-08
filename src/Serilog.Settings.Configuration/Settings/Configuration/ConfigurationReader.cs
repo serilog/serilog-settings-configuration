@@ -76,6 +76,7 @@ class ConfigurationReader : IConfigurationReader
             SubscribeToFilterExpressionChanges();
 
             _resolutionContext.AddFilterSwitch(switchName, filterSwitch);
+            _resolutionContext.ReaderOptions.OnFilterSwitchCreated?.Invoke(switchName, filterSwitch);
 
             void SubscribeToFilterExpressionChanges()
             {

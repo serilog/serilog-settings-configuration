@@ -62,13 +62,12 @@ sealed class ResolutionContext
         return referenceName;
     }
 
-    public string AddFilterSwitch(string filterSwitchName, LoggingFilterSwitchProxy filterSwitch)
+    public void AddFilterSwitch(string filterSwitchName, LoggingFilterSwitchProxy filterSwitch)
     {
         if (filterSwitchName == null) throw new ArgumentNullException(nameof(filterSwitchName));
         if (filterSwitch == null) throw new ArgumentNullException(nameof(filterSwitch));
         var referenceName = ToSwitchReference(filterSwitchName);
         _declaredFilterSwitches[referenceName] = filterSwitch;
-        return referenceName;
     }
 
     string ToSwitchReference(string switchName)

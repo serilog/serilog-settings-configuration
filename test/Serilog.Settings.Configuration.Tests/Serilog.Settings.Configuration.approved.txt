@@ -46,7 +46,12 @@ namespace Serilog.Settings.Configuration
         public bool AllowInternalMethods { get; init; }
         public bool AllowInternalTypes { get; init; }
         public System.IFormatProvider? FormatProvider { get; init; }
+        public System.Action<string, Serilog.Settings.Configuration.ILoggingFilterSwitch>? OnFilterSwitchCreated { get; init; }
         public System.Action<string, Serilog.Core.LoggingLevelSwitch>? OnLevelSwitchCreated { get; init; }
         public string? SectionName { get; init; }
+    }
+    public interface ILoggingFilterSwitch
+    {
+        string? Expression { get; set; }
     }
 }
