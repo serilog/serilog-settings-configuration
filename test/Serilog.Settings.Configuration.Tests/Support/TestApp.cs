@@ -93,16 +93,18 @@ public class TestApp : IAsyncLifetime
 
         File.WriteAllText(fodyWeaversXml.FullName, publishMode == PublishMode.SingleFile && IsDesktop ? "<Weavers><Costura/></Weavers>" : "<Weavers/>");
 
-        var publishArgs = new[] {
+        var publishArgsBase = new[] {
             "publish",
             "--no-restore",
             "--configuration", "Release",
             "--output", outputDirectory.FullName,
             $"-p:TargetFramework={TargetFramework}"
         };
+        var autoGenerateBindingRedirects = $"-p:AutoGenerateBindingRedirects={publishMode is PublishMode.Standard}";
         var publishSingleFile = $"-p:PublishSingleFile={publishMode is PublishMode.SingleFile or PublishMode.SelfContained}";
         var selfContained = $"-p:SelfContained={publishMode is PublishMode.SelfContained}";
-        await RunDotnetAsync(_workingDirectory, IsDesktop ? publishArgs : publishArgs.Append(publishSingleFile).Append(selfContained).ToArray());
+        var publishArgs = (IsDesktop ? publishArgsBase.Append(autoGenerateBindingRedirects) : publishArgsBase.Append(publishSingleFile).Append(selfContained)).ToArray();
+        await RunDotnetAsync(_workingDirectory, publishArgs);
 
         var executableFileName = RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? "TestApp.exe" : "TestApp";
         var executableFile = new FileInfo(Path.Combine(outputDirectory.FullName, executableFileName));
