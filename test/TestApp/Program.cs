@@ -22,7 +22,7 @@ SelfLog.Enable(Console.Error);
 
 Thread.CurrentThread.Name = "Main thread";
 
-var configurationValues = new Dictionary<string, string>
+var configurationValues = new Dictionary<string, string?>
 {
     ["Serilog:Enrich:0"] = "WithThreadName",
     ["Serilog:WriteTo:0:Name"] = "Console",
