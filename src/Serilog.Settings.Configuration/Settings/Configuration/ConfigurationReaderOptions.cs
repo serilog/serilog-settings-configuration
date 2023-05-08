@@ -79,7 +79,6 @@ public sealed class ConfigurationReaderOptions
 
     /// <summary>
     /// Called when a log filter switch is created while reading the <c>Serilog:FilterSwitches</c> section of the configuration.
-    /// The switch name includes the leading <c>$</c> character.
     /// </summary>
     public Action<string, ILoggingFilterSwitch>? OnFilterSwitchCreated { get; init; }
 

@@ -1548,19 +1548,16 @@ public class ConfigurationSettingsTests
         Assert.Equal(LogEventLevel.Debug, systemThreading.MinimumLevel);
     }
 
-    [Theory]
-    [InlineData("$switch1", "$switch2")]
-    [InlineData("$switch1", "switch2")]
-    [InlineData("switch1", "$switch2")]
-    [InlineData("switch1", "switch2")]
-    public void TestLogFilterSwitchesCallback(string switch1Name, string switch2Name)
+    [Fact]
+    public void TestLogFilterSwitchesCallback()
     {
-        var json = $$"""
+        // language=json
+        var json = """
             {
-                'Serilog': {
-                    'FilterSwitches': {
-                        '{{switch1Name}}': 'Prop = 1',
-                        '{{switch2Name}}': 'Prop = 2'
+                "Serilog": {
+                    "FilterSwitches": {
+                        "switch1": "Prop = 1",
+                        "$switch2": "Prop = 2"
                     }
                 }
             }
@@ -1572,7 +1569,7 @@ public class ConfigurationSettingsTests
 
         Assert.Equal(2, switches.Count);
 
-        var switch1 = Assert.Contains("$switch1", switches);
+        var switch1 = Assert.Contains("switch1", switches);
         Assert.Equal("Prop = 1", switch1.Expression);
 
         var switch2 = Assert.Contains("$switch2", switches);

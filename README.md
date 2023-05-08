@@ -288,7 +288,7 @@ var logger = new LoggerConfiguration()
     .ReadFrom.Configuration(configuration, options)
     .CreateLogger();
 
-ILoggingFilterSwitch filterSwitch = filterSwitches["$filterSwitch"];
+ILoggingFilterSwitch filterSwitch = filterSwitches["filterSwitch"];
 ```
 
 ### Nested configuration sections
