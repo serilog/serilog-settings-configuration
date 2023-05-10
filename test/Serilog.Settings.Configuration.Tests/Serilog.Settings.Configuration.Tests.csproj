@@ -1,12 +1,8 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFrameworks>net6.0;netcoreapp3.1;net462</TargetFrameworks>
-    <LangVersion>latest</LangVersion>
-    <AssemblyName>Serilog.Settings.Configuration.Tests</AssemblyName>
-    <AssemblyOriginatorKeyFile>../../assets/Serilog.snk</AssemblyOriginatorKeyFile>
-    <SignAssembly>true</SignAssembly>
-    <PublicSign Condition=" '$(OS)' != 'Windows_NT' ">true</PublicSign>
+    <TargetFrameworks Condition=" '$(OS)' == 'Windows_NT'">net48</TargetFrameworks>
+    <TargetFrameworks>$(TargetFrameworks);net7.0;net6.0</TargetFrameworks>
   </PropertyGroup>
 
   <ItemGroup>
@@ -21,11 +17,20 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="6.0.0" />
-    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.2.0" />
-    <PackageReference Include="Microsoft.TestPlatform.ObjectModel" Version="17.2.0" />
+    <PackageReference Include="CliWrap" Version="3.6.0" />
+    <PackageReference Include="FluentAssertions" Version="6.10.0" />
+    <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="7.0.0" />
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.5.0" />
+    <PackageReference Include="NuGet.Frameworks" Version="6.5.0" />
+    <PackageReference Include="Polly" Version="7.2.3" />
     <PackageReference Include="Serilog.Expressions" Version="3.3.0" />
     <PackageReference Include="xunit.runner.visualstudio" Version="2.4.5" />
-    <PackageReference Include="xunit" Version="2.4.1" />
+    <PackageReference Include="xunit" Version="2.4.2" />
+    <PackageReference Include="Shouldly" Version="4.1.0" />
+    <PackageReference Include="PublicApiGenerator" Version="11.0.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Using Include="Xunit" />
   </ItemGroup>
 </Project>

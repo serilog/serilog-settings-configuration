@@ -56,7 +56,7 @@ For a more sophisticated example go to the [sample](sample/Sample) folder.
 
 Root section name can be changed:
 
-```json
+```yaml
 {
   "CustomSection": {
     ...
@@ -65,8 +65,9 @@ Root section name can be changed:
 ```
 
 ```csharp
+var options = new ConfigurationReaderOptions { SectionName = "CustomSection" };
 var logger = new LoggerConfiguration()
-    .ReadFrom.Configuration(configuration, sectionName: "CustomSection")
+    .ReadFrom.Configuration(configuration, options)
     .CreateLogger();
 ```
 
@@ -74,7 +75,7 @@ var logger = new LoggerConfiguration()
 
 `Using` section contains list of **assemblies** in which configuration methods (`WriteTo.File()`, `Enrich.WithThreadId()`) reside.
 
-```json
+```yaml
 "Serilog": {
     "Using":  [ "Serilog.Sinks.Console", "Serilog.Enrichers.Thread", /* ... */ ],
     // ...
@@ -83,7 +84,7 @@ var logger = new LoggerConfiguration()
 
 For .NET Core projects build tools produce `.deps.json` files and this package implements a convention using `Microsoft.Extensions.DependencyModel` to find any package among dependencies with `Serilog` anywhere in the name and pulls configuration methods from it, so the `Using` section in example above can be omitted:
 
-```json
+```yaml
 {
   "Serilog": {
     "MinimumLevel": "Debug",
@@ -106,8 +107,9 @@ In case of [non-standard](#azure-functions-v2-v3) dependency management you can 
 ```csharp
 var functionDependencyContext = DependencyContext.Load(typeof(Startup).Assembly);
 
+var options = new ConfigurationReaderOptions(functionDependencyContext) { SectionName = "AzureFunctionsJobHost:Serilog" };
 var logger = new LoggerConfiguration()
-    .ReadFrom.Configuration(hostConfig, sectionName: "AzureFunctionsJobHost:Serilog", dependencyContext: functionDependencyContext)
+    .ReadFrom.Configuration(hostConfig, options)
     .CreateLogger();
 ```
 
@@ -119,8 +121,9 @@ var configurationAssemblies = new[]
     typeof(ConsoleLoggerConfigurationExtensions).Assembly,
     typeof(FileLoggerConfigurationExtensions).Assembly,
 };
+var options = new ConfigurationReaderOptions(configurationAssemblies);
 var logger = new LoggerConfiguration()
-    .ReadFrom.Configuration(configuration, configurationAssemblies)
+    .ReadFrom.Configuration(configuration, options)
     .CreateLogger();
 ```
 
@@ -183,6 +186,22 @@ You can also declare `LoggingLevelSwitch`-es in custom section and reference the
 
 Level updates to switches are also respected for a dynamic update.
 
+Since version 7.0.0, both declared switches (i.e. `Serilog:LevelSwitches` section) and minimum level override switches (i.e. `Serilog:MinimumLevel:Override` section) are exposed through a callback on the reader options so that a reference can be kept:
+
+```csharp
+var allSwitches = new Dictionary<string, LoggingLevelSwitch>();
+var options = new ConfigurationReaderOptions
+{
+    OnLevelSwitchCreated = (switchName, levelSwitch) => allSwitches[switchName] = levelSwitch
+};
+
+var logger = new LoggerConfiguration()
+    .ReadFrom.Configuration(configuration, options)
+    .CreateLogger();
+
+LoggingLevelSwitch controlSwitch = allSwitches["$controlSwitch"];
+```
+
 ### WriteTo, Enrich, AuditTo, Destructure sections
 
 These sections support simplified syntax, for example the following is valid if no arguments are needed by the sinks:
@@ -195,7 +214,7 @@ Or alternatively, the long-form (`"Name":` ...) syntax from the example above ca
 
 By `Microsoft.Extensions.Configuration.Json` convention, array syntax implicitly defines index for each element in order to make unique paths for configuration keys. So the example above is equivalent to:
 
-```json
+```yaml
 "WriteTo": {
     "0": "Console",
     "1": "DiagnosticTrace"
@@ -204,7 +223,7 @@ By `Microsoft.Extensions.Configuration.Json` convention, array syntax implicitly
 
 And
 
-```json
+```yaml
 "WriteTo:0": "Console",
 "WriteTo:1": "DiagnosticTrace"
 ```
@@ -213,7 +232,7 @@ And
 
 When overriding settings with [environment variables](https://docs.microsoft.com/en-us/aspnet/core/fundamentals/configuration/?view=aspnetcore-3.1#environment-variables) it becomes less convenient and fragile, so you can specify custom names:
 
-```json
+```yaml
 "WriteTo": {
     "ConsoleSink": "Console",
     "DiagnosticTraceSink": { "Name": "DiagnosticTrace" }
@@ -226,9 +245,9 @@ This section defines a static list of key-value pairs that will enrich log event
 
 ### Filter section
 
-This section defines filters that will be applied to log events. It is especially usefull in combination with _[Serilog.Expressions](https://github.com/serilog/serilog-expressions)_ (or legacy _[Serilog.Filters.Expressions](https://github.com/serilog/serilog-filters-expressions)_) package so you can write expression in text form:
+This section defines filters that will be applied to log events. It is especially useful in combination with _[Serilog.Expressions](https://github.com/serilog/serilog-expressions)_ (or legacy _[Serilog.Filters.Expressions](https://github.com/serilog/serilog-filters-expressions)_) package so you can write expression in text form:
 
-```json
+```yaml
 "Filter": [{
   "Name": "ByIncludingOnly",
   "Args": {
@@ -239,7 +258,7 @@ This section defines filters that will be applied to log events. It is especiall
 
 Using this package you can also declare `LoggingFilterSwitch`-es in custom section and reference them for filter parameters:
 
-```json
+```yaml
 {
     "Serilog": {
         "FilterSwitches": { "filterSwitch": "Application = 'Sample'" },
@@ -256,11 +275,27 @@ Using this package you can also declare `LoggingFilterSwitch`-es in custom secti
 
 Level updates to switches are also respected for a dynamic update.
 
+Since version 7.0.0, filter switches are exposed through a callback on the reader options so that a reference can be kept:
+
+```csharp
+var filterSwitches = new Dictionary<string, ILoggingFilterSwitch>();
+var options = new ConfigurationReaderOptions
+{
+    OnFilterSwitchCreated = (switchName, filterSwitch) => filterSwitches[switchName] = filterSwitch
+};
+
+var logger = new LoggerConfiguration()
+    .ReadFrom.Configuration(configuration, options)
+    .CreateLogger();
+
+ILoggingFilterSwitch filterSwitch = filterSwitches["filterSwitch"];
+```
+
 ### Nested configuration sections
 
 Some Serilog packages require a reference to a logger configuration object. The sample program in this project illustrates this with the following entry configuring the _[Serilog.Sinks.Async](https://github.com/serilog/serilog-sinks-async)_ package to wrap the _[Serilog.Sinks.File](https://github.com/serilog/serilog-sinks-file)_ package. The `configure` parameter references the File sink configuration:
 
-```json
+```yaml
 "WriteTo:Async": {
   "Name": "Async",
   "Args": {
@@ -282,11 +317,13 @@ Some Serilog packages require a reference to a logger configuration object. The 
 
 When the configuration specifies a discrete value for a parameter (such as a string literal), the package will attempt to convert that value to the target method's declared CLR type of the parameter. Additional explicit handling is provided for parsing strings to `Uri`, `TimeSpan`, `enum`, arrays and custom collections.
 
+Since version 7.0.0, conversion will use the invariant culture (`CultureInfo.InvariantCulture`) as long as the `ReadFrom.Configuration(IConfiguration configuration, ConfigurationReaderOptions options)` method is used. Obsolete methods use the current culture to preserve backward compatibility.
+
 ### Static member support
 
 Static member access can be used for passing to the configuration argument via [special](https://github.com/serilog/serilog-settings-configuration/blob/dev/test/Serilog.Settings.Configuration.Tests/StringArgumentValueTests.cs#L35) syntax:
 
-```json
+```yaml
 {
   "Args": {
      "encoding": "System.Text.Encoding::UTF8",
@@ -299,7 +336,7 @@ Static member access can be used for passing to the configuration argument via [
 
 If the parameter value is not a discrete value, it will try to find a best matching public constructor for the argument:
 
-```json
+```yaml
 {
   "Name": "Console",
   "Args": {
@@ -307,6 +344,7 @@ If the parameter value is not a discrete value, it will try to find a best match
       // `type` (or $type) is optional, must be specified for abstract declared parameter types
       "type": "Serilog.Templates.ExpressionTemplate, Serilog.Expressions",
       "template": "[{@t:HH:mm:ss} {@l:u3} {Coalesce(SourceContext, '<none>')}] {@m}\n{@x}"
+      }
   }
 }
 ```
@@ -317,7 +355,7 @@ For other cases the package will use the configuration binding system provided b
 
 If parameter type is an interface or an abstract class you need to specify the full type name that implements abstract type. The implementation type should have parameterless constructor.
 
-```json
+```yaml
 "Destructure": [
     { "Name": "With", "Args": { "policy": "Sample.CustomPolicy, Sample" } },
     ...
@@ -377,8 +415,9 @@ public class Startup : FunctionsStartup
             var functionDependencyContext = DependencyContext.Load(typeof(Startup).Assembly);
 
             var hostConfig = sp.GetRequiredService<IConfiguration>();
+            var options = new ConfigurationReaderOptions(functionDependencyContext) { SectionName = "AzureFunctionsJobHost:Serilog" };
             var logger = new LoggerConfiguration()
-                .ReadFrom.Configuration(hostConfig, sectionName: "AzureFunctionsJobHost:Serilog", dependencyContext: functionDependencyContext)
+                .ReadFrom.Configuration(hostConfig, options)
                 .CreateLogger();
 
             return new SerilogLoggerProvider(logger, dispose: true);
@@ -405,3 +444,7 @@ In order to make auto-discovery of configuration assemblies work, modify Functio
 
 </Project>
 ```
+
+### Versioning
+
+This package tracks the versioning and target framework support of its [_Microsoft.Extensions.Configuration_](https://nuget.org/packages/Microsoft.Extensions.Configuration) dependency.

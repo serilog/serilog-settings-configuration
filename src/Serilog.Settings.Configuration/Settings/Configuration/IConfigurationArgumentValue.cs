@@ -1,9 +1,6 @@
-﻿using System;
+﻿namespace Serilog.Settings.Configuration;
 
-namespace Serilog.Settings.Configuration
+interface IConfigurationArgumentValue
 {
-    interface IConfigurationArgumentValue
-    {
-        object ConvertTo(Type toType, ResolutionContext resolutionContext);
-    }
+    object? ConvertTo(Type toType, ResolutionContext resolutionContext);
 }
