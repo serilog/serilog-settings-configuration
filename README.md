@@ -186,7 +186,7 @@ You can also declare `LoggingLevelSwitch`-es in custom section and reference the
 
 Level updates to switches are also respected for a dynamic update.
 
-Since version 4.0.0, both declared switches (i.e. `Serilog:LevelSwitches` section) and minimum level override switches (i.e. `Serilog:MinimumLevel:Override` section) are exposed through a callback on the reader options so that a reference can be kept:
+Since version 7.0.0, both declared switches (i.e. `Serilog:LevelSwitches` section) and minimum level override switches (i.e. `Serilog:MinimumLevel:Override` section) are exposed through a callback on the reader options so that a reference can be kept:
 
 ```csharp
 var allSwitches = new Dictionary<string, LoggingLevelSwitch>();
@@ -275,7 +275,7 @@ Using this package you can also declare `LoggingFilterSwitch`-es in custom secti
 
 Level updates to switches are also respected for a dynamic update.
 
-Since version 4.0.0, filter switches are exposed through a callback on the reader options so that a reference can be kept:
+Since version 7.0.0, filter switches are exposed through a callback on the reader options so that a reference can be kept:
 
 ```csharp
 var filterSwitches = new Dictionary<string, ILoggingFilterSwitch>();
@@ -317,7 +317,7 @@ Some Serilog packages require a reference to a logger configuration object. The 
 
 When the configuration specifies a discrete value for a parameter (such as a string literal), the package will attempt to convert that value to the target method's declared CLR type of the parameter. Additional explicit handling is provided for parsing strings to `Uri`, `TimeSpan`, `enum`, arrays and custom collections.
 
-Since version 4.0.0, conversion will use the invariant culture (`CultureInfo.InvariantCulture`) as long as the `ReadFrom.Configuration(IConfiguration configuration, ConfigurationReaderOptions options)` method is used. Obsolete methods use the current culture to preserve backward compatibility.
+Since version 7.0.0, conversion will use the invariant culture (`CultureInfo.InvariantCulture`) as long as the `ReadFrom.Configuration(IConfiguration configuration, ConfigurationReaderOptions options)` method is used. Obsolete methods use the current culture to preserve backward compatibility.
 
 ### Static member support
 
