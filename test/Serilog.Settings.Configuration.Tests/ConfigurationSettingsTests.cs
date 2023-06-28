@@ -406,6 +406,35 @@ public class ConfigurationSettingsTests
     }
 
     [Fact]
+    public void TestMinimumLevelOverridesForChildContext_With_Environment_Variables()
+    {
+        Environment.SetEnvironmentVariable("My_Serilog__MinimumLevel__Default", "Warning");
+        Environment.SetEnvironmentVariable("My_Serilog__MinimumLevel__Override__System", "Warning");
+        Environment.SetEnvironmentVariable("My_Serilog__MinimumLevel__Override__System__Threading", "Debug");
+
+        var builder = new ConfigurationBuilder().AddEnvironmentVariables("My_");
+        var configuration = new LoggerConfiguration().ReadFrom.Configuration(builder.Build());
+
+        LogEvent? evt = null;
+
+        var log = configuration
+            .WriteTo.Sink(new DelegatingSink(e => evt = e))
+            .CreateLogger();
+
+        log.Write(Some.DebugEvent());
+        Assert.Null(evt);
+
+        var custom = log.ForContext(Constants.SourceContextPropertyName, typeof(System.Threading.Tasks.Task).FullName + "<42>");
+        custom.Write(Some.DebugEvent());
+        Assert.NotNull(evt);
+
+        evt = null;
+        var systemThreadingLogger = log.ForContext<System.Threading.Tasks.Task>();
+        systemThreadingLogger.Write(Some.DebugEvent());
+        Assert.NotNull(evt);
+    }
+
+    [Fact]
     public void SinksWithAbstractParamsAreConfiguredWithTypeName()
     {
         // language=json

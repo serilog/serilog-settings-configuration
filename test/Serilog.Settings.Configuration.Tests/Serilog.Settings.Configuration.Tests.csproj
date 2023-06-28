@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFrameworks Condition=" '$(OS)' == 'Windows_NT'">net48</TargetFrameworks>
@@ -19,6 +19,7 @@
   <ItemGroup>
     <PackageReference Include="CliWrap" Version="3.6.0" />
     <PackageReference Include="FluentAssertions" Version="6.10.0" />
+    <PackageReference Include="Microsoft.Extensions.Configuration.EnvironmentVariables" Version="7.0.0" />
     <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="7.0.0" />
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.5.0" />
     <PackageReference Include="NuGet.Frameworks" Version="6.5.0" />
