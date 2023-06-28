@@ -160,10 +160,19 @@ class ConfigurationReader : IConfigurationReader
             loggerConfiguration.MinimumLevel.ControlledBy(globalMinimumLevelSwitch);
         }
 
+        // Level overrides may be set via environment variables. In that case it may be problematic to use dots in
+        // variable name, see https://github.com/dotnet/AspNetCore.Docs/issues/17378, so all dots should be replaces
+        // with double underscore. The consequence is that configuration becomes "nested" and GetSection("Override").GetChildren()
+        // call returns nothing since this method returns only immediate descendant configuration sub-sections.
+        // The workaround is to use AsEnumerable(true) method to retrieve all descendants and then manually replace : with .
+        var flattenDescendants = minimumLevelDirective.GetSection("Override").AsEnumerable(true).ToList();
+
         foreach (var overrideDirective in minimumLevelDirective.GetSection("Override").GetChildren())
         {
             var overridePrefix = overrideDirective.Key;
             var overridenLevelOrSwitch = overrideDirective.Value;
+            // filter out "normal" keys
+            flattenDescendants.RemoveAll(p => p.Key == overridePrefix);
             if (Enum.TryParse(overridenLevelOrSwitch, out LogEventLevel _))
             {
                 ApplyMinimumLevelConfiguration(overrideDirective, (configuration, levelSwitch) =>
@@ -171,6 +180,29 @@ class ConfigurationReader : IConfigurationReader
                     configuration.Override(overridePrefix, levelSwitch);
                     _resolutionContext.ReaderOptions.OnLevelSwitchCreated?.Invoke(overridePrefix, levelSwitch);
                 });
+            }
+            else if (!string.IsNullOrEmpty(overridenLevelOrSwitch))
+            {
+                var overrideSwitch = _resolutionContext.LookUpLevelSwitchByName(overridenLevelOrSwitch!);
+                // not calling ApplyMinimumLevel local function because here we have a reference to a LogLevelSwitch already
+                loggerConfiguration.MinimumLevel.Override(overridePrefix, overrideSwitch);
+            }
+        }
+
+        // Process remaining configuration values if any. Note that this code path does not call
+        // SubscribeToLoggingLevelChanges as ApplyMinimumLevelConfiguration does above. This can
+        // be improved some time later.
+        foreach (var pair in flattenDescendants)
+        {
+            var overridePrefix = pair.Key.Replace(':', '.');
+            var overridenLevelOrSwitch = pair.Value;
+            if (Enum.TryParse(overridenLevelOrSwitch, out LogEventLevel _))
+            {
+                var minimumLevel = ParseLogEventLevel(overridenLevelOrSwitch!);
+
+                var levelSwitch = new LoggingLevelSwitch(minimumLevel);
+                loggerConfiguration.MinimumLevel.Override(overridePrefix, levelSwitch);
+                _resolutionContext.ReaderOptions.OnLevelSwitchCreated?.Invoke(overridePrefix, levelSwitch);
             }
             else if (!string.IsNullOrEmpty(overridenLevelOrSwitch))
             {
