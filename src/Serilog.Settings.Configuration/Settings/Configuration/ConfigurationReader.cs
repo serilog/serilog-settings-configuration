@@ -221,7 +221,7 @@ class ConfigurationReader : IConfigurationReader
             levelSection.GetReloadToken,
             () =>
             {
-                if (Enum.TryParse(levelSection.Value, out LogEventLevel minimumLevel))
+                if (Enum.TryParse(levelSection.Value, ignoreCase: true, out LogEventLevel minimumLevel))
                     levelSwitch.MinimumLevel = minimumLevel;
                 else
                     SelfLog.WriteLine($"The value {levelSection.Value} is not a valid Serilog level.");
