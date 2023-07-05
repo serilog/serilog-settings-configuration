@@ -164,7 +164,7 @@ class ConfigurationReader : IConfigurationReader
         {
             var overridePrefix = overrideDirective.Key;
             var overridenLevelOrSwitch = overrideDirective.Value;
-            if (Enum.TryParse(overridenLevelOrSwitch, out LogEventLevel _))
+            if (Enum.TryParse(overridenLevelOrSwitch, ignoreCase: true, out LogEventLevel _))
             {
                 ApplyMinimumLevelConfiguration(overrideDirective, (configuration, levelSwitch) =>
                 {
@@ -221,7 +221,7 @@ class ConfigurationReader : IConfigurationReader
             levelSection.GetReloadToken,
             () =>
             {
-                if (Enum.TryParse(levelSection.Value, out LogEventLevel minimumLevel))
+                if (Enum.TryParse(levelSection.Value, ignoreCase: true, out LogEventLevel minimumLevel))
                     levelSwitch.MinimumLevel = minimumLevel;
                 else
                     SelfLog.WriteLine($"The value {levelSection.Value} is not a valid Serilog level.");
@@ -591,9 +591,7 @@ class ConfigurationReader : IConfigurationReader
     }
 
     static LogEventLevel ParseLogEventLevel(string value)
-    {
-        if (!Enum.TryParse(value, ignoreCase: true, out LogEventLevel parsedLevel))
-            throw new InvalidOperationException($"The value {value} is not a valid Serilog level.");
-        return parsedLevel;
-    }
+        => Enum.TryParse(value, ignoreCase: true, out LogEventLevel parsedLevel)
+            ? parsedLevel
+            : throw new InvalidOperationException($"The value {value} is not a valid Serilog level.");
 }
