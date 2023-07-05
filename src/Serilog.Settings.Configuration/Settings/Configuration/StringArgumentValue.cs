@@ -10,7 +10,7 @@ class StringArgumentValue : IConfigurationArgumentValue
 {
     readonly string _providedValue;
 
-    static readonly Regex StaticMemberAccessorRegex = new Regex("^(?<shortTypeName>[^:]+)::(?<memberName>[A-Za-z][A-Za-z0-9]*)(?<typeNameExtraQualifiers>[^:]*)$");
+    static readonly Regex StaticMemberAccessorRegex = new("^(?<shortTypeName>[^:]+)::(?<memberName>[A-Za-z][A-Za-z0-9]*)(?<typeNameExtraQualifiers>[^:]*)$");
 
     public StringArgumentValue(string providedValue)
     {
