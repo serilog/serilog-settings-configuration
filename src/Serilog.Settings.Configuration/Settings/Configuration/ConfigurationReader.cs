@@ -383,7 +383,7 @@ class ConfigurationReader : IConfigurationReader
             assemblies.Add(assumed);
         }
 
-        if (assemblies.Count == 1)
+        if (assemblies.Count == 1 && !UsingSectionExists())
         {
             var message = $"""
                 No {usingSection.Path} configuration section is defined and no Serilog assemblies were found.
@@ -396,6 +396,11 @@ class ConfigurationReader : IConfigurationReader
         }
 
         return assemblies;
+
+        // https://github.com/serilog/serilog-settings-configuration/issues/389
+        bool UsingSectionExists() =>
+            // usingSection.Exists() alas, see https://github.com/dotnet/runtime/issues/58104
+            section.GetChildren().Any(e => e.Key == "Using");
     }
 
     void CallConfigurationMethods(ILookup<string, Dictionary<string, IConfigurationArgumentValue>> methods, IReadOnlyCollection<MethodInfo> configurationMethods, object receiver)

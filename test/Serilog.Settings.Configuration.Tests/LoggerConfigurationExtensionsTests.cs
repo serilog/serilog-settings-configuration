@@ -1,6 +1,7 @@
 using Microsoft.Extensions.Configuration;
 using Serilog.Events;
 using Serilog.Settings.Configuration.Tests.Support;
+using TestDummies;
 
 namespace Serilog.Settings.Configuration.Tests;
 
@@ -82,6 +83,29 @@ public class LoggerConfigurationExtensionsTests
                      "(method 'Serilog.LoggerConfiguration DummyWithConfiguration(Serilog.Configuration.LoggerSinkConfiguration, Microsoft.Extensions.Configuration.IConfiguration, Serilog.Events.LogEventLevel)')",
             exception.Message);
 
+    }
+
+    [Fact]
+    public void ReadFromConfigurationDoesNotThrowWithEmptyUsingSection()
+    {
+        // language=json
+        var json = """
+            {
+                "Serilog": {
+                    "Using": [],
+                    "MinimumLevel": "Debug"
+                }
+            }
+            """;
+
+        var config = new ConfigurationBuilder()
+            .AddJsonString(json)
+            .Build();
+
+        _ = new LoggerConfiguration()
+               .ReadFrom.Configuration(config)
+               .WriteTo.DummyConsole()
+               .CreateLogger();
     }
 
     [Fact]
