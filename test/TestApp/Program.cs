@@ -21,13 +21,20 @@ if (args.Length == 1 && args[0] == "is-single-file")
 SelfLog.Enable(Console.Error);
 
 Thread.CurrentThread.Name = "Main thread";
+const string outputTemplate = "({ThreadName}) [{Level}] {Message}{NewLine}";
 
-var configurationValues = new Dictionary<string, string?>
+var configurationValues = new Dictionary<string, string?>();
+var minimumLevelOnly = args.Contains("--minimum-level-only");
+if (minimumLevelOnly)
 {
-    ["Serilog:Enrich:0"] = "WithThreadName",
-    ["Serilog:WriteTo:0:Name"] = "Console",
-    ["Serilog:WriteTo:0:Args:outputTemplate"] = "({ThreadName}) [{Level}] {Message}{NewLine}",
-};
+    configurationValues["Serilog:MinimumLevel"] = "Verbose";
+}
+else
+{
+    configurationValues["Serilog:Enrich:0"] = "WithThreadName";
+    configurationValues["Serilog:WriteTo:0:Name"] = "Console";
+    configurationValues["Serilog:WriteTo:0:Args:outputTemplate"] = outputTemplate;
+}
 
 if (args.Contains("--using-thread")) configurationValues["Serilog:Using:Thread"] = "Serilog.Enrichers.Thread";
 if (args.Contains("--using-console")) configurationValues["Serilog:Using:Console"] = "Serilog.Sinks.Console";
@@ -40,7 +47,14 @@ try
 {
     var configuration = new ConfigurationBuilder().AddInMemoryCollection(configurationValues).Build();
     var options = assemblies.Count > 0 ? new ConfigurationReaderOptions(assemblies.ToArray()) : null;
-    var logger = new LoggerConfiguration().ReadFrom.Configuration(configuration, options).CreateLogger();
+    var loggerConfiguration = new LoggerConfiguration().ReadFrom.Configuration(configuration, options);
+    if (minimumLevelOnly)
+    {
+        loggerConfiguration
+            .Enrich.WithThreadName()
+            .WriteTo.Console(outputTemplate: outputTemplate);
+    }
+    var logger = loggerConfiguration.CreateLogger();
     logger.Information("Expected success");
     return 0;
 }
