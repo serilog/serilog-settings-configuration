@@ -88,6 +88,15 @@ public sealed class PublishSingleFileTests : IDisposable, IClassFixture<TestApp>
         stdErr.Should().BeEmpty();
     }
 
+    [Theory]
+    [ClassData(typeof(PublishModeTheoryData))]
+    public async Task RunTestApp_ConfigureMinimumLevelOnly(PublishMode publishMode)
+    {
+        var (_, stdOut, stdErr) = await RunTestAppAsync(publishMode, "--minimum-level-only");
+        stdOut.Should().Be("(Main thread) [Information] Expected success");
+        stdErr.Should().BeEmpty();
+    }
+
     async Task<(bool IsSingleFile, string StdOut, string StdErr)> RunTestAppAsync(PublishMode publishMode, params string[] args)
     {
         // Determine whether the app is a _true_ single file, i.e. not a .NET Core 3.x version which

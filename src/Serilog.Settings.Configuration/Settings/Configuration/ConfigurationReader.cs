@@ -17,6 +17,9 @@ class ConfigurationReader : IConfigurationReader
 {
     const string LevelSwitchNameRegex = @"^\${0,1}[A-Za-z]+[A-Za-z0-9]*$";
 
+    // Section names that can be handled by Serilog itself (hence builtin) without requiring any additional assemblies.
+    static readonly string[] BuiltinSectionNames = { "LevelSwitches", "MinimumLevel", "Properties" };
+
     readonly IConfiguration _section;
     readonly IReadOnlyCollection<Assembly> _configurationAssemblies;
     readonly ResolutionContext _resolutionContext;
@@ -383,7 +386,10 @@ class ConfigurationReader : IConfigurationReader
             assemblies.Add(assumed);
         }
 
-        if (assemblies.Count == 1)
+        // We don't want to throw if the configuration contains only sections that can be handled by Serilog itself, without requiring any additional assembly.
+        // See https://github.com/serilog/serilog-settings-configuration/issues/389
+        var requiresAdditionalAssemblies = section.GetChildren().Select(e => e.Key).Except(BuiltinSectionNames).Any();
+        if (assemblies.Count == 1 && requiresAdditionalAssemblies)
         {
             var message = $"""
                 No {usingSection.Path} configuration section is defined and no Serilog assemblies were found.
