@@ -17,6 +17,9 @@ class ConfigurationReader : IConfigurationReader
 {
     const string LevelSwitchNameRegex = @"^\${0,1}[A-Za-z]+[A-Za-z0-9]*$";
 
+    // Section names that can be handled by Serilog itself (hence builtin) without requiring any additional assemblies.
+    static readonly string[] BuiltinSectionNames = { "LevelSwitches", "MinimumLevel", "Properties" };
+
     readonly IConfiguration _section;
     readonly IReadOnlyCollection<Assembly> _configurationAssemblies;
     readonly ResolutionContext _resolutionContext;
@@ -164,7 +167,7 @@ class ConfigurationReader : IConfigurationReader
         {
             var overridePrefix = overrideDirective.Key;
             var overridenLevelOrSwitch = overrideDirective.Value;
-            if (Enum.TryParse(overridenLevelOrSwitch, out LogEventLevel _))
+            if (Enum.TryParse(overridenLevelOrSwitch, ignoreCase: true, out LogEventLevel _))
             {
                 ApplyMinimumLevelConfiguration(overrideDirective, (configuration, levelSwitch) =>
                 {
@@ -221,7 +224,7 @@ class ConfigurationReader : IConfigurationReader
             levelSection.GetReloadToken,
             () =>
             {
-                if (Enum.TryParse(levelSection.Value, out LogEventLevel minimumLevel))
+                if (Enum.TryParse(levelSection.Value, ignoreCase: true, out LogEventLevel minimumLevel))
                     levelSwitch.MinimumLevel = minimumLevel;
                 else
                     SelfLog.WriteLine($"The value {levelSection.Value} is not a valid Serilog level.");
@@ -383,7 +386,10 @@ class ConfigurationReader : IConfigurationReader
             assemblies.Add(assumed);
         }
 
-        if (assemblies.Count == 1)
+        // We don't want to throw if the configuration contains only sections that can be handled by Serilog itself, without requiring any additional assembly.
+        // See https://github.com/serilog/serilog-settings-configuration/issues/389
+        var requiresAdditionalAssemblies = section.GetChildren().Select(e => e.Key).Except(BuiltinSectionNames).Any();
+        if (assemblies.Count == 1 && requiresAdditionalAssemblies)
         {
             var message = $"""
                 No {usingSection.Path} configuration section is defined and no Serilog assemblies were found.
@@ -591,9 +597,7 @@ class ConfigurationReader : IConfigurationReader
     }
 
     static LogEventLevel ParseLogEventLevel(string value)
-    {
-        if (!Enum.TryParse(value, ignoreCase: true, out LogEventLevel parsedLevel))
-            throw new InvalidOperationException($"The value {value} is not a valid Serilog level.");
-        return parsedLevel;
-    }
+        => Enum.TryParse(value, ignoreCase: true, out LogEventLevel parsedLevel)
+            ? parsedLevel
+            : throw new InvalidOperationException($"The value {value} is not a valid Serilog level.");
 }
