@@ -315,7 +315,7 @@ Some Serilog packages require a reference to a logger configuration object. The 
 
 ### Destructuring
 
-Destructuring means extracting pieces of information from an object and create properties with values; Serilog offers the [@ destructuring operator](https://github.com/serilog/serilog/wiki/Structured-Data#preserving-object-structure). In case there is a need to customize the way log events are serialized (e.g., hide property values or replace them with something else), one can define several destructuring policies, like this:
+Destructuring means extracting pieces of information from an object and create properties with values; Serilog offers the `@` [structure-capturing operator](https://github.com/serilog/serilog/wiki/Structured-Data#preserving-object-structure). In case there is a need to customize the way log events are serialized (e.g., hide property values or replace them with something else), one can define several destructuring policies, like this:
 
 ```yaml
 "Destructure": [
@@ -343,35 +343,29 @@ Destructuring means extracting pieces of information from an object and create p
 This is how the first destructuring policy would look like:
 
 ```csharp
-namespace MyFirstNamespace
+namespace MyFirstNamespace;
+
+public record MyDto(int Id, int Name);
+
+public class FirstDestructuringPolicy : IDestructuringPolicy
 {
-  public class MyDto
-  {
-    public int Id {get; set;}
-    public int Name {get; set;}
-  }
-
-  public class FirstDestructuringPolicy : IDestructuringPolicy
-  {
-    public bool TryDestructure(object value, ILogEventPropertyValueFactory propertyValueFactory, out LogEventPropertyValue result)
+    public bool TryDestructure(object value, ILogEventPropertyValueFactory propertyValueFactory, 
+        [NotNullWhen(true)] out LogEventPropertyValue? result)
     {
-      result = null;
-      MyDto dto = value as MyDto;
+        if (value is not MyDto dto)
+        {
+            result = null;
+            return false;
+        }
 
-      if (dto == null)
-      {
-          return false;
-      }
+        result = new StructureValue(new List<LogEventProperty>
+        {
+            new LogEventProperty("Identifier", new ScalarValue(deleteTodoItemInfo.Id)),
+            new LogEventProperty("NormalizedName", new ScalarValue(dto.Name.ToUpperInvariant()))
+        });
 
-      result = new StructureValue(new List<LogEventProperty>
-      {
-          new LogEventProperty("Identifier", new ScalarValue(deleteTodoItemInfo.Id)),
-          new LogEventProperty("NormalizedName", new ScalarValue(dto.Name.ToUpperInvariant()))
-      });
-
-      return true;
+        return true;
     }
-  }
 }
 ```
 
