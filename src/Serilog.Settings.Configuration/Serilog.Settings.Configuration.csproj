@@ -13,6 +13,7 @@
     <PackageTags>serilog;json</PackageTags>
     <PackageIcon>icon.png</PackageIcon>
     <PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
+    <PackageProjectUrl>https://github.com/serilog/serilog-settings-configuration</PackageProjectUrl>
     <RootNamespace>Serilog</RootNamespace>
     <PublishRepositoryUrl>true</PublishRepositoryUrl>
     <EmbedUntrackedSources>true</EmbedUntrackedSources>
