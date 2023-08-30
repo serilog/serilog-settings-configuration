@@ -313,6 +313,74 @@ Some Serilog packages require a reference to a logger configuration object. The 
 },
 ```
 
+### Destructuring
+
+Destructuring means extracting pieces of information from an object and create properties with values; Serilog offers the `@` [structure-capturing operator](https://github.com/serilog/serilog/wiki/Structured-Data#preserving-object-structure). In case there is a need to customize the way log events are serialized (e.g., hide property values or replace them with something else), one can define several destructuring policies, like this:
+
+```yaml
+"Destructure": [
+  {
+    "Name": "With",
+    "Args": {
+      "policy": "MyFirstNamespace.FirstDestructuringPolicy, MyFirstAssembly"
+    }
+  },
+  {
+    "Name": "With",
+    "Args": {
+      "policy": "policy": "MySecondNamespace.SecondDestructuringPolicy, MySecondAssembly"
+    }
+  },
+   {
+    "Name": "With",
+    "Args": {
+      "policy": "policy": "MyThirdNamespace.ThirdDestructuringPolicy, MyThirdAssembly"
+    }
+  },
+],
+```
+
+This is how the first destructuring policy would look like:
+
+```csharp
+namespace MyFirstNamespace;
+
+public record MyDto(int Id, int Name);
+
+public class FirstDestructuringPolicy : IDestructuringPolicy
+{
+    public bool TryDestructure(object value, ILogEventPropertyValueFactory propertyValueFactory, 
+        [NotNullWhen(true)] out LogEventPropertyValue? result)
+    {
+        if (value is not MyDto dto)
+        {
+            result = null;
+            return false;
+        }
+
+        result = new StructureValue(new List<LogEventProperty>
+        {
+            new LogEventProperty("Identifier", new ScalarValue(deleteTodoItemInfo.Id)),
+            new LogEventProperty("NormalizedName", new ScalarValue(dto.Name.ToUpperInvariant()))
+        });
+
+        return true;
+    }
+}
+```
+
+Assuming Serilog needs to destructure an argument of type **MyDto** when handling a log event:
+
+```csharp
+logger.LogInformation("About to process input: {@MyDto} ...", myDto);
+```
+
+it will apply **FirstDestructuringPolicy** which will convert **MyDto** instance to a **StructureValue** instance; a Serilog console sink would write the following entry:
+
+```text
+About to process input: {"Identifier": 191, "NormalizedName": "SOME_UPPER_CASE_NAME"} ...
+```
+
 ## Arguments binding
 
 When the configuration specifies a discrete value for a parameter (such as a string literal), the package will attempt to convert that value to the target method's declared CLR type of the parameter. Additional explicit handling is provided for parsing strings to `Uri`, `TimeSpan`, `enum`, arrays and custom collections.
