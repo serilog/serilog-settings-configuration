@@ -372,7 +372,7 @@ public class FirstDestructuringPolicy : IDestructuringPolicy
 Assuming Serilog needs to destructure an argument of type **MyDto** when handling a log event:
 
 ```csharp
-logger.LogInformation("About to process input: {@MyDto} ...", myDto);
+logger.Information("About to process input: {@MyDto} ...", myDto);
 ```
 
 it will apply **FirstDestructuringPolicy** which will convert **MyDto** instance to a **StructureValue** instance; a Serilog console sink would write the following entry:
