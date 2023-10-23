@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <TargetFrameworks Condition=" '$(OS)' == 'Windows_NT'">net48</TargetFrameworks>
-    <TargetFrameworks>$(TargetFrameworks);net7.0;net6.0</TargetFrameworks>
+    <TargetFrameworks>$(TargetFrameworks);net7.0;net6.0;net8.0</TargetFrameworks>
   </PropertyGroup>
 
   <ItemGroup>
@@ -19,7 +19,7 @@
   <ItemGroup>
     <PackageReference Include="CliWrap" Version="3.6.0" />
     <PackageReference Include="FluentAssertions" Version="6.10.0" />
-    <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="7.0.0" />
+    <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="8.0.0-*" />
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.5.0" />
     <PackageReference Include="NuGet.Frameworks" Version="6.5.0" />
     <PackageReference Include="Polly" Version="7.2.3" />

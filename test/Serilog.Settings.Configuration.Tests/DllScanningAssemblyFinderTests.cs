@@ -9,18 +9,11 @@ namespace Serilog.Settings.Configuration.Tests;
 
 public class DllScanningAssemblyFinderTests
 {
+#if NETFRAMEWORK
     const string BinDir1 = "bin1";
     const string BinDir2 = "bin2";
     const string BinDir3 = "bin3";
 
-    [Fact]
-    public void ShouldProbeCurrentDirectory()
-    {
-        var assemblyNames = new DllScanningAssemblyFinder().FindAssembliesContainingName("TestDummies");
-        Assert.Single(assemblyNames);
-    }
-
-#if NETFRAMEWORK
     [Fact]
     public void ShouldProbePrivateBinPath()
     {
@@ -61,4 +54,11 @@ public class DllScanningAssemblyFinderTests
         }
     }
 #endif
+
+    [Fact]
+    public void ShouldProbeCurrentDirectory()
+    {
+        var assemblyNames = new DllScanningAssemblyFinder().FindAssembliesContainingName("TestDummies");
+        Assert.Single(assemblyNames);
+    }
 }
