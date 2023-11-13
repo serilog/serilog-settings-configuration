@@ -3,11 +3,11 @@
   <PropertyGroup>
     <Description>Microsoft.Extensions.Configuration (appsettings.json) support for Serilog.</Description>
     <!-- This must match the major and minor components of the referenced Microsoft.Extensions.Logging package. -->
-    <VersionPrefix>7.0.2</VersionPrefix>
+    <VersionPrefix>8.0.0</VersionPrefix>
     <Authors>Serilog Contributors</Authors>
     <!-- These must match the Dependencies tab in https://www.nuget.org/packages/microsoft.settings.configuration at
         the target version. -->
-    <TargetFrameworks>net462;netstandard2.0;net6.0;net7.0</TargetFrameworks>
+    <TargetFrameworks>net462;netstandard2.0;net6.0;net7.0;net8.0</TargetFrameworks>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <AssemblyName>Serilog.Settings.Configuration</AssemblyName>
     <PackageTags>serilog;json</PackageTags>
@@ -27,13 +27,13 @@
   <ItemGroup>
     <PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.1.1" PrivateAssets="All" />
     <PackageReference Include="PolySharp" Version="1.13.1" PrivateAssets="All" />
-    <PackageReference Include="Serilog" Version="2.12.0" />
+    <PackageReference Include="Serilog" Version="3.1.0-*" />
     <None Include="..\..\assets\icon.png" Pack="true" PackagePath="" Visible="false" />
   </ItemGroup>
 
   <ItemGroup>
     <!-- The versions of all references in this group must match the major and minor components of the package version prefix. -->
-    <PackageReference Include="Microsoft.Extensions.Configuration.Binder" Version="7.0.0" />
-    <PackageReference Include="Microsoft.Extensions.DependencyModel" Version="7.0.0" />
+    <PackageReference Include="Microsoft.Extensions.Configuration.Binder" Version="8.0.0-*" />
+    <PackageReference Include="Microsoft.Extensions.DependencyModel" Version="8.0.0-*" />
   </ItemGroup>
 </Project>
