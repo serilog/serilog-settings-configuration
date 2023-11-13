@@ -9,6 +9,7 @@
     <PublishReferencesDocumentationFiles>false</PublishReferencesDocumentationFiles>
     <AllowedReferenceRelatedFileExtensions>none</AllowedReferenceRelatedFileExtensions>
     <UseCurrentRuntimeIdentifier>true</UseCurrentRuntimeIdentifier>
+    <SelfContained>true</SelfContained>
   </PropertyGroup>
 
   <ItemGroup Condition="$(Configuration) == 'Debug'">
