@@ -1,6 +1,7 @@
 ﻿using Serilog.Core;
 using Serilog.Events;
 using System.Collections;
+using System.Diagnostics.CodeAnalysis;
 
 namespace TestDummies;
 
@@ -24,7 +25,7 @@ public class DummyPolicy : IDestructuringPolicy
 
     public decimal Decimal { get; set; }
 
-    public bool TryDestructure(object value, ILogEventPropertyValueFactory propertyValueFactory, out LogEventPropertyValue? result)
+    public bool TryDestructure(object value, ILogEventPropertyValueFactory propertyValueFactory, [NotNullWhen(true)] out LogEventPropertyValue? result)
     {
         result = null;
         return false;

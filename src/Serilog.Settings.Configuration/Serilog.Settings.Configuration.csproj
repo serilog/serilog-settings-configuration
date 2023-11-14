@@ -26,14 +26,14 @@
 
   <ItemGroup>
     <PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.1.1" PrivateAssets="All" />
-    <PackageReference Include="PolySharp" Version="1.13.1" PrivateAssets="All" />
-    <PackageReference Include="Serilog" Version="3.1.0-*" />
+    <PackageReference Include="PolySharp" Version="1.13.2" PrivateAssets="All" />
+    <PackageReference Include="Serilog" Version="3.1.1" />
     <None Include="..\..\assets\icon.png" Pack="true" PackagePath="" Visible="false" />
   </ItemGroup>
 
   <ItemGroup>
     <!-- The versions of all references in this group must match the major and minor components of the package version prefix. -->
-    <PackageReference Include="Microsoft.Extensions.Configuration.Binder" Version="8.0.0-*" />
-    <PackageReference Include="Microsoft.Extensions.DependencyModel" Version="8.0.0-*" />
+    <PackageReference Include="Microsoft.Extensions.Configuration.Binder" Version="8.0.0" />
+    <PackageReference Include="Microsoft.Extensions.DependencyModel" Version="8.0.0" />
   </ItemGroup>
 </Project>
