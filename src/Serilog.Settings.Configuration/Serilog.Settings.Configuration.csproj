@@ -12,7 +12,10 @@
     <AssemblyName>Serilog.Settings.Configuration</AssemblyName>
     <PackageTags>serilog;json</PackageTags>
     <PackageIcon>icon.png</PackageIcon>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
     <PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
+    <PackageProjectUrl>https://github.com/serilog/serilog-settings-configuration</PackageProjectUrl>
+    <PackageReleaseNotes>$(PackageProjectUrl)/releases</PackageReleaseNotes>
     <RootNamespace>Serilog</RootNamespace>
     <PublishRepositoryUrl>true</PublishRepositoryUrl>
     <EmbedUntrackedSources>true</EmbedUntrackedSources>
@@ -29,6 +32,7 @@
     <PackageReference Include="PolySharp" Version="1.13.2" PrivateAssets="All" />
     <PackageReference Include="Serilog" Version="3.1.1" />
     <None Include="..\..\assets\icon.png" Pack="true" PackagePath="" Visible="false" />
+    <None Include="..\..\README.md" Pack="true" PackagePath="" />
   </ItemGroup>
 
   <ItemGroup>
