@@ -395,12 +395,12 @@ public class ConfigurationSettingsTests
         log.Write(Some.DebugEvent());
         Assert.Null(evt);
 
-        var custom = log.ForContext(Constants.SourceContextPropertyName, typeof(System.Threading.Tasks.Task).FullName + "<42>");
+        var custom = log.ForContext(Constants.SourceContextPropertyName, typeof(Task).FullName + "<42>");
         custom.Write(Some.DebugEvent());
         Assert.NotNull(evt);
 
         evt = null;
-        var systemThreadingLogger = log.ForContext<System.Threading.Tasks.Task>();
+        var systemThreadingLogger = log.ForContext<Task>();
         systemThreadingLogger.Write(Some.DebugEvent());
         Assert.NotNull(evt);
     }
