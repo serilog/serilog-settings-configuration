@@ -3,6 +3,7 @@
   <PropertyGroup>
     <TargetFrameworks Condition=" '$(OS)' == 'Windows_NT'">net48</TargetFrameworks>
     <TargetFrameworks>$(TargetFrameworks);net6.0;net7.0;net8.0</TargetFrameworks>
+    <DeterministicSourcePaths>false</DeterministicSourcePaths>
   </PropertyGroup>
 
   <ItemGroup>
