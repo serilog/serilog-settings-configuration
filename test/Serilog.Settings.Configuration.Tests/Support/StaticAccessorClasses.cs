@@ -56,4 +56,5 @@ public class ClassWithStaticAccessors
     public static int IntParseMethod(string value) => int.Parse(value);
     public static int IntParseMethod(string value, string otherValue) => throw new NotImplementedException(); // will not be chosen, extra parameter
     public static int IntParseMethod(object value) => throw new NotImplementedException(); // will not be chosen, wrong parameter type
+    public static int IntParseMethodNoOverloads(string value) => int.Parse(value);
 }

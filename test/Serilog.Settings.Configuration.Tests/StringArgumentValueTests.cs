@@ -2,8 +2,9 @@
 using Serilog.Events;
 using Serilog.Formatting;
 using Serilog.Formatting.Json;
-
 using Serilog.Settings.Configuration.Tests.Support;
+using System.Globalization;
+using System.Reflection;
 
 namespace Serilog.Settings.Configuration.Tests;
 
@@ -94,6 +95,17 @@ public class StringArgumentValueTests
 
         Assert.IsAssignableFrom(targetType, actual);
         Assert.Equal(ConcreteImpl.Instance, actual);
+    }
+
+    [Fact]
+    public void StaticMembersAccessorsCanBeUsedForMethodInfoWhenThereAreNoOverloads()
+    {
+        var stringArgumentValue = new StringArgumentValue("Serilog.Settings.Configuration.Tests.Support.ClassWithStaticAccessors::IntParseMethodNoOverloads, Serilog.Settings.Configuration.Tests");
+
+        var actual = stringArgumentValue.ConvertTo(typeof(MethodInfo), new ResolutionContext());
+
+        var parser = Assert.IsAssignableFrom<MethodInfo>(actual);
+        Assert.Equal(100, parser.Invoke(null, ["100"]));
     }
 
     [Theory]
@@ -211,6 +223,66 @@ public class StringArgumentValueTests
     }
 
     [Fact]
+    public void StringValuesConvertToEnumByName()
+    {
+        var value = new StringArgumentValue(nameof(LogEventLevel.Information));
+
+        var actual = value.ConvertTo(typeof(LogEventLevel), new());
+
+        Assert.Equal(LogEventLevel.Information, actual);
+    }
+
+    [Fact]
+    public void StringValuesConvertToEnumByValue()
+    {
+        var value = new StringArgumentValue("2");
+
+        var actual = value.ConvertTo(typeof(LogEventLevel), new());
+
+        Assert.Equal(LogEventLevel.Information, actual);
+    }
+
+    [Fact]
+    public void StringValuesConvertToUnwrappedNullable()
+    {
+        var value = new StringArgumentValue("123");
+
+        var actual = value.ConvertTo(typeof(int?), new());
+
+        Assert.Equal(123, actual);
+    }
+
+    [Fact]
+    public void StringValuesConvertToNullWhenEmptyNullable()
+    {
+        var value = new StringArgumentValue("");
+
+        var actual = value.ConvertTo(typeof(int?), new());
+
+        Assert.Null(actual);
+    }
+
+    [Fact]
+    public void StringValuesConvertToUri()
+    {
+        var stringArgumentValue = new StringArgumentValue("https://test.local");
+
+        var actual = stringArgumentValue.ConvertTo(typeof(Uri), new ResolutionContext());
+
+        Assert.Equal(new Uri("https://test.local"), actual as Uri);
+    }
+
+    [Fact]
+    public void StringValuesConvertToTimespan()
+    {
+        var stringArgumentValue = new StringArgumentValue("1.23:45:30.1234567");
+
+        var actual = stringArgumentValue.ConvertTo(typeof(TimeSpan), new ResolutionContext());
+
+        Assert.Equal(TimeSpan.Parse("1.23:45:30.1234567"), actual);
+    }
+
+    [Fact]
     public void StringValuesConvertToTypeFromShortTypeName()
     {
         var shortTypeName = "System.Version";
@@ -231,4 +303,74 @@ public class StringArgumentValueTests
 
         Assert.Equal(typeof(Version), actual);
     }
+
+    [Theory]
+    [InlineData(typeof(bool), false, "False")]
+    [InlineData(typeof(bool), true, "True")]
+    [InlineData(typeof(sbyte), (sbyte)-1, "-1")]
+    [InlineData(typeof(byte), (byte)2, "2")]
+    [InlineData(typeof(short), (short)-3, "-3")]
+    [InlineData(typeof(ushort), (ushort)4, "4")]
+    [InlineData(typeof(int), -5, "-5")]
+    [InlineData(typeof(uint), 6U, "6")]
+    [InlineData(typeof(long), -7L, "-7")]
+    [InlineData(typeof(ulong), 8UL, "8")]
+    [InlineData(typeof(float), -9.1F, "-9.1")]
+    [InlineData(typeof(double), 10.2D, "10.2")]
+    public void StringValuesConvertToPrimitives(Type type, object expected, string sectionValue)
+    {
+        var value = new StringArgumentValue(sectionValue);
+
+        var actual = value.ConvertTo(type, new());
+
+        Assert.Equal(expected, actual);
+    }
+
+    [Fact]
+    public void StringValuesConvertToPrimitivesUsingAlternativeFormatProvider()
+    {
+        var value = new StringArgumentValue("1.234,56");
+
+        var formatProvider = new NumberFormatInfo()
+        {
+            NumberDecimalSeparator = ",",
+            NumberGroupSeparator = ".",
+            NumberGroupSizes = [3],
+        };
+
+        var actual = value.ConvertTo(typeof(decimal), new(readerOptions: new() { FormatProvider = formatProvider }));
+
+        Assert.Equal(1234.56M, actual);
+    }
+
+    [Theory]
+    [InlineData("")]
+    [InlineData("Just some string that is hard to misinterpret")]
+    [InlineData("True")]
+    [InlineData("10")]
+    [InlineData("Information")]
+    [InlineData("1.23:45:30.1234567")]
+    [InlineData("https://test.local")]
+    [InlineData("Serilog.Formatting.Json.JsonFormatter")]
+    [InlineData("Serilog.Formatting.Json.JsonFormatter, Serilog")]
+    [InlineData("Serilog.Settings.Configuration.Tests.Support.ClassWithStaticAccessors::IntProperty, Serilog.Settings.Configuration.Tests")]
+    [InlineData("Serilog.Settings.Configuration.Tests.Support.ClassWithStaticAccessors::StringProperty, Serilog.Settings.Configuration.Tests")]
+    [InlineData("Serilog.Settings.Configuration.Tests.Support.ClassWithStaticAccessors::InterfaceProperty, Serilog.Settings.Configuration.Tests")]
+    [InlineData("Serilog.Settings.Configuration.Tests.Support.ClassWithStaticAccessors::AbstractProperty, Serilog.Settings.Configuration.Tests")]
+    [InlineData("Serilog.Settings.Configuration.Tests.Support.ClassWithStaticAccessors::InterfaceField, Serilog.Settings.Configuration.Tests")]
+    [InlineData("Serilog.Settings.Configuration.Tests.Support.ClassWithStaticAccessors::AbstractField, Serilog.Settings.Configuration.Tests")]
+    [InlineData("Serilog.Settings.Configuration.Tests.Support.ClassWithStaticAccessors::FuncIntParseField, Serilog.Settings.Configuration.Tests")]
+    [InlineData("Serilog.Settings.Configuration.Tests.Support.ClassWithStaticAccessors::NamedIntParseField, Serilog.Settings.Configuration.Tests")]
+    [InlineData("Serilog.Settings.Configuration.Tests.Support.ClassWithStaticAccessors::FuncIntParseProperty, Serilog.Settings.Configuration.Tests")]
+    [InlineData("Serilog.Settings.Configuration.Tests.Support.ClassWithStaticAccessors::NamedIntParseProperty, Serilog.Settings.Configuration.Tests")]
+    [InlineData("Serilog.Settings.Configuration.Tests.Support.ClassWithStaticAccessors::IntParseMethod, Serilog.Settings.Configuration.Tests")]
+    public void StringValuesConvertToString(string expected)
+    {
+        var value = new StringArgumentValue(expected);
+
+        var actual = value.ConvertTo(typeof(string), new());
+
+        Assert.Equal(expected, actual);
+    }
+
 }
