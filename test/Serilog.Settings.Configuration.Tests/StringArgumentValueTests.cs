@@ -331,7 +331,7 @@ public class StringArgumentValueTests
     {
         var value = new StringArgumentValue("1.234,56");
 
-        var formatProvider = new NumberFormatInfo()
+        var formatProvider = new NumberFormatInfo
         {
             NumberDecimalSeparator = ",",
             NumberGroupSeparator = ".",
@@ -372,5 +372,4 @@ public class StringArgumentValueTests
 
         Assert.Equal(expected, actual);
     }
-
 }
