@@ -1,10 +1,9 @@
-﻿using Microsoft.Extensions.Configuration;
+﻿using System.Collections;
+using System.Globalization;
+using Microsoft.Extensions.Configuration;
 using Serilog.Configuration;
 using Serilog.Events;
 using Serilog.Settings.Configuration.Tests.Support;
-using System.Collections;
-using System.Diagnostics.CodeAnalysis;
-using System.Globalization;
 using TestDummies;
 using TestDummies.Console;
 
@@ -490,7 +489,7 @@ public class ObjectArgumentValueTests
             return backing.Remove(item);
         }
 
-        public bool TryGetValue(string key, [MaybeNullWhen(false)] out int value)
+        public bool TryGetValue(string key, out int value)
         {
             return backing.TryGetValue(key, out value);
         }
@@ -519,7 +518,7 @@ public class ObjectArgumentValueTests
         public abstract IEnumerator<KeyValuePair<string, int>> GetEnumerator();
         public abstract bool Remove(string key);
         public abstract bool Remove(KeyValuePair<string, int> item);
-        public abstract bool TryGetValue(string key, [MaybeNullWhen(false)] out int value);
+        public abstract bool TryGetValue(string key, out int value);
 
         IEnumerator IEnumerable.GetEnumerator()
         {
@@ -564,7 +563,7 @@ public class ObjectArgumentValueTests
             throw new NotImplementedException();
         }
 
-        public bool TryGetValue(string key, [MaybeNullWhen(false)] out int value)
+        public bool TryGetValue(string key, out int value)
         {
             throw new NotImplementedException();
         }
@@ -592,9 +591,7 @@ public class ObjectArgumentValueTests
         ConvertToReturnsType<CustomReadOnlyDictionary>(value);
     }
 
-    class PrivateImplWithPublicCtor : AnAbstractClass, IAmAnInterface
-    {
-    }
+    class PrivateImplWithPublicCtor : AnAbstractClass, IAmAnInterface;
 
     [Theory]
     [InlineData(typeof(AbstractClass), typeof(ConcreteClass))]
@@ -631,7 +628,7 @@ public class ObjectArgumentValueTests
             {
                 "Ctor": {
                     "$type": "Serilog.Settings.Configuration.Tests.ObjectArgumentValueTests+WithTypeArgumentClassCtor, Serilog.Settings.Configuration.Tests",
-                    "type": "Serilog.Settings.Configuration.Tests.ObjectArgumentValueTests+PrivateImplWithPublicCtor, Serilog.Settings.Configuration.Tests",
+                    "type": "Serilog.Settings.Configuration.Tests.ObjectArgumentValueTests+PrivateImplWithPublicCtor, Serilog.Settings.Configuration.Tests"
                 }
             }
             """, "Ctor");
@@ -698,7 +695,7 @@ public class ObjectArgumentValueTests
     public void ConvertToExplicitTypeMatchingArgumentsCaseInsensitively()
     {
         // language=json
-        var section = JsonStringConfigSource.LoadSection($$"""
+        var section = JsonStringConfigSource.LoadSection("""
             {
                 "Ctor": {
                     "type": "Serilog.Settings.Configuration.Tests.ObjectArgumentValueTests+WithOverloads, Serilog.Settings.Configuration.Tests",
