@@ -345,8 +345,11 @@ public class ObjectArgumentValueTests
     }
 
     [Theory]
+    [InlineData(typeof(IEnumerable<int>))]
     [InlineData(typeof(ICollection<int>))]
+    [InlineData(typeof(IReadOnlyCollection<int>))]
     [InlineData(typeof(IList<int>))]
+    [InlineData(typeof(IReadOnlyList<int>))]
     [InlineData(typeof(List<int>))]
     public void ConvertToContainerUsingList(Type containerType)
     {
@@ -364,8 +367,13 @@ public class ObjectArgumentValueTests
         Assert.Equal([1, 1], list);
     }
 
-    [Fact]
-    public void ConvertToContainerUsingHashSet()
+    [Theory]
+    [InlineData(typeof(ISet<int>))]
+#if NET5_0_OR_GREATER
+    [InlineData(typeof(IReadOnlySet<int>))]
+#endif
+    [InlineData(typeof(HashSet<int>))]
+    public void ConvertToContainerUsingHashSet(Type containerType)
     {
         // language=json
         var section = JsonStringConfigSource.LoadSection("""
@@ -375,13 +383,48 @@ public class ObjectArgumentValueTests
             """, "Container");
         var value = new ObjectArgumentValue(section, []);
 
-        var container = value.ConvertTo(typeof(HashSet<int>), new());
+        var container = value.ConvertTo(containerType, new());
 
         var set = Assert.IsType<HashSet<int>>(container);
         Assert.Equal([1, 2], set);
     }
 
+    [Fact]
+    public void ConvertToForcedHashSetImplementationWithCustomComparer()
+    {
+        // In .Net Framework HashSet<T> is not part of mscorlib, but inside System.Core
+        // As a result the type string "System.Collections.Generic.HashSet`1[[System.String]]" will fail
+        // Using AssemblyQualifiedName to automatically switch to the correct type string, depending of framework
+
+        // language=json
+        var json = $$"""
+            {
+                "Container":
+                {
+                    "type": "{{typeof(HashSet<string>).AssemblyQualifiedName}}",
+                    "collection": [
+                        "a",
+                        "A",
+                        "b",
+                        "b"
+                    ],
+                    "comparer": "System.StringComparer::OrdinalIgnoreCase"
+                }
+            }
+            """;
+        var section = JsonStringConfigSource.LoadSection(json, "Container");
+        var value = new ObjectArgumentValue(section, []);
+
+        var container = value.ConvertTo(typeof(IEnumerable<string>), new());
+
+        var set = Assert.IsType<HashSet<string>>(container);
+        Assert.Equal(["a", "b"], set);
+    }
+
     [Theory]
+    [InlineData(typeof(IEnumerable<KeyValuePair<string, int>>))]
+    [InlineData(typeof(ICollection<KeyValuePair<string, int>>))]
+    [InlineData(typeof(IReadOnlyCollection<KeyValuePair<string, int>>))]
     [InlineData(typeof(IDictionary<string, int>))]
     [InlineData(typeof(IReadOnlyDictionary<string, int>))]
     [InlineData(typeof(Dictionary<string, int>))]
@@ -405,6 +448,9 @@ public class ObjectArgumentValueTests
     }
 
     [Theory]
+    [InlineData(typeof(IEnumerable<KeyValuePair<int, int>>))]
+    [InlineData(typeof(ICollection<KeyValuePair<int, int>>))]
+    [InlineData(typeof(IReadOnlyCollection<KeyValuePair<int, int>>))]
     [InlineData(typeof(IDictionary<int, int>))]
     [InlineData(typeof(IReadOnlyDictionary<int, int>))]
     [InlineData(typeof(Dictionary<int, int>))]
@@ -498,6 +544,29 @@ public class ObjectArgumentValueTests
         {
             return ((IEnumerable)backing).GetEnumerator();
         }
+    }
+
+    [Fact]
+    public void ConvertToContainerUsingDictionaryWithoutPublicDefaultConstructor()
+    {
+        // language=json
+        var json = """
+            {
+                "Container": {
+                    "values":
+                    {
+                        "a": 1,
+                        "b": 2
+                    }
+                }
+            }
+            """;
+        var section = JsonStringConfigSource.LoadSection(json, "Container");
+        var value = new ObjectArgumentValue(section, []);
+
+        var dictionary = ConvertToReturnsType<DictionaryWithoutPublicDefaultConstructor>(value);
+
+        Assert.Equal(new Dictionary<string, int> { { "a", 1 }, { "b", 2 } }, dictionary);
     }
 
     abstract class CustomAbstractDictionary : IDictionary<string, int>
@@ -830,6 +899,199 @@ public class ObjectArgumentValueTests
         public IReadOnlyList<int> Values { get; }
 
         public WithParamsArray(params int[] values) { Values = values; }
+    }
+
+    [Fact]
+    public void ConvertToExplicitTypeWithParamsConstructorArgument()
+    {
+        // language=json
+        var json = """
+            {
+                "Ctor": {
+                    "type": "Serilog.Settings.Configuration.Tests.ObjectArgumentValueTests+WithParamsArray, Serilog.Settings.Configuration.Tests",
+                    "values": [1, 2, 3]
+                }
+            }
+            """;
+        var section = JsonStringConfigSource.LoadSection(json, "Ctor");
+        var value = new ObjectArgumentValue(section, []);
+
+        var result = value.ConvertTo(typeof(IAmAnInterface), new());
+
+        var actual = Assert.IsType<WithParamsArray>(result);
+        Assert.Equal([1, 2, 3], actual.Values);
+    }
+
+    [Theory]
+    [InlineData(typeof(IEnumerable<int>))]
+    [InlineData(typeof(ICollection<int>))]
+    [InlineData(typeof(IReadOnlyCollection<int>))]
+    [InlineData(typeof(IList<int>))]
+    [InlineData(typeof(IReadOnlyList<int>))]
+    [InlineData(typeof(List<int>))]
+    public void ConvertToExplicitTypeWithContainerConstructorArgument(Type containerType)
+    {
+        var expectedType = typeof(GenericClass<>).MakeGenericType(containerType);
+        var valueProp = expectedType.GetProperty(nameof(GenericClass<object>.Value));
+
+        // language=json
+        var json = $$"""
+            {
+                "Ctor": {
+                    "type": "Serilog.Settings.Configuration.Tests.Support.GenericClass`1[[{{containerType.AssemblyQualifiedName}}]], Serilog.Settings.Configuration.Tests",
+                    "value": [1, 2, 3]
+                }
+            }
+            """;
+        var section = JsonStringConfigSource.LoadSection(json, "Ctor");
+        var value = new ObjectArgumentValue(section, []);
+
+        var result = value.ConvertTo(typeof(IAmAnInterface), new());
+
+        Assert.IsType(expectedType, result);
+        var list = Assert.IsType<List<int>>(valueProp?.GetValue(result));
+        Assert.Equal([1, 2, 3], list);
+    }
+
+    [Theory]
+    [InlineData(typeof(ISet<int>))]
+#if NET5_0_OR_GREATER
+    [InlineData(typeof(IReadOnlySet<int>))]
+#endif
+    [InlineData(typeof(HashSet<int>))]
+    public void ConvertToExplicitTypeWithSetConstructorArgument(Type containerType)
+    {
+        var expectedType = typeof(GenericClass<>).MakeGenericType(containerType);
+        var valueProp = expectedType.GetProperty(nameof(GenericClass<object>.Value));
+
+        // language=json
+        var json = $$"""
+            {
+                "Ctor": {
+                    "type": "Serilog.Settings.Configuration.Tests.Support.GenericClass`1[[{{containerType.AssemblyQualifiedName}}]], Serilog.Settings.Configuration.Tests",
+                    "value": [ 1, 1, 2, 2 ]
+                }
+            }
+            """;
+        var section = JsonStringConfigSource.LoadSection(json, "Ctor");
+        var value = new ObjectArgumentValue(section, []);
+
+        var result = value.ConvertTo(typeof(IAmAnInterface), new());
+
+        Assert.IsType(expectedType, result);
+        var set = Assert.IsType<HashSet<int>>(valueProp?.GetValue(result));
+        Assert.Equal([1, 2], set);
+    }
+
+
+    [Theory]
+    [InlineData(typeof(IEnumerable<KeyValuePair<string, int>>))]
+    [InlineData(typeof(ICollection<KeyValuePair<string, int>>))]
+    [InlineData(typeof(IReadOnlyCollection<KeyValuePair<string, int>>))]
+    [InlineData(typeof(IDictionary<string, int>))]
+    [InlineData(typeof(IReadOnlyDictionary<string, int>))]
+    [InlineData(typeof(Dictionary<string, int>))]
+    public void ConvertToExplicitTypeWithDictionaryConstructorArgument(Type containerType)
+    {
+        var expectedType = typeof(GenericClass<>).MakeGenericType(containerType);
+        var valueProp = expectedType.GetProperty(nameof(GenericClass<object>.Value));
+
+        // language=json
+        var json = $$"""
+            {
+                "Ctor": {
+                    "type": "Serilog.Settings.Configuration.Tests.Support.GenericClass`1[[{{containerType.AssemblyQualifiedName}}]], Serilog.Settings.Configuration.Tests",
+                    "value": {
+                        "a": 1,
+                        "b": 2
+                    }
+                }
+            }
+            """;
+        var section = JsonStringConfigSource.LoadSection(json, "Ctor");
+        var value = new ObjectArgumentValue(section, []);
+
+        var result = value.ConvertTo(typeof(IAmAnInterface), new());
+
+        Assert.IsType(expectedType, result);
+        var dictionary = Assert.IsType<Dictionary<string, int>>(valueProp?.GetValue(result));
+        Assert.Equal(new Dictionary<string, int> { { "a", 1 }, { "b", 2 } }, dictionary);
+    }
+
+    [Fact]
+    public void ConvertToExplicitTypeWithStructConstructorArgument()
+    {
+        // language=json
+        var json = """
+            {
+                "Ctor": {
+                    "type": "Serilog.Settings.Configuration.Tests.Support.GenericClass`1[[Serilog.Settings.Configuration.Tests.ObjectArgumentValueTests+PlainStruct, Serilog.Settings.Configuration.Tests]], Serilog.Settings.Configuration.Tests",
+                    "value": { "A" : "1" }
+                }
+            }
+            """;
+        var section = JsonStringConfigSource.LoadSection(json, "Ctor");
+        var value = new ObjectArgumentValue(section, []);
+
+        var result = value.ConvertTo(typeof(IAmAnInterface), new());
+
+        var actual = Assert.IsType<GenericClass<PlainStruct>>(result);
+        Assert.Equal("1", actual.Value.A);
+        Assert.Null(actual.Value.B);
+    }
+
+    [Fact]
+    public void ConvertToExplicitTypeWithClassConstructorArgument()
+    {
+        // language=json
+        var json = """
+            {
+                "Ctor": {
+                    "type": "Serilog.Settings.Configuration.Tests.Support.GenericClass`1[[TestDummies.DummyLoggerConfigurationExtensions+Binding, TestDummies]], Serilog.Settings.Configuration.Tests",
+                    "value": { "foo" : "bar" }
+                }
+            }
+            """;
+        var section = JsonStringConfigSource.LoadSection(json, "Ctor");
+        var value = new ObjectArgumentValue(section, []);
+
+        var result = value.ConvertTo(typeof(IAmAnInterface), new());
+
+        var actual = Assert.IsType<GenericClass<TestDummies.DummyLoggerConfigurationExtensions.Binding>>(result);
+        Assert.Equal("bar", actual.Value.Foo);
+        Assert.Null(actual.Value.Abc);
+    }
+
+    readonly struct Struct : IAmAnInterface
+    {
+        public readonly string String { get; }
+
+        public Struct(string str) { String = str; }
+    }
+
+    [Fact]
+    public void ConvertToExplicitTypeWithExplicitStructConstructorArgument()
+    {
+        // language=json
+        var json = """
+            {
+                "Ctor": {
+                    "type": "Serilog.Settings.Configuration.Tests.Support.GenericClass`1[[Serilog.Settings.Configuration.Tests.Support.IAmAnInterface, Serilog.Settings.Configuration.Tests]], Serilog.Settings.Configuration.Tests",
+                    "value": {
+                        "type": "Serilog.Settings.Configuration.Tests.ObjectArgumentValueTests+Struct, Serilog.Settings.Configuration.Tests",
+                        "str" : "abc"
+                    }
+                }
+            }
+            """;
+        var section = JsonStringConfigSource.LoadSection(json, "Ctor");
+        var value = new ObjectArgumentValue(section, []);
+
+        var result = value.ConvertTo(typeof(IAmAnInterface), new());
+
+        var actual = Assert.IsType<GenericClass<IAmAnInterface>>(result);
+        var structValue = Assert.IsType<Struct>(actual.Value);
+        Assert.Equal("abc", structValue.String);
     }
 
     [Fact]
