@@ -328,13 +328,13 @@ Destructuring means extracting pieces of information from an object and create p
   {
     "Name": "With",
     "Args": {
-      "policy": "policy": "MySecondNamespace.SecondDestructuringPolicy, MySecondAssembly"
+      "policy": "MySecondNamespace.SecondDestructuringPolicy, MySecondAssembly"
     }
   },
    {
     "Name": "With",
     "Args": {
-      "policy": "policy": "MyThirdNamespace.ThirdDestructuringPolicy, MyThirdAssembly"
+      "policy": "MyThirdNamespace.ThirdDestructuringPolicy, MyThirdAssembly"
     }
   },
 ],
