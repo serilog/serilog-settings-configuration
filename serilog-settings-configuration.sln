@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Version 16
-VisualStudioVersion = 16.0.29709.97
+# Visual Studio Version 17
+VisualStudioVersion = 17.8.34302.71
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{4E41FD57-5FAB-4E3C-B16E-463DE98338BC}"
 EndProject
@@ -13,11 +13,11 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "assets", "assets", "{62D0B9
 		Build.ps1 = Build.ps1
 		CHANGES.md = CHANGES.md
 		Directory.Build.props = Directory.Build.props
+		global.json = global.json
 		assets\icon.png = assets\icon.png
 		LICENSE = LICENSE
 		README.md = README.md
 		serilog-settings-configuration.sln.DotSettings = serilog-settings-configuration.sln.DotSettings
-		global.json = global.json
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "test", "test", "{D551DCB0-7771-4D01-BEBD-F7B57D1CF0E3}"
@@ -32,7 +32,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Sample", "sample\Sample\Sam
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TestDummies", "test\TestDummies\TestDummies.csproj", "{B7CF5068-DD19-4868-A268-5280BDE90361}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TestApp", "test\TestApp\TestApp.csproj", "{1B6E08F3-16C9-4912-BEEE-57DB78C92A12}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TestApp", "test\TestApp\TestApp.csproj", "{1B6E08F3-16C9-4912-BEEE-57DB78C92A12}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "JsonShema.Playground", "test\JsonShema.Playground\JsonShema.Playground.csproj", "{3137E063-8AB6-4380-B246-AFA8AE28E26E}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -58,6 +60,10 @@ Global
 		{B7CF5068-DD19-4868-A268-5280BDE90361}.Release|Any CPU.Build.0 = Release|Any CPU
 		{1B6E08F3-16C9-4912-BEEE-57DB78C92A12}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{1B6E08F3-16C9-4912-BEEE-57DB78C92A12}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3137E063-8AB6-4380-B246-AFA8AE28E26E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3137E063-8AB6-4380-B246-AFA8AE28E26E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3137E063-8AB6-4380-B246-AFA8AE28E26E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3137E063-8AB6-4380-B246-AFA8AE28E26E}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -68,6 +74,7 @@ Global
 		{A00E5E32-54F9-401A-BBA1-2F6FCB6366CD} = {D24872B9-57F3-42A7-BC8D-F9DA222FCE1B}
 		{B7CF5068-DD19-4868-A268-5280BDE90361} = {D551DCB0-7771-4D01-BEBD-F7B57D1CF0E3}
 		{1B6E08F3-16C9-4912-BEEE-57DB78C92A12} = {D551DCB0-7771-4D01-BEBD-F7B57D1CF0E3}
+		{3137E063-8AB6-4380-B246-AFA8AE28E26E} = {D551DCB0-7771-4D01-BEBD-F7B57D1CF0E3}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {485F8843-42D7-4267-B5FB-20FE9181DEE9}
