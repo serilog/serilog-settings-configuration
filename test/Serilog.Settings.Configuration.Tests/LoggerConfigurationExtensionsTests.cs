@@ -139,4 +139,23 @@ public class LoggerConfigurationExtensionsTests
             .CreateLogger();
 
     }
+
+    [Fact]
+    [Trait("BugFix", "https://github.com/serilog/serilog-settings-configuration/issues/332")]
+    public void ReadFromConfigurationThrowsWhenMinimumLevelDefaultSetButMinimumLevelValueIsEmptyString()
+    {
+        var configuration = new ConfigurationBuilder()
+            .AddInMemoryCollection(new Dictionary<string, string?>
+            {
+                ["Serilog"] = "",
+                ["Serilog:MinimumLevel"] = "",
+                ["Serilog:MinimumLevel:Default"] = "Information",
+
+            })
+            .Build();
+
+        new LoggerConfiguration()
+            .ReadFrom.Configuration(configuration)
+            .CreateLogger();
+    }
 }

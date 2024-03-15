@@ -200,12 +200,12 @@ class ConfigurationReader : IConfigurationReader
             {
                 foreach (var provider in _configurationRoot.Providers.Reverse())
                 {
-                    if (provider.TryGet(minimumLevelDirective.Path, out _))
+                    if (provider.TryGet(minimumLevelDirective.Path, out var minValue) && !string.IsNullOrEmpty(minValue))
                     {
                         return _configurationRoot.GetSection(minimumLevelDirective.Path);
                     }
 
-                    if (provider.TryGet(defaultLevelDirective.Path, out _))
+                    if (provider.TryGet(defaultLevelDirective.Path, out var defaultValue) && !string.IsNullOrEmpty(defaultValue))
                     {
                         return _configurationRoot.GetSection(defaultLevelDirective.Path);
                     }
