@@ -185,17 +185,17 @@ public class ConfigurationReaderTests
         Assert.Equal(typeof(string), selected?.GetParameters()[2].ParameterType);
     }
 
-    public static IEnumerable<object[]> FlatMinimumLevel => new List<object[]>
-    {
-        new object[] { GetConfigRoot(appsettingsJsonLevel: minimumLevelFlatTemplate.Format(LogEventLevel.Error)), LogEventLevel.Error },
-        new object[] { GetConfigRoot(appsettingsDevelopmentJsonLevel: minimumLevelFlatTemplate.Format(LogEventLevel.Error)), LogEventLevel.Error },
-        new object[] { GetConfigRoot(envVariables: new Dictionary<string, string?> {{minimumLevelFlatKey, LogEventLevel.Error.ToString()}}), LogEventLevel.Error},
-        new object[] { GetConfigRoot(
+    public static IEnumerable<object[]> FlatMinimumLevel =>
+    [
+        [GetConfigRoot(appsettingsJsonLevel: minimumLevelFlatTemplate.Format(LogEventLevel.Error)), LogEventLevel.Error],
+        [GetConfigRoot(appsettingsDevelopmentJsonLevel: minimumLevelFlatTemplate.Format(LogEventLevel.Error)), LogEventLevel.Error],
+        [GetConfigRoot(envVariables: new Dictionary<string, string?> {{minimumLevelFlatKey, LogEventLevel.Error.ToString()}}), LogEventLevel.Error],
+        [GetConfigRoot(
                 appsettingsJsonLevel: minimumLevelFlatTemplate.Format(LogEventLevel.Debug),
                 envVariables: new Dictionary<string, string?> {{minimumLevelFlatKey, LogEventLevel.Error.ToString()}}),
             LogEventLevel.Error
-        }
-    };
+        ]
+    ];
 
     [Theory]
     [MemberData(nameof(FlatMinimumLevel))]
@@ -209,17 +209,17 @@ public class ConfigurationReaderTests
         AssertLogEventLevels(loggerConfig, expectedMinimumLevel);
     }
 
-    public static IEnumerable<object[]> ObjectMinimumLevel => new List<object[]>
-    {
-        new object[] { GetConfigRoot(appsettingsJsonLevel: minimumLevelObjectTemplate.Format(LogEventLevel.Error)), LogEventLevel.Error },
-        new object[] { GetConfigRoot(appsettingsJsonLevel: minimumLevelObjectTemplate.Format(LogEventLevel.Error.ToString().ToUpper())), LogEventLevel.Error },
-        new object[] { GetConfigRoot(appsettingsDevelopmentJsonLevel: minimumLevelObjectTemplate.Format(LogEventLevel.Error)), LogEventLevel.Error },
-        new object[] { GetConfigRoot(envVariables: new Dictionary<string, string?>{{minimumLevelObjectKey, LogEventLevel.Error.ToString() } }), LogEventLevel.Error },
-        new object[] { GetConfigRoot(
+    public static IEnumerable<object[]> ObjectMinimumLevel =>
+    [
+        [GetConfigRoot(appsettingsJsonLevel: minimumLevelObjectTemplate.Format(LogEventLevel.Error)), LogEventLevel.Error],
+        [GetConfigRoot(appsettingsJsonLevel: minimumLevelObjectTemplate.Format(LogEventLevel.Error.ToString().ToUpper())), LogEventLevel.Error],
+        [GetConfigRoot(appsettingsDevelopmentJsonLevel: minimumLevelObjectTemplate.Format(LogEventLevel.Error)), LogEventLevel.Error],
+        [GetConfigRoot(envVariables: new Dictionary<string, string?>{{minimumLevelObjectKey, LogEventLevel.Error.ToString() } }), LogEventLevel.Error],
+        [GetConfigRoot(
             appsettingsJsonLevel: minimumLevelObjectTemplate.Format(LogEventLevel.Error),
             appsettingsDevelopmentJsonLevel: minimumLevelObjectTemplate.Format(LogEventLevel.Debug)),
-            LogEventLevel.Debug }
-    };
+            LogEventLevel.Debug ]
+    ];
 
     [Theory]
     [MemberData(nameof(ObjectMinimumLevel))]
@@ -234,25 +234,22 @@ public class ConfigurationReaderTests
     }
 
     // currently only works in the .NET 4.6.1 and .NET Standard builds of Serilog.Settings.Configuration
-    public static IEnumerable<object[]> MixedMinimumLevel => new List<object[]>
-    {
-        new object[]
-        {
+    public static IEnumerable<object[]> MixedMinimumLevel =>
+    [
+        [
             GetConfigRoot(
                 appsettingsJsonLevel: minimumLevelObjectTemplate.Format(LogEventLevel.Error),
                 appsettingsDevelopmentJsonLevel: minimumLevelFlatTemplate.Format(LogEventLevel.Debug)),
             LogEventLevel.Debug
-        },
-        new object[]
-        {
+        ],
+        [
             GetConfigRoot(
                 appsettingsJsonLevel: minimumLevelFlatTemplate.Format(LogEventLevel.Error),
                 appsettingsDevelopmentJsonLevel: minimumLevelObjectTemplate.Format(LogEventLevel.Debug)),
             LogEventLevel.Debug
-        },
+        ],
         // precedence should be flat > object if from the same source
-        new object[]
-        {
+        [
             GetConfigRoot(
                 envVariables: new Dictionary<string, string?>()
                 {
@@ -260,8 +257,8 @@ public class ConfigurationReaderTests
                     {minimumLevelFlatKey, LogEventLevel.Debug.ToString()}
                 }),
             LogEventLevel.Debug
-        }
-    };
+        ]
+    ];
 
     [Theory]
     [MemberData(nameof(MixedMinimumLevel))]
