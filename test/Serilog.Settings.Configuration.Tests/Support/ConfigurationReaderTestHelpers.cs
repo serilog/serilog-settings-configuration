@@ -55,7 +55,7 @@ static class ConfigurationReaderTestHelpers
 
         configBuilder.AddJsonString(appsettingsJsonLevel            ?? "{}");
         configBuilder.AddJsonString(appsettingsDevelopmentJsonLevel ?? "{}");
-        configBuilder.Add(new ReloadableConfigurationSource(envVariables ?? new Dictionary<string, string?>()));
+        configBuilder.Add(new ReloadableConfigurationSource(envVariables ?? []));
 
         return configBuilder.Build();
     }

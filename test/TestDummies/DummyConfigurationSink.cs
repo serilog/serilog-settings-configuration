@@ -15,7 +15,7 @@ public class DummyConfigurationSink : ILogEventSink
     [ThreadStatic]
     static IConfigurationSection? _configSection;
 
-    public static List<LogEvent> Emitted => _emitted ?? (_emitted = new List<LogEvent>());
+    public static List<LogEvent> Emitted => _emitted ?? (_emitted = []);
 
     public static IConfiguration? Configuration => _configuration;
 

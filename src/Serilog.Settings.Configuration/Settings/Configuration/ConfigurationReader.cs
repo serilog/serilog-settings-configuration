@@ -18,7 +18,7 @@ class ConfigurationReader : IConfigurationReader
     const string LevelSwitchNameRegex = @"^\${0,1}[A-Za-z]+[A-Za-z0-9]*$";
 
     // Section names that can be handled by Serilog itself (hence builtin) without requiring any additional assemblies.
-    static readonly string[] BuiltinSectionNames = { "LevelSwitches", "MinimumLevel", "Properties" };
+    static readonly string[] BuiltinSectionNames = ["LevelSwitches", "MinimumLevel", "Properties"];
 
     readonly IConfiguration _section;
     readonly IReadOnlyCollection<Assembly> _configurationAssemblies;
@@ -218,7 +218,7 @@ class ConfigurationReader : IConfigurationReader
         }
     }
 
-    void SubscribeToLoggingLevelChanges(IConfigurationSection levelSection, LoggingLevelSwitch levelSwitch)
+    static void SubscribeToLoggingLevelChanges(IConfigurationSection levelSection, LoggingLevelSwitch levelSwitch)
     {
         ChangeToken.OnChange(
             levelSection.GetReloadToken,
