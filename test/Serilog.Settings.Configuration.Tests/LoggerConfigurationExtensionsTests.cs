@@ -142,7 +142,7 @@ public class LoggerConfigurationExtensionsTests
 
     [Fact]
     [Trait("BugFix", "https://github.com/serilog/serilog-settings-configuration/issues/332")]
-    public void ReadFromConfigurationThrowsWhenMinimumLevelDefaultSetButMinimumLevelValueIsEmptyString()
+    public void ReadFromConfiguration_ShouldNot_Throw_When_MinimumLevel_Default_Set_But_MinimumLevel_Value_Is_Empty_String()
     {
         var configuration = new ConfigurationBuilder()
             .AddInMemoryCollection(new Dictionary<string, string?>
