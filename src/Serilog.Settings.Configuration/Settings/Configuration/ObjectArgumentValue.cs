@@ -1,5 +1,4 @@
 using System.Diagnostics.CodeAnalysis;
-using System.Linq.Expressions;
 using System.Reflection;
 
 using Microsoft.Extensions.Configuration;
@@ -46,13 +45,16 @@ class ObjectArgumentValue : IConfigurationArgumentValue
         if (toType.IsArray)
             return CreateArray();
 
+        // Only try to call ctor when type is explicitly specified in _section
+        if (TryCallCtorExplicit(_section, resolutionContext, out var ctorResult))
+            return ctorResult;
+
         if (IsContainer(toType, out var elementType) && TryCreateContainer(out var container))
             return container;
 
-        if (TryBuildCtorExpression(_section, toType, resolutionContext, out var ctorExpression))
-        {
-            return Expression.Lambda<Func<object>>(ctorExpression).Compile().Invoke();
-        }
+        // Without a type explicitly specified, attempt to call ctor of toType
+        if (TryCallCtorImplicit(_section, toType, resolutionContext, out ctorResult))
+            return ctorResult;
 
         // MS Config binding can work with a limited set of primitive types and collections
         return _section.Get(toType);
@@ -76,33 +78,41 @@ class ObjectArgumentValue : IConfigurationArgumentValue
         {
             result = null;
 
-            if (toType.GetConstructor(Type.EmptyTypes) == null)
-                return false;
-
-            // https://docs.microsoft.com/en-us/dotnet/csharp/programming-guide/classes-and-structs/object-and-collection-initializers#collection-initializers
-            var addMethod = toType.GetMethods().FirstOrDefault(m => !m.IsStatic && m.Name == "Add" && m.GetParameters().Length == 1 && m.GetParameters()[0].ParameterType == elementType);
-            if (addMethod == null)
-                return false;
-
-            var configurationElements = _section.GetChildren().ToArray();
-            result = Activator.CreateInstance(toType) ?? throw new InvalidOperationException($"Activator.CreateInstance returned null for {toType}");
-
-            for (int i = 0; i < configurationElements.Length; ++i)
+            if (IsConstructableDictionary(toType, elementType, out var concreteType, out var keyType, out var valueType, out var addMethod))
             {
-                var argumentValue = ConfigurationReader.GetArgumentValue(configurationElements[i], _configurationAssemblies);
-                var value = argumentValue.ConvertTo(elementType, resolutionContext);
-                addMethod.Invoke(result, new[] { value });
-            }
+                result = Activator.CreateInstance(concreteType) ?? throw new InvalidOperationException($"Activator.CreateInstance returned null for {concreteType}");
 
-            return true;
+                foreach (var section in _section.GetChildren())
+                {
+                    var argumentValue = ConfigurationReader.GetArgumentValue(section, _configurationAssemblies);
+                    var key = new StringArgumentValue(section.Key).ConvertTo(keyType, resolutionContext);
+                    var value = argumentValue.ConvertTo(valueType, resolutionContext);
+                    addMethod.Invoke(result, new[] { key, value });
+                }
+                return true;
+            }
+            else if (IsConstructableContainer(toType, elementType, out concreteType, out addMethod))
+            {
+                result = Activator.CreateInstance(concreteType) ?? throw new InvalidOperationException($"Activator.CreateInstance returned null for {concreteType}");
+
+                foreach (var section in _section.GetChildren())
+                {
+                    var argumentValue = ConfigurationReader.GetArgumentValue(section, _configurationAssemblies);
+                    var value = argumentValue.ConvertTo(elementType, resolutionContext);
+                    addMethod.Invoke(result, new[] { value });
+                }
+                return true;
+            }
+            else
+            {
+                return false;
+            }
         }
     }
 
-    internal static bool TryBuildCtorExpression(
-        IConfigurationSection section, Type parameterType, ResolutionContext resolutionContext, [NotNullWhen(true)] out NewExpression? ctorExpression)
+    bool TryCallCtorExplicit(
+        IConfigurationSection section, ResolutionContext resolutionContext, [NotNullWhen(true)] out object? value)
     {
-        ctorExpression = null;
-
         var typeDirective = section.GetValue<string>("$type") switch
         {
             not null => "$type",
@@ -116,21 +126,39 @@ class ObjectArgumentValue : IConfigurationArgumentValue
         var type = typeDirective switch
         {
             not null => Type.GetType(section.GetValue<string>(typeDirective)!, throwOnError: false),
-            null => parameterType,
+            null => null,
         };
 
         if (type is null or { IsAbstract: true })
         {
+            value = null;
             return false;
         }
+        else
+        {
+            var suppliedArguments = section.GetChildren().Where(s => s.Key != typeDirective)
+                .ToDictionary(s => s.Key, StringComparer.OrdinalIgnoreCase);
+            return TryCallCtor(type, suppliedArguments, resolutionContext, out value);
+        }
 
-        var suppliedArguments = section.GetChildren().Where(s => s.Key != typeDirective)
+    }
+
+    bool TryCallCtorImplicit(
+        IConfigurationSection section, Type parameterType, ResolutionContext resolutionContext, out object? value)
+    {
+        var suppliedArguments = section.GetChildren()
             .ToDictionary(s => s.Key, StringComparer.OrdinalIgnoreCase);
+        return TryCallCtor(parameterType, suppliedArguments, resolutionContext, out value);
+    }
+
+    bool TryCallCtor(Type type, Dictionary<string, IConfigurationSection> suppliedArguments, ResolutionContext resolutionContext, [NotNullWhen(true)] out object? value)
+    {
+        value = null;
 
         if (suppliedArguments.Count == 0 &&
             type.GetConstructor(Type.EmptyTypes) is ConstructorInfo parameterlessCtor)
         {
-            ctorExpression = Expression.New(parameterlessCtor);
+            value = parameterlessCtor.Invoke([]);
             return true;
         }
 
@@ -163,64 +191,31 @@ class ObjectArgumentValue : IConfigurationArgumentValue
             return false;
         }
 
-        var ctorArguments = new List<Expression>();
-        foreach (var argumentValue in ctor.ArgumentValues)
+        var ctorArguments = new object?[ctor.ArgumentValues.Count];
+        for (var i = 0; i < ctor.ArgumentValues.Count; i++)
         {
-            if (TryBindToCtorArgument(argumentValue.Value, argumentValue.Type, resolutionContext, out var argumentExpression))
+            var argument = ctor.ArgumentValues[i];
+            var valueValue = argument.Value;
+            if (valueValue is IConfigurationSection s)
             {
-                ctorArguments.Add(argumentExpression);
+                var argumentValue = ConfigurationReader.GetArgumentValue(s, _configurationAssemblies);
+                valueValue = argumentValue.ConvertTo(argument.Type, resolutionContext);
             }
-            else
-            {
-                return false;
-            }
+            ctorArguments[i] = valueValue;
         }
 
-        ctorExpression = Expression.New(ctor.ConstructorInfo, ctorArguments);
+        value = ctor.ConstructorInfo.Invoke(ctorArguments);
         return true;
-
-        static bool TryBindToCtorArgument(object value, Type type, ResolutionContext resolutionContext, [NotNullWhen(true)] out Expression? argumentExpression)
-        {
-            argumentExpression = null;
-
-            if (value is IConfigurationSection s)
-            {
-                if (s.Value is string argValue)
-                {
-                    var stringArgumentValue = new StringArgumentValue(argValue);
-                    try
-                    {
-                        argumentExpression = Expression.Constant(
-                            stringArgumentValue.ConvertTo(type, resolutionContext),
-                            type);
-
-                        return true;
-                    }
-                    catch (Exception)
-                    {
-                        return false;
-                    }
-                }
-                else if (s.GetChildren().Any())
-                {
-                    if (TryBuildCtorExpression(s, type, resolutionContext, out var ctorExpression))
-                    {
-                        argumentExpression = ctorExpression;
-                        return true;
-                    }
-
-                    return false;
-                }
-            }
-
-            argumentExpression = Expression.Constant(value, type);
-            return true;
-        }
     }
 
     static bool IsContainer(Type type, [NotNullWhen(true)] out Type? elementType)
     {
         elementType = null;
+        if (type.IsGenericType && type.GetGenericTypeDefinition() == typeof(IEnumerable<>))
+        {
+            elementType = type.GetGenericArguments()[0];
+            return true;
+        }
         foreach (var iface in type.GetInterfaces())
         {
             if (iface.IsGenericType)
@@ -233,6 +228,89 @@ class ObjectArgumentValue : IConfigurationArgumentValue
             }
         }
 
+        return false;
+    }
+
+    static bool IsConstructableDictionary(Type type, Type elementType, [NotNullWhen(true)] out Type? concreteType, [NotNullWhen(true)] out Type? keyType, [NotNullWhen(true)] out Type? valueType, [NotNullWhen(true)] out MethodInfo? addMethod)
+    {
+        concreteType = null;
+        keyType = null;
+        valueType = null;
+        addMethod = null;
+        if (!elementType.IsGenericType || elementType.GetGenericTypeDefinition() != typeof(KeyValuePair<,>))
+        {
+            return false;
+        }
+        var argumentTypes = elementType.GetGenericArguments();
+        keyType = argumentTypes[0];
+        valueType = argumentTypes[1];
+        if (type.IsAbstract)
+        {
+            concreteType = typeof(Dictionary<,>).MakeGenericType(argumentTypes);
+            if (!type.IsAssignableFrom(concreteType))
+            {
+                return false;
+            }
+        }
+        else
+        {
+            concreteType = type;
+        }
+        if (concreteType.GetConstructor(Type.EmptyTypes) == null)
+        {
+            return false;
+        }
+        foreach (var method in concreteType.GetMethods())
+        {
+            if (!method.IsStatic && method.Name == "Add")
+            {
+                var parameters = method.GetParameters();
+                if (parameters.Length == 2 && parameters[0].ParameterType == keyType && parameters[1].ParameterType == valueType)
+                {
+                    addMethod = method;
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    static bool IsConstructableContainer(Type type, Type elementType, [NotNullWhen(true)] out Type? concreteType, [NotNullWhen(true)] out MethodInfo? addMethod)
+    {
+        addMethod = null;
+        if (type.IsAbstract)
+        {
+            concreteType = typeof(List<>).MakeGenericType(elementType);
+            if (!type.IsAssignableFrom(concreteType))
+            {
+                concreteType = typeof(HashSet<>).MakeGenericType(elementType);
+                if (!type.IsAssignableFrom(concreteType))
+                {
+                    concreteType = null;
+                    return false;
+                }
+            }
+        }
+        else
+        {
+            concreteType = type;
+        }
+        if (concreteType.GetConstructor(Type.EmptyTypes) == null)
+        {
+            return false;
+        }
+        foreach (var method in concreteType.GetMethods())
+        {
+            if (!method.IsStatic && method.Name == "Add")
+            {
+                var parameters = method.GetParameters();
+                if (parameters.Length == 1 && parameters[0].ParameterType == elementType)
+                {
+                    addMethod = method;
+                    return true;
+                }
+            }
+        }
         return false;
     }
 }
