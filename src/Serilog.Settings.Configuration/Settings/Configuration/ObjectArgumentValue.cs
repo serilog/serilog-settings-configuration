@@ -91,7 +91,7 @@ class ObjectArgumentValue : IConfigurationArgumentValue
             {
                 var argumentValue = ConfigurationReader.GetArgumentValue(configurationElements[i], _configurationAssemblies);
                 var value = argumentValue.ConvertTo(elementType, resolutionContext);
-                addMethod.Invoke(result, new[] { value });
+                addMethod.Invoke(result, [value]);
             }
 
             return true;

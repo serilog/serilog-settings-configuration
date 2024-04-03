@@ -26,7 +26,7 @@ public class TestApp : IAsyncLifetime
         {
             file.CopyTo(_workingDirectory.File(file.Name).FullName, overwrite: true);
         }
-        _executables = new Dictionary<PublishMode, FileInfo>();
+        _executables = [];
     }
 
     async Task IAsyncLifetime.InitializeAsync()
