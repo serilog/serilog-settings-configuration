@@ -201,4 +201,3 @@ FakesAssemblies/
 project.lock.json
 
 artifacts/
-/test/TestApp-*

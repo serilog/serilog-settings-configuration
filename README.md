@@ -2,7 +2,7 @@
 
 A Serilog settings provider that reads from [Microsoft.Extensions.Configuration](https://docs.microsoft.com/en-us/aspnet/core/fundamentals/configuration/?view=aspnetcore-3.1) sources, including .NET Core's `appsettings.json` file.
 
-By default, configuration is read from the `Serilog` section.
+By default, configuration is read from the `Serilog` section that should be at the **top level** of the configuration file.
 
 ```json
 {
@@ -328,13 +328,13 @@ Destructuring means extracting pieces of information from an object and create p
   {
     "Name": "With",
     "Args": {
-      "policy": "policy": "MySecondNamespace.SecondDestructuringPolicy, MySecondAssembly"
+      "policy": "MySecondNamespace.SecondDestructuringPolicy, MySecondAssembly"
     }
   },
    {
     "Name": "With",
     "Args": {
-      "policy": "policy": "MyThirdNamespace.ThirdDestructuringPolicy, MyThirdAssembly"
+      "policy": "MyThirdNamespace.ThirdDestructuringPolicy, MyThirdAssembly"
     }
   },
 ],
