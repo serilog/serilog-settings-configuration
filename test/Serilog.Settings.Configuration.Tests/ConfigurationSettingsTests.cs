@@ -60,7 +60,7 @@ public class ConfigurationSettingsTests
     [Theory]
     [InlineData(null)]
     [InlineData("")]
-    public void CanReadWithoutSerilogSection(string sectionName)
+    public void CanReadWithoutSerilogSection(string? sectionName)
     {
         LogEvent? evt = null;
 
