@@ -3,6 +3,8 @@ using System.Globalization;
 using Microsoft.Extensions.Configuration;
 using Serilog.Configuration;
 using Serilog.Events;
+using Serilog.Formatting;
+using Serilog.Formatting.Display;
 using Serilog.Settings.Configuration.Tests.Support;
 using TestDummies;
 using TestDummies.Console;
@@ -1162,10 +1164,10 @@ public class ObjectArgumentValueTests
         // language=json
         var json = $$"""
             {
-                "Serilog": {{sectionValue}}
+                "value": {{sectionValue}}
             }
             """;
-        var section = JsonStringConfigSource.LoadSection(json, "Serilog");
+        var section = JsonStringConfigSource.LoadSection(json, "value");
         var value = new ObjectArgumentValue(section, []);
 
         var actual = value.ConvertTo(type, new());
@@ -1181,10 +1183,10 @@ public class ObjectArgumentValueTests
         // language=json
         const string json = """
             {
-                "Serilog": 123
+                "value": 123
             }
             """;
-        var section = JsonStringConfigSource.LoadSection(json, "Serilog");
+        var section = JsonStringConfigSource.LoadSection(json, "value");
         var value = new ObjectArgumentValue(section, []);
 
         var actual = value.ConvertTo(typeof(int?), new());
@@ -1199,10 +1201,10 @@ public class ObjectArgumentValueTests
         // language=json
         const string json = """
             {
-                "Serilog": null
+                "value": null
             }
             """;
-        var section = JsonStringConfigSource.LoadSection(json, "Serilog");
+        var section = JsonStringConfigSource.LoadSection(json, "value");
         var value = new ObjectArgumentValue(section, []);
 
         var actual = value.ConvertTo(typeof(int?), new());
@@ -1216,10 +1218,10 @@ public class ObjectArgumentValueTests
         // language=json
         const string json = """
             {
-                "Serilog": { "foo" : "bar" }
+                "value": { "foo" : "bar" }
             }
             """;
-        var section = JsonStringConfigSource.LoadSection(json, "Serilog");
+        var section = JsonStringConfigSource.LoadSection(json, "value");
         var value = new ObjectArgumentValue(section, []);
 
         var actual = value.ConvertTo(typeof(TestDummies.DummyLoggerConfigurationExtensions.Binding), new());
@@ -1241,10 +1243,10 @@ public class ObjectArgumentValueTests
         // language=json
         const string json = """
             {
-                "Serilog": { "A" : "1" }
+                "value": { "A" : "1" }
             }
             """;
-        var section = JsonStringConfigSource.LoadSection(json, "Serilog");
+        var section = JsonStringConfigSource.LoadSection(json, "value");
         var value = new ObjectArgumentValue(section, []);
 
         var actual = value.ConvertTo(typeof(PlainStruct), new());
@@ -1263,14 +1265,49 @@ public class ObjectArgumentValueTests
         // language=json
         const string json = """
             {
-               "Serilog": null
+               "value": null
             }
             """;
-        var section = JsonStringConfigSource.LoadSection(json, "Serilog");
+        var section = JsonStringConfigSource.LoadSection(json, "value");
         var value = new ObjectArgumentValue(section, []);
 
         var actual = value.ConvertTo(typeof(PlainStruct), new());
 
         Assert.Null(actual);
+    }
+
+    // This is intended to mirror Serilog.Sinks.Email's options type.
+    // https://github.com/serilog/serilog-settings-configuration/issues/417
+    public class NestedComplexType
+    {
+        public string? Host { get; set; }
+        public ITextFormatter? Subject { get; set; }
+    }
+
+    [Fact]
+    public void ConstructsNestedComplexObjects()
+    {
+        // language=json
+        const string json = """
+            {
+                "options": {
+                  "subject": {
+                    "type": "Serilog.Formatting.Display.MessageTemplateTextFormatter, Serilog",
+                    "outputTemplate": "Serilog test"
+                  },
+                  "host": "localhost"
+                }
+            }
+            """;
+
+        var section = JsonStringConfigSource.LoadSection(json, "options");
+        var value = new ObjectArgumentValue(section, []);
+
+        var actual = AssertConvertsToType<NestedComplexType>(value);
+        Assert.Equal("localhost", actual.Host);
+        var formatter = Assert.IsType<MessageTemplateTextFormatter>(actual.Subject);
+        var sw = new StringWriter();
+        formatter.Format(Some.LogEvent(), sw);
+        Assert.Equal("Serilog test", sw.ToString());
     }
 }
