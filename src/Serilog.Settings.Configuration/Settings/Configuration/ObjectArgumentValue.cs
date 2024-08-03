@@ -185,12 +185,14 @@ class ObjectArgumentValue : ConfigurationArgumentValue
                         }
                         else
                         {
-                            return new { ci, args, isCallable = false, matches, stringMatches, suppliedNames };
+                            return new { ci, args, isCallable = false, matches, stringMatches,
+                                usedArguments = suppliedNames };
                         }
                     }
                 }
 
-                return new { ci, args, isCallable = true, matches, stringMatches, suppliedNames };
+                return new { ci, args, isCallable = true, matches, stringMatches,
+                    usedArguments = suppliedNames };
             })
             .Where(binding => binding.isCallable)
             .OrderByDescending(binding => binding.matches)
@@ -217,7 +219,11 @@ class ObjectArgumentValue : ConfigurationArgumentValue
 
         foreach (var pi in type.GetProperties(BindingFlags.Instance | BindingFlags.Public))
         {
-            if (!binding.suppliedNames.Contains(pi.Name) && suppliedArguments.TryGetValue(pi.Name, out var section) && pi.CanWrite)
+            if (!binding.usedArguments.Contains(pi.Name) &&
+                suppliedArguments.TryGetValue(pi.Name, out var section)
+                && pi.CanWrite &&
+                // This avoids trying to call esoteric indexers and so on.
+                pi.GetSetMethod(false)?.GetParameters().Length == 1)
             {
                 var propertyValue = FromSection(section, _configurationAssemblies);
                 try
