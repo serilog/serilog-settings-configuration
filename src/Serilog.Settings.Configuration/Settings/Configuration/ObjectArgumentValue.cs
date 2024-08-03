@@ -38,7 +38,7 @@ class ObjectArgumentValue : IConfigurationArgumentValue
                 _ when configType == typeof(LoggerConfiguration) => new Action<LoggerConfiguration>(configReader.Configure),
                 _ when configType == typeof(LoggerSinkConfiguration) => new Action<LoggerSinkConfiguration>(configReader.ApplySinks),
                 _ when configType == typeof(LoggerEnrichmentConfiguration) => new Action<LoggerEnrichmentConfiguration>(configReader.ApplyEnrichment),
-                _ => throw new ArgumentException($"Configuration resolution for Action<{configType.Name}> parameter type at the path {_section.Path} is not implemented.")
+                _ => throw new ArgumentException($"Configuration resolution for `Action<{configType.Name}>` parameter type at the path `{_section.Path}` is not implemented.")
             };
         }
 
