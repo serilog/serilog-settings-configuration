@@ -222,10 +222,12 @@ public class StringArgumentValueTests
         Assert.Contains("\"LevelSwitches\":{\"$mySwitch\":", ex.Message);
     }
 
-    [Fact]
-    public void StringValuesConvertToEnumByName()
+    [Theory]
+    [InlineData("Information")]
+    [InlineData("information")]
+    public void StringValuesConvertToEnumByName(string level)
     {
-        var value = new StringArgumentValue(nameof(LogEventLevel.Information));
+        var value = new StringArgumentValue(level);
 
         var actual = value.ConvertTo(typeof(LogEventLevel), new());
 
