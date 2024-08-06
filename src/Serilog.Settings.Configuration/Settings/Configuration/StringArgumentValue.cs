@@ -51,7 +51,7 @@ class StringArgumentValue : IConfigurationArgumentValue
         }
 
         if (toTypeInfo.IsEnum)
-            return Enum.Parse(toType, argumentValue);
+            return Enum.Parse(toType, argumentValue, ignoreCase: true);
 
         var convertor = ExtendedTypeConversions
             .Where(t => t.Key.GetTypeInfo().IsAssignableFrom(toTypeInfo))
