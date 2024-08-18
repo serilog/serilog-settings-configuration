@@ -303,14 +303,14 @@ class ConfigurationReader : IConfigurationReader
         }
     }
 
-    internal ILookup<string, Dictionary<string, IConfigurationArgumentValue>> GetMethodCalls(IConfiguration directive)
+    internal ILookup<string, Dictionary<string, ConfigurationArgumentValue>> GetMethodCalls(IConfiguration directive)
     {
         var children = directive.GetChildren().ToList();
 
         var result =
             (from child in children
              where child.Value != null // Plain string
-             select new { Name = child.Value, Args = new Dictionary<string, IConfigurationArgumentValue>() })
+             select new { Name = child.Value, Args = new Dictionary<string, ConfigurationArgumentValue>() })
                  .Concat(
             (from child in children
              where child.Value == null
@@ -319,7 +319,7 @@ class ConfigurationReader : IConfigurationReader
                              select new
                              {
                                  Name = argument.Key,
-                                 Value = GetArgumentValue(argument, _configurationAssemblies)
+                                 Value = ConfigurationArgumentValue.FromSection(argument, _configurationAssemblies)
                              }).ToDictionary(p => p.Name, p => p.Value)
              select new { Name = name, Args = callArgs }))
                  .ToLookup(p => p.Name, p => p.Args);
@@ -334,31 +334,6 @@ class ConfigurationReader : IConfigurationReader
 
             return name.Value;
         }
-    }
-
-    internal static IConfigurationArgumentValue GetArgumentValue(IConfigurationSection argumentSection, IReadOnlyCollection<Assembly> configurationAssemblies)
-    {
-        IConfigurationArgumentValue argumentValue;
-
-        // Reject configurations where an element has both scalar and complex
-        // values as a result of reading multiple configuration sources.
-        if (argumentSection.Value != null && argumentSection.GetChildren().Any())
-            throw new InvalidOperationException(
-                $"The value for the argument '{argumentSection.Path}' is assigned different value " +
-                "types in more than one configuration source. Ensure all configurations consistently " +
-                "use either a scalar (int, string, boolean) or a complex (array, section, list, " +
-                "POCO, etc.) type for this argument value.");
-
-        if (argumentSection.Value != null)
-        {
-            argumentValue = new StringArgumentValue(argumentSection.Value);
-        }
-        else
-        {
-            argumentValue = new ObjectArgumentValue(argumentSection, configurationAssemblies);
-        }
-
-        return argumentValue;
     }
 
     static IReadOnlyCollection<Assembly> LoadConfigurationAssemblies(IConfiguration section, AssemblyFinder assemblyFinder)
@@ -404,7 +379,7 @@ class ConfigurationReader : IConfigurationReader
         return assemblies;
     }
 
-    void CallConfigurationMethods(ILookup<string, Dictionary<string, IConfigurationArgumentValue>> methods, IReadOnlyCollection<MethodInfo> configurationMethods, object receiver)
+    void CallConfigurationMethods(ILookup<string, Dictionary<string, ConfigurationArgumentValue>> methods, IReadOnlyCollection<MethodInfo> configurationMethods, object receiver)
     {
         foreach (var method in methods.SelectMany(g => g.Select(x => new { g.Key, Value = x })))
         {
