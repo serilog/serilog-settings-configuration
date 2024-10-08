@@ -4,10 +4,11 @@ using System.Reflection;
 using Microsoft.Extensions.Configuration;
 
 using Serilog.Configuration;
+using Serilog.Debugging;
 
 namespace Serilog.Settings.Configuration;
 
-class ObjectArgumentValue : IConfigurationArgumentValue
+class ObjectArgumentValue : ConfigurationArgumentValue
 {
     readonly IConfigurationSection _section;
     readonly IReadOnlyCollection<Assembly> _configurationAssemblies;
@@ -20,7 +21,7 @@ class ObjectArgumentValue : IConfigurationArgumentValue
         _configurationAssemblies = configurationAssemblies ?? throw new ArgumentNullException(nameof(configurationAssemblies));
     }
 
-    public object? ConvertTo(Type toType, ResolutionContext resolutionContext)
+    public override object? ConvertTo(Type toType, ResolutionContext resolutionContext)
     {
         // return the entire section for internal processing
         if (toType == typeof(IConfigurationSection)) return _section;
@@ -28,7 +29,7 @@ class ObjectArgumentValue : IConfigurationArgumentValue
         // process a nested configuration to populate an Action<> logger/sink config parameter?
         var typeInfo = toType.GetTypeInfo();
         if (typeInfo.IsGenericType &&
-            typeInfo.GetGenericTypeDefinition() is Type genericType && genericType == typeof(Action<>))
+            typeInfo.GetGenericTypeDefinition() is {} genericType && genericType == typeof(Action<>))
         {
             var configType = typeInfo.GenericTypeArguments[0];
             IConfigurationReader configReader = new ConfigurationReader(_section, _configurationAssemblies, resolutionContext);
@@ -38,7 +39,7 @@ class ObjectArgumentValue : IConfigurationArgumentValue
                 _ when configType == typeof(LoggerConfiguration) => new Action<LoggerConfiguration>(configReader.Configure),
                 _ when configType == typeof(LoggerSinkConfiguration) => new Action<LoggerSinkConfiguration>(configReader.ApplySinks),
                 _ when configType == typeof(LoggerEnrichmentConfiguration) => new Action<LoggerEnrichmentConfiguration>(configReader.ApplyEnrichment),
-                _ => throw new ArgumentException($"Configuration resolution for Action<{configType.Name}> parameter type at the path {_section.Path} is not implemented.")
+                _ => throw new ArgumentException($"Configuration resolution for `Action<{configType.Name}>` parameter type at the path `{_section.Path}` is not implemented.")
             };
         }
 
@@ -64,9 +65,9 @@ class ObjectArgumentValue : IConfigurationArgumentValue
             var arrayElementType = toType.GetElementType()!;
             var configurationElements = _section.GetChildren().ToArray();
             var array = Array.CreateInstance(arrayElementType, configurationElements.Length);
-            for (int i = 0; i < configurationElements.Length; ++i)
+            for (var i = 0; i < configurationElements.Length; ++i)
             {
-                var argumentValue = ConfigurationReader.GetArgumentValue(configurationElements[i], _configurationAssemblies);
+                var argumentValue = FromSection(configurationElements[i], _configurationAssemblies);
                 var value = argumentValue.ConvertTo(arrayElementType, resolutionContext);
                 array.SetValue(value, i);
             }
@@ -84,29 +85,28 @@ class ObjectArgumentValue : IConfigurationArgumentValue
 
                 foreach (var section in _section.GetChildren())
                 {
-                    var argumentValue = ConfigurationReader.GetArgumentValue(section, _configurationAssemblies);
+                    var argumentValue = FromSection(section, _configurationAssemblies);
                     var key = new StringArgumentValue(section.Key).ConvertTo(keyType, resolutionContext);
                     var value = argumentValue.ConvertTo(valueType, resolutionContext);
-                    addMethod.Invoke(result, new[] { key, value });
+                    addMethod.Invoke(result, [key, value]);
                 }
                 return true;
             }
-            else if (IsConstructableContainer(toType, elementType, out concreteType, out addMethod))
+
+            if (IsConstructableContainer(toType, elementType, out concreteType, out addMethod))
             {
                 result = Activator.CreateInstance(concreteType) ?? throw new InvalidOperationException($"Activator.CreateInstance returned null for {concreteType}");
 
                 foreach (var section in _section.GetChildren())
                 {
-                    var argumentValue = ConfigurationReader.GetArgumentValue(section, _configurationAssemblies);
+                    var argumentValue = FromSection(section, _configurationAssemblies);
                     var value = argumentValue.ConvertTo(elementType, resolutionContext);
                     addMethod.Invoke(result, new[] { value });
                 }
                 return true;
             }
-            else
-            {
-                return false;
-            }
+
+            return false;
         }
     }
 
@@ -153,58 +153,90 @@ class ObjectArgumentValue : IConfigurationArgumentValue
 
     bool TryCallCtor(Type type, Dictionary<string, IConfigurationSection> suppliedArguments, ResolutionContext resolutionContext, [NotNullWhen(true)] out object? value)
     {
-        value = null;
+        var binding = type.GetConstructors()
+            .Select(ci =>
+            {
+                var args = new List<object?>();
+                var matches = 0;
+                var stringMatches = 0;
+                var suppliedNames = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+                foreach (var p in ci.GetParameters())
+                {
+                    if (suppliedArguments.TryGetValue(p.Name ?? "", out var argValue))
+                    {
+                        args.Add(argValue);
+                        matches += 1;
 
-        if (suppliedArguments.Count == 0 &&
-            type.GetConstructor(Type.EmptyTypes) is ConstructorInfo parameterlessCtor)
+                        if (p.ParameterType == typeof(string))
+                        {
+                            stringMatches += 1;
+                        }
+
+                        if (p.Name != null)
+                        {
+                            suppliedNames.Add(p.Name);
+                        }
+                    }
+                    else
+                    {
+                        if (p.HasDefaultValue)
+                        {
+                            args.Add(p.DefaultValue);
+                        }
+                        else
+                        {
+                            return new { ci, args, isCallable = false, matches, stringMatches,
+                                usedArguments = suppliedNames };
+                        }
+                    }
+                }
+
+                return new { ci, args, isCallable = true, matches, stringMatches,
+                    usedArguments = suppliedNames };
+            })
+            .Where(binding => binding.isCallable)
+            .OrderByDescending(binding => binding.matches)
+            .ThenByDescending(binding => binding.stringMatches)
+            .ThenBy(binding => binding.args.Count)
+            .FirstOrDefault();
+
+        if (binding == null)
         {
-            value = parameterlessCtor.Invoke([]);
-            return true;
-        }
-
-        var ctor =
-            (from c in type.GetConstructors()
-             from p in c.GetParameters()
-             let argumentBindResult = suppliedArguments.TryGetValue(p.Name ?? "", out var argValue) switch
-             {
-                 true => new { success = true, hasMatch = true, value = (object?)argValue },
-                 false => p.HasDefaultValue switch
-                 {
-                     true  => new { success = true,  hasMatch = false, value = (object?)p.DefaultValue },
-                     false => new { success = false, hasMatch = false, value = (object?)null },
-                 },
-             }
-             group new { argumentBindResult, p.ParameterType } by c into gr
-             where gr.All(z => z.argumentBindResult.success)
-             let matchedArgs = gr.Where(z => z.argumentBindResult.hasMatch).ToList()
-             orderby matchedArgs.Count descending,
-                     matchedArgs.Count(p => p.ParameterType == typeof(string)) descending
-             select new
-             {
-                 ConstructorInfo = gr.Key,
-                 ArgumentValues = gr.Select(z => new { Value = z.argumentBindResult.value, Type = z.ParameterType })
-                                    .ToList()
-             }).FirstOrDefault();
-
-        if (ctor is null)
-        {
+            value = null;
             return false;
         }
 
-        var ctorArguments = new object?[ctor.ArgumentValues.Count];
-        for (var i = 0; i < ctor.ArgumentValues.Count; i++)
+        for (var i = 0; i < binding.ci.GetParameters().Length; ++i)
         {
-            var argument = ctor.ArgumentValues[i];
-            var valueValue = argument.Value;
-            if (valueValue is IConfigurationSection s)
+            if (binding.args[i] is IConfigurationSection section)
             {
-                var argumentValue = ConfigurationReader.GetArgumentValue(s, _configurationAssemblies);
-                valueValue = argumentValue.ConvertTo(argument.Type, resolutionContext);
+                var argumentValue = FromSection(section, _configurationAssemblies);
+                binding.args[i] = argumentValue.ConvertTo(binding.ci.GetParameters()[i].ParameterType, resolutionContext);
             }
-            ctorArguments[i] = valueValue;
         }
 
-        value = ctor.ConstructorInfo.Invoke(ctorArguments);
+        value = binding.ci.Invoke(binding.args.ToArray());
+
+        foreach (var pi in type.GetProperties(BindingFlags.Instance | BindingFlags.Public))
+        {
+            if (!binding.usedArguments.Contains(pi.Name) &&
+                suppliedArguments.TryGetValue(pi.Name, out var section)
+                && pi.CanWrite &&
+                // This avoids trying to call esoteric indexers and so on.
+                pi.GetSetMethod(false)?.GetParameters().Length == 1)
+            {
+                var propertyValue = FromSection(section, _configurationAssemblies);
+                try
+                {
+                    pi.SetValue(value, propertyValue.ConvertTo(pi.PropertyType, resolutionContext));
+                }
+                catch (Exception ex)
+                {
+                    SelfLog.WriteLine($"Serilog.Settings.Configuration: Property setter on {type} failed: {ex}");
+                }
+            }
+        }
+
         return true;
     }
 
@@ -262,7 +294,7 @@ class ObjectArgumentValue : IConfigurationArgumentValue
         }
         foreach (var method in concreteType.GetMethods())
         {
-            if (!method.IsStatic && method.Name == "Add")
+            if (method is { IsStatic: false, Name: "Add" })
             {
                 var parameters = method.GetParameters();
                 if (parameters.Length == 2 && parameters[0].ParameterType == keyType && parameters[1].ParameterType == valueType)
@@ -301,7 +333,7 @@ class ObjectArgumentValue : IConfigurationArgumentValue
         }
         foreach (var method in concreteType.GetMethods())
         {
-            if (!method.IsStatic && method.Name == "Add")
+            if (method is { IsStatic: false, Name: "Add" })
             {
                 var parameters = method.GetParameters();
                 if (parameters.Length == 1 && parameters[0].ParameterType == elementType)
