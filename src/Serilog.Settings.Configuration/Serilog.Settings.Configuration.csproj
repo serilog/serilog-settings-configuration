@@ -3,7 +3,7 @@
   <PropertyGroup>
     <Description>Microsoft.Extensions.Configuration (appsettings.json) support for Serilog.</Description>
     <!-- This must match the major and minor components of the referenced Microsoft.Extensions.Logging package. -->
-    <VersionPrefix>8.0.3</VersionPrefix>
+    <VersionPrefix>8.0.4</VersionPrefix>
     <Authors>Serilog Contributors</Authors>
     <!-- These must match the Dependencies tab in https://www.nuget.org/packages/microsoft.settings.configuration at
         the target version. -->
@@ -38,6 +38,6 @@
   <ItemGroup>
     <!-- The versions of all references in this group must match the major and minor components of the package version prefix. -->
     <PackageReference Include="Microsoft.Extensions.Configuration.Binder" Version="8.0.0" />
-    <PackageReference Include="Microsoft.Extensions.DependencyModel" Version="8.0.1" />
+    <PackageReference Include="Microsoft.Extensions.DependencyModel" Version="8.0.2" />
   </ItemGroup>
 </Project>
