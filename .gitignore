@@ -201,3 +201,5 @@ FakesAssemblies/
 project.lock.json
 
 artifacts/
+
+.DS_Store
