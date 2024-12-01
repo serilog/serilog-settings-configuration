@@ -52,7 +52,7 @@ try {
 
         Write-Output "build: Testing project in $test"
 
-        & dotnet test -c Release --no-build --no-restore
+        & dotnet test -c Release --no-build --no-restore -p:CollectCoverage=true -p:CoverletOutputFormat=opencover -p:CoverletOutput=.coverage/
         if ($LASTEXITCODE -ne 0) { throw "Testing failed" }
 
         Pop-Location
