@@ -54,7 +54,7 @@ public class StringArgumentValueTests
     // a full-qualified type name should not be considered a static member accessor
     [InlineData("My.NameSpace.Class, MyAssembly, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089",
        null, null)]
-    public void TryParseStaticMemberAccessorReturnsExpectedResults(string input, string? expectedAccessorType, string expectedPropertyName)
+    public void TryParseStaticMemberAccessorReturnsExpectedResults(string? input, string? expectedAccessorType, string? expectedPropertyName)
     {
         var actual = StringArgumentValue.TryParseStaticMemberAccessor(input,
             out var actualAccessorType,
@@ -222,10 +222,12 @@ public class StringArgumentValueTests
         Assert.Contains("\"LevelSwitches\":{\"$mySwitch\":", ex.Message);
     }
 
-    [Fact]
-    public void StringValuesConvertToEnumByName()
+    [Theory]
+    [InlineData("Information")]
+    [InlineData("information")]
+    public void StringValuesConvertToEnumByName(string level)
     {
-        var value = new StringArgumentValue(nameof(LogEventLevel.Information));
+        var value = new StringArgumentValue(level);
 
         var actual = value.ConvertTo(typeof(LogEventLevel), new());
 

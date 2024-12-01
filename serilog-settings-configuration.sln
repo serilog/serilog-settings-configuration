@@ -9,7 +9,6 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "assets", "assets", "{62D0B9
 	ProjectSection(SolutionItems) = preProject
 		.editorconfig = .editorconfig
 		.gitignore = .gitignore
-		appveyor.yml = appveyor.yml
 		Build.ps1 = Build.ps1
 		CHANGES.md = CHANGES.md
 		Directory.Build.props = Directory.Build.props
@@ -18,6 +17,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "assets", "assets", "{62D0B9
 		README.md = README.md
 		serilog-settings-configuration.sln.DotSettings = serilog-settings-configuration.sln.DotSettings
 		global.json = global.json
+		Directory.Version.props = Directory.Version.props
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "test", "test", "{D551DCB0-7771-4D01-BEBD-F7B57D1CF0E3}"
@@ -33,6 +33,13 @@ EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TestDummies", "test\TestDummies\TestDummies.csproj", "{B7CF5068-DD19-4868-A268-5280BDE90361}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TestApp", "test\TestApp\TestApp.csproj", "{1B6E08F3-16C9-4912-BEEE-57DB78C92A12}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".github", ".github", "{21A409AD-2C11-41A8-88C8-360062EA8E48}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "workflows", "workflows", "{391B84C5-A7BA-4BE1-95A0-E459FA61D971}"
+	ProjectSection(SolutionItems) = preProject
+		.github\workflows\ci.yml = .github\workflows\ci.yml
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -68,6 +75,7 @@ Global
 		{A00E5E32-54F9-401A-BBA1-2F6FCB6366CD} = {D24872B9-57F3-42A7-BC8D-F9DA222FCE1B}
 		{B7CF5068-DD19-4868-A268-5280BDE90361} = {D551DCB0-7771-4D01-BEBD-F7B57D1CF0E3}
 		{1B6E08F3-16C9-4912-BEEE-57DB78C92A12} = {D551DCB0-7771-4D01-BEBD-F7B57D1CF0E3}
+		{391B84C5-A7BA-4BE1-95A0-E459FA61D971} = {21A409AD-2C11-41A8-88C8-360062EA8E48}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {485F8843-42D7-4267-B5FB-20FE9181DEE9}

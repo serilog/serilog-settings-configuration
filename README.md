@@ -1,8 +1,8 @@
-# Serilog.Settings.Configuration [![Build status](https://ci.appveyor.com/api/projects/status/r2bgfimd9ocr61px/branch/master?svg=true)](https://ci.appveyor.com/project/serilog/serilog-settings-configuration/branch/master) [![NuGet Version](http://img.shields.io/nuget/v/Serilog.Settings.Configuration.svg?style=flat)](https://www.nuget.org/packages/Serilog.Settings.Configuration/)
+# Serilog.Settings.Configuration [![Build status](https://github.com/serilog/serilog-settings-configuration/actions/workflows/ci.yml/badge.svg?branch=dev)](https://github.com/serilog/serilog-settings-configuration/actions)&nbsp;[![NuGet Version](http://img.shields.io/nuget/v/Serilog.Settings.Configuration.svg?style=flat)](https://www.nuget.org/packages/Serilog.Settings.Configuration/)
 
 A Serilog settings provider that reads from [Microsoft.Extensions.Configuration](https://docs.microsoft.com/en-us/aspnet/core/fundamentals/configuration/?view=aspnetcore-3.1) sources, including .NET Core's `appsettings.json` file.
 
-By default, configuration is read from the `Serilog` section.
+By default, configuration is read from the `Serilog` section that should be at the **top level** of the configuration file.
 
 ```json
 {
@@ -349,7 +349,7 @@ public record MyDto(int Id, int Name);
 
 public class FirstDestructuringPolicy : IDestructuringPolicy
 {
-    public bool TryDestructure(object value, ILogEventPropertyValueFactory propertyValueFactory, 
+    public bool TryDestructure(object value, ILogEventPropertyValueFactory propertyValueFactory,
         [NotNullWhen(true)] out LogEventPropertyValue? result)
     {
         if (value is not MyDto dto)

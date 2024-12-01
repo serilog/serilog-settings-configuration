@@ -3,9 +3,13 @@ using System.Globalization;
 using Microsoft.Extensions.Configuration;
 using Serilog.Configuration;
 using Serilog.Events;
+using Serilog.Formatting;
+using Serilog.Formatting.Display;
 using Serilog.Settings.Configuration.Tests.Support;
 using TestDummies;
 using TestDummies.Console;
+// ReSharper disable NotDisposedResourceIsReturned
+// ReSharper disable UnusedAutoPropertyAccessor.Local
 
 // ReSharper disable UnusedMember.Local
 // ReSharper disable UnusedParameter.Local
@@ -15,20 +19,21 @@ namespace Serilog.Settings.Configuration.Tests;
 
 public class ObjectArgumentValueTests
 {
-    static T ConvertToReturnsType<T>(ObjectArgumentValue value, ResolutionContext? resolutionContext = null)
+    static T AssertConvertsToType<T>(ObjectArgumentValue value, ResolutionContext? resolutionContext = null)
     {
         return Assert.IsType<T>(value.ConvertTo(typeof(T), resolutionContext ?? new()));
     }
 
     [Fact]
-    public void ConvertToIConfigurationSection()
+    public void ConvertsToIConfigurationSection()
     {
         // language=json
-        var section = JsonStringConfigSource.LoadSection("""
+        const string json = """
             {
-                "Serilog": {}
+                "section": {}
             }
-            """, "Serilog");
+            """;
+        var section = JsonStringConfigSource.LoadSection(json, "section");
         var value = new ObjectArgumentValue(section, []);
 
         var actual = value.ConvertTo(typeof(IConfigurationSection), new());
@@ -37,12 +42,12 @@ public class ObjectArgumentValueTests
     }
 
     [Fact]
-    public void ConvertToLoggerConfigurationCallback()
+    public void ConvertsToLoggerConfigurationCallback()
     {
         // language=json
-        var section = JsonStringConfigSource.LoadSection("""
+        const string json = """
             {
-                "Serilog": {
+                "callback": {
                     "WriteTo": [{
                         "Name": "DummyRollingFile",
                         "Args": {"pathFormat" : "C:\\"}
@@ -50,10 +55,11 @@ public class ObjectArgumentValueTests
                     "Enrich": ["WithDummyThreadId"]
                 }
             }
-            """, "Serilog");
+            """;
+        var section = JsonStringConfigSource.LoadSection(json, "callback");
         var value = new ObjectArgumentValue(section, [typeof(DummyRollingFileSink).Assembly]);
 
-        var configure = ConvertToReturnsType<Action<LoggerConfiguration>>(value);
+        var configure = AssertConvertsToType<Action<LoggerConfiguration>>(value);
 
         var config = new LoggerConfiguration();
         configure(config);
@@ -67,10 +73,10 @@ public class ObjectArgumentValueTests
     }
 
     [Fact]
-    public void ConvertToLoggerSinkConfigurationCallback()
+    public void ConvertsToLoggerSinkConfigurationCallback()
     {
         // language=json
-        var section = JsonStringConfigSource.LoadSection("""
+        const string json = """
             {
                 "WriteTo": [{
                     "Name": "Dummy",
@@ -79,10 +85,11 @@ public class ObjectArgumentValueTests
                     }
                 }]
             }
-            """, "WriteTo");
+            """;
+        var section = JsonStringConfigSource.LoadSection(json, "WriteTo");
         var value = new ObjectArgumentValue(section, [typeof(DummyConfigurationSink).Assembly]);
 
-        var configureSinks = ConvertToReturnsType<Action<LoggerSinkConfiguration>>(value);
+        var configureSinks = AssertConvertsToType<Action<LoggerSinkConfiguration>>(value);
 
         var config = new LoggerConfiguration();
         configureSinks(config.WriteTo);
@@ -97,10 +104,10 @@ public class ObjectArgumentValueTests
     }
 
     [Fact]
-    public void ConvertToLoggerEnrichmentConfiguration()
+    public void ConvertsToLoggerEnrichmentConfiguration()
     {
         // language=json
-        var section = JsonStringConfigSource.LoadSection("""
+        const string json = """
             {
                 "Enrich": [{
                     "Name": "AtLevel",
@@ -110,10 +117,11 @@ public class ObjectArgumentValueTests
                     }
                 }]
             }
-            """, "Enrich");
+            """;
+        var section = JsonStringConfigSource.LoadSection(json, "Enrich");
         var value = new ObjectArgumentValue(section, [typeof(LoggerEnrichmentConfiguration).Assembly, typeof(DummyThreadIdEnricher).Assembly]);
 
-        var configureEnrichment = ConvertToReturnsType<Action<LoggerEnrichmentConfiguration>>(value);
+        var configureEnrichment = AssertConvertsToType<Action<LoggerEnrichmentConfiguration>>(value);
 
         var config = new LoggerConfiguration();
         config.WriteTo.DummyRollingFile("");
@@ -131,39 +139,41 @@ public class ObjectArgumentValueTests
     }
 
     [Fact]
-    public void ConvertToConfigurationCallbackThrows()
+    public void ConvertToUnrecognizedConfigurationCallbackThrows()
     {
         // language=json
-        var section = JsonStringConfigSource.LoadSection("""
+        const string json = """
             {
-                "Configure": {}
+                "configure": {}
             }
-            """, "Configure");
+            """;
+        var section = JsonStringConfigSource.LoadSection(json, "configure");
         var value = new ObjectArgumentValue(section, []);
 
         var ex = Assert.Throws<ArgumentException>(() => value.ConvertTo(typeof(Action<ConfigurationReaderOptions>), new()));
 
-        Assert.Equal("Configuration resolution for Action<ConfigurationReaderOptions> parameter type at the path Configure is not implemented.", ex.Message);
+        Assert.Equal("Configuration resolution for `Action<ConfigurationReaderOptions>` parameter type at the path `configure` is not implemented.", ex.Message);
     }
 
     [Fact]
-    public void ConvertToArrayUsingStringArgumentValueForElements()
+    public void ConvertsToEnumArrayUsingStringArgumentValueForElements()
     {
         // language=json
-        var section = JsonStringConfigSource.LoadSection("""
+        const string json = """
             {
                 "Array": [ "Information", 3, null ]
             }
-            """, "Array");
+            """;
+        var section = JsonStringConfigSource.LoadSection(json, "Array");
         var value = new ObjectArgumentValue(section, []);
 
-        var array = ConvertToReturnsType<LogEventLevel?[]>(value);
+        var array = AssertConvertsToType<LogEventLevel?[]>(value);
 
         Assert.Equal([LogEventLevel.Information, LogEventLevel.Warning, null], array);
     }
 
     [Fact]
-    public void ConvertToArrayOfArraysPassingContext()
+    public void ConvertsToArrayOfArraysPassingContext()
     {
         var formatProvider = new NumberFormatInfo
         {
@@ -173,7 +183,7 @@ public class ObjectArgumentValueTests
         };
 
         // language=json
-        var json = """
+        const string json = """
             {
                 "Array": [ [ 1, 2 ], [ 3, 4 ], [ "1.234,56" ] ]
             }
@@ -181,23 +191,24 @@ public class ObjectArgumentValueTests
         var section = JsonStringConfigSource.LoadSection(json, "Array");
         var value = new ObjectArgumentValue(section, []);
 
-        var array = ConvertToReturnsType<decimal[][]>(value, new(readerOptions: new() { FormatProvider = formatProvider }));
+        var array = AssertConvertsToType<decimal[][]>(value, new(readerOptions: new() { FormatProvider = formatProvider }));
 
         Assert.Equal([[1, 2], [3, 4], [1_234.56M]], array);
     }
 
     [Fact]
-    public void ConvertToArrayRecursingObjectArgumentValuePassingAssemblies()
+    public void ConvertsToArrayRecursingObjectArgumentValuePassingAssemblies()
     {
         // language=json
-        var section = JsonStringConfigSource.LoadSection("""
+        const string json = """
             {
                 "Array": [{ "WriteTo": [{ "Name": "DummyConsole", "Args": {} }] }]
             }
-            """, "Array");
+            """;
+        var section = JsonStringConfigSource.LoadSection(json, "Array");
         var value = new ObjectArgumentValue(section, [typeof(DummyConsoleSink).Assembly]);
 
-        var configureCalls = ConvertToReturnsType<Action<LoggerConfiguration>[]>(value);
+        var configureCalls = AssertConvertsToType<Action<LoggerConfiguration>[]>(value);
 
         var configure = Assert.Single(configureCalls);
         var config = new LoggerConfiguration();
@@ -211,20 +222,21 @@ public class ObjectArgumentValueTests
     }
 
     [Fact]
-    public void ConvertToArrayWithDifferentImplementations()
+    public void ConvertsToArrayWithDifferentImplementations()
     {
         // language=json
-        var section = JsonStringConfigSource.LoadSection("""
+        const string json = """
             {
                 "Array": [
                     "Serilog.Settings.Configuration.Tests.Support.ConcreteImpl::Instance, Serilog.Settings.Configuration.Tests",
                     "Serilog.Settings.Configuration.Tests.ObjectArgumentValueTests+PrivateImplWithPublicCtor, Serilog.Settings.Configuration.Tests"
                 ]
             }
-            """, "Array");
+            """;
+        var section = JsonStringConfigSource.LoadSection(json, "Array");
         var value = new ObjectArgumentValue(section, []);
 
-        var array = ConvertToReturnsType<AnAbstractClass[]>(value);
+        var array = AssertConvertsToType<AnAbstractClass[]>(value);
 
         Assert.Collection(array,
             first => Assert.IsType<ConcreteImpl>(first),
@@ -232,23 +244,24 @@ public class ObjectArgumentValueTests
     }
 
     [Fact]
-    public void ConvertToContainerUsingStringArgumentValueForElements()
+    public void ConvertsToContainerUsingStringArgumentValueForElements()
     {
         // language=json
-        var section = JsonStringConfigSource.LoadSection("""
+        const string json = """
             {
                 "List": [ "Information", 3, null ]
             }
-            """, "List");
+            """;
+        var section = JsonStringConfigSource.LoadSection(json, "List");
         var value = new ObjectArgumentValue(section, []);
 
-        var list = ConvertToReturnsType<List<LogEventLevel?>>(value);
+        var list = AssertConvertsToType<List<LogEventLevel?>>(value);
 
         Assert.Equal([LogEventLevel.Information, LogEventLevel.Warning, null], list);
     }
 
     [Fact]
-    public void ConvertToNestedContainerPassingContext()
+    public void ConvertsToNestedContainerPassingContext()
     {
         var formatProvider = new NumberFormatInfo
         {
@@ -258,30 +271,32 @@ public class ObjectArgumentValueTests
         };
 
         // language=json
-        var section = JsonStringConfigSource.LoadSection("""
+        const string json = """
             {
               "List": [ [ 1, 2 ], [ 3, 4 ], [ "1.234,56" ] ]
             }
-            """, "List");
+            """;
+        var section = JsonStringConfigSource.LoadSection(json, "List");
         var value = new ObjectArgumentValue(section, []);
 
-        var array = ConvertToReturnsType<List<List<decimal>>>(value, new(readerOptions: new() { FormatProvider = formatProvider }));
+        var array = AssertConvertsToType<List<List<decimal>>>(value, new(readerOptions: new() { FormatProvider = formatProvider }));
 
         Assert.Equal([[1, 2], [3, 4], [1_234.56M]], array);
     }
 
     [Fact]
-    public void ConvertToContainerRecursingObjectArgumentValuePassingAssemblies()
+    public void ConvertsToContainerRecursingObjectArgumentValuePassingAssemblies()
     {
         // language=json
-        var section = JsonStringConfigSource.LoadSection("""
+        const string json = """
             {
                 "List": [{ "WriteTo": [{ "Name": "DummyConsole", "Args": {} }] }]
             }
-            """, "List");
+            """;
+        var section = JsonStringConfigSource.LoadSection(json, "List");
         var value = new ObjectArgumentValue(section, [typeof(DummyConsoleSink).Assembly]);
 
-        var configureCalls = ConvertToReturnsType<List<Action<LoggerConfiguration>>>(value);
+        var configureCalls = AssertConvertsToType<List<Action<LoggerConfiguration>>>(value);
 
         var configure = Assert.Single(configureCalls);
         var config = new LoggerConfiguration();
@@ -295,20 +310,21 @@ public class ObjectArgumentValueTests
     }
 
     [Fact]
-    public void ConvertToListWithDifferentImplementations()
+    public void ConvertsToListWithDifferentImplementations()
     {
         // language=json
-        var section = JsonStringConfigSource.LoadSection("""
+        const string json = """
             {
                 "List": [
                     "Serilog.Settings.Configuration.Tests.Support.ConcreteImpl::Instance, Serilog.Settings.Configuration.Tests",
                     "Serilog.Settings.Configuration.Tests.ObjectArgumentValueTests+PrivateImplWithPublicCtor, Serilog.Settings.Configuration.Tests"
                 ]
             }
-            """, "List");
+            """;
+        var section = JsonStringConfigSource.LoadSection(json, "List");
         var value = new ObjectArgumentValue(section, []);
 
-        var list = ConvertToReturnsType<List<AnAbstractClass>>(value);
+        var list = AssertConvertsToType<List<AnAbstractClass>>(value);
 
         Assert.Collection(list,
             first => Assert.IsType<ConcreteImpl>(first),
@@ -319,7 +335,7 @@ public class ObjectArgumentValueTests
     {
         public IEnumerator<string> GetEnumerator()
         {
-            return Enumerable.Empty<string>().GetEnumerator();
+            yield break;
         }
 
         IEnumerator IEnumerable.GetEnumerator()
@@ -332,30 +348,35 @@ public class ObjectArgumentValueTests
     public void ConvertToUnsupportedContainerWillBeCreatedButWillRemainEmpty()
     {
         // language=json
-        var section = JsonStringConfigSource.LoadSection("""
+        const string json = """
             {
                 "List": ["a", "b"]
             }
-            """, "List");
+            """;
+        var section = JsonStringConfigSource.LoadSection(json, "List");
         var value = new ObjectArgumentValue(section, []);
 
-        var unsupported = ConvertToReturnsType<UnsupportedContainer>(value);
+        var unsupported = AssertConvertsToType<UnsupportedContainer>(value);
 
         Assert.Empty(unsupported);
     }
 
     [Theory]
+    [InlineData(typeof(IEnumerable<int>))]
     [InlineData(typeof(ICollection<int>))]
+    [InlineData(typeof(IReadOnlyCollection<int>))]
     [InlineData(typeof(IList<int>))]
+    [InlineData(typeof(IReadOnlyList<int>))]
     [InlineData(typeof(List<int>))]
     public void ConvertToContainerUsingList(Type containerType)
     {
         // language=json
-        var section = JsonStringConfigSource.LoadSection("""
+        const string json = """
             {
                 "Container": [ 1, 1 ]
             }
-            """, "Container");
+            """;
+        var section = JsonStringConfigSource.LoadSection(json, "Container");
         var value = new ObjectArgumentValue(section, []);
 
         var container = value.ConvertTo(containerType, new());
@@ -364,38 +385,80 @@ public class ObjectArgumentValueTests
         Assert.Equal([1, 1], list);
     }
 
-    [Fact]
-    public void ConvertToContainerUsingHashSet()
+    [Theory]
+    [InlineData(typeof(ISet<int>))]
+#if NET5_0_OR_GREATER
+    [InlineData(typeof(IReadOnlySet<int>))]
+#endif
+    [InlineData(typeof(HashSet<int>))]
+    public void ConvertsToContainerUsingHashSet(Type containerType)
     {
         // language=json
-        var section = JsonStringConfigSource.LoadSection("""
+        const string json = """
             {
                 "Container": [ 1, 1, 2, 2 ]
             }
-            """, "Container");
+            """;
+        var section = JsonStringConfigSource.LoadSection(json, "Container");
         var value = new ObjectArgumentValue(section, []);
 
-        var container = value.ConvertTo(typeof(HashSet<int>), new());
+        var container = value.ConvertTo(containerType, new());
 
         var set = Assert.IsType<HashSet<int>>(container);
         Assert.Equal([1, 2], set);
     }
 
+    [Fact]
+    public void ConvertsToForcedHashSetImplementationWithCustomComparer()
+    {
+        // In .Net Framework HashSet<T> is not part of mscorlib, but inside System.Core
+        // As a result the type string "System.Collections.Generic.HashSet`1[[System.String]]" will fail
+        // Using AssemblyQualifiedName to automatically switch to the correct type string, depending on framework
+
+        // language=json
+        var json = $$"""
+            {
+                "Container":
+                {
+                    "type": "{{typeof(HashSet<string>).AssemblyQualifiedName}}",
+                    "collection": [
+                        "a",
+                        "A",
+                        "b",
+                        "b"
+                    ],
+                    "comparer": "System.StringComparer::OrdinalIgnoreCase"
+                }
+            }
+            """;
+        var section = JsonStringConfigSource.LoadSection(json, "Container");
+        var value = new ObjectArgumentValue(section, []);
+
+        var container = value.ConvertTo(typeof(IEnumerable<string>), new());
+
+        var set = Assert.IsType<HashSet<string>>(container);
+        Assert.Equal(["a", "b"], set);
+    }
+
     [Theory]
+    [InlineData(typeof(IEnumerable<KeyValuePair<string, int>>))]
+    [InlineData(typeof(ICollection<KeyValuePair<string, int>>))]
+    [InlineData(typeof(IReadOnlyCollection<KeyValuePair<string, int>>))]
     [InlineData(typeof(IDictionary<string, int>))]
     [InlineData(typeof(IReadOnlyDictionary<string, int>))]
     [InlineData(typeof(Dictionary<string, int>))]
-    public void ConvertToContainerUsingDictionary(Type containerType)
+    public void ConvertsToContainerUsingDictionary(Type containerType)
     {
         // language=json
-        var section = JsonStringConfigSource.LoadSection("""
+        const string json = """
             {
                 "Container": {
                     "a": 1,
                     "b": 2
                 }
             }
-        """, "Container");
+            """;
+        var section = JsonStringConfigSource.LoadSection(json, "Container");
         var value = new ObjectArgumentValue(section, []);
 
         var container = value.ConvertTo(containerType, new());
@@ -405,20 +468,24 @@ public class ObjectArgumentValueTests
     }
 
     [Theory]
+    [InlineData(typeof(IEnumerable<KeyValuePair<int, int>>))]
+    [InlineData(typeof(ICollection<KeyValuePair<int, int>>))]
+    [InlineData(typeof(IReadOnlyCollection<KeyValuePair<int, int>>))]
     [InlineData(typeof(IDictionary<int, int>))]
     [InlineData(typeof(IReadOnlyDictionary<int, int>))]
     [InlineData(typeof(Dictionary<int, int>))]
-    public void ConvertToContainerUsingDictionaryUsingStringArgumentValueToConvertKey(Type containerType)
+    public void ConvertsToContainerUsingDictionaryUsingStringArgumentValueToConvertKey(Type containerType)
     {
         // language=json
-        var section = JsonStringConfigSource.LoadSection("""
+        const string json = """
             {
                 "Container": {
                     "1": 2,
                     "3": 4
                 }
             }
-        """, "Container");
+            """;
+        var section = JsonStringConfigSource.LoadSection(json, "Container");
         var value = new ObjectArgumentValue(section, []);
 
         var container = value.ConvertTo(containerType, new());
@@ -500,6 +567,29 @@ public class ObjectArgumentValueTests
         }
     }
 
+    [Fact]
+    public void ConvertsToContainerUsingDictionaryWithoutPublicDefaultConstructor()
+    {
+        // language=json
+        const string json = """
+            {
+                "Container": {
+                    "values":
+                    {
+                        "a": 1,
+                        "b": 2
+                    }
+                }
+            }
+            """;
+        var section = JsonStringConfigSource.LoadSection(json, "Container");
+        var value = new ObjectArgumentValue(section, []);
+
+        var dictionary = AssertConvertsToType<DictionaryWithoutPublicDefaultConstructor>(value);
+
+        Assert.Equal(new Dictionary<string, int> { { "a", 1 }, { "b", 2 } }, dictionary);
+    }
+
     abstract class CustomAbstractDictionary : IDictionary<string, int>
     {
         public abstract int this[string key] { get; set; }
@@ -530,14 +620,15 @@ public class ObjectArgumentValueTests
     public void ConvertToCustomAbstractDictionaryThrows()
     {
         // language=json
-        var section = JsonStringConfigSource.LoadSection("""
+        const string json = """
             {
                 "Container": {
                     "a": 1,
                     "b": 2
                 }
             }
-        """, "Container");
+            """;
+        var section = JsonStringConfigSource.LoadSection(json, "Container");
         var value = new ObjectArgumentValue(section, []);
 
         Assert.Throws<InvalidOperationException>(() => value.ConvertTo(typeof(CustomAbstractDictionary), new()));
@@ -578,17 +669,18 @@ public class ObjectArgumentValueTests
     public void ConvertToCustomReadOnlyDictionaryCreatesEmpty()
     {
         // language=json
-        var section = JsonStringConfigSource.LoadSection("""
+        const string json = """
             {
                 "Container": {
                     "a": 1,
                     "b": 2
                 }
             }
-        """, "Container");
+            """;
+        var section = JsonStringConfigSource.LoadSection(json, "Container");
         var value = new ObjectArgumentValue(section, []);
 
-        ConvertToReturnsType<CustomReadOnlyDictionary>(value);
+        AssertConvertsToType<CustomReadOnlyDictionary>(value);
     }
 
     class PrivateImplWithPublicCtor : AnAbstractClass, IAmAnInterface;
@@ -598,14 +690,15 @@ public class ObjectArgumentValueTests
     [InlineData(typeof(IAmAnInterface), typeof(PrivateImplWithPublicCtor))]
     [InlineData(typeof(AnAbstractClass), typeof(PrivateImplWithPublicCtor))]
     [InlineData(typeof(AConcreteClass), typeof(ConcreteImplOfConcreteClass))]
-    public void ConvertToExplicitType(Type targetType, Type expectedType)
+    public void ConvertsToExplicitType(Type targetType, Type expectedType)
     {
         // language=json
-        var section = JsonStringConfigSource.LoadSection($$"""
+        var json = $$"""
             {
                 "Ctor": { "type": "{{expectedType.AssemblyQualifiedName}}"}
             }
-            """, "Ctor");
+            """;
+        var section = JsonStringConfigSource.LoadSection(json, "Ctor");
         var value = new ObjectArgumentValue(section, []);
 
         var result = value.ConvertTo(targetType, new());
@@ -621,17 +714,18 @@ public class ObjectArgumentValueTests
     }
 
     [Fact]
-    public void ConvertToExplicitTypeUsingTypeAsConstructorArgument()
+    public void ConvertsToExplicitTypeUsingTypeAsConstructorArgument()
     {
         // language=json
-        var section = JsonStringConfigSource.LoadSection("""
+        const string json = """
             {
                 "Ctor": {
                     "$type": "Serilog.Settings.Configuration.Tests.ObjectArgumentValueTests+WithTypeArgumentClassCtor, Serilog.Settings.Configuration.Tests",
                     "type": "Serilog.Settings.Configuration.Tests.ObjectArgumentValueTests+PrivateImplWithPublicCtor, Serilog.Settings.Configuration.Tests"
                 }
             }
-            """, "Ctor");
+            """;
+        var section = JsonStringConfigSource.LoadSection(json, "Ctor");
         var value = new ObjectArgumentValue(section, []);
 
         var result = value.ConvertTo(typeof(AnAbstractClass), new());
@@ -666,20 +760,20 @@ public class ObjectArgumentValueTests
     [Theory]
     [InlineData("", null)]
     [InlineData(",\"d\": \"DValue\"", "DValue")]
-    public void ConvertToExplicitTypePickingConstructorOverloadWithMostMatchingArguments(string dJson, string? d)
+    public void ConvertsToExplicitTypePickingConstructorOverloadWithMostMatchingArguments(string dJson, string? d)
     {
-        // language=json
-        var section = JsonStringConfigSource.LoadSection($$"""
+        var json = $$"""
             {
                 "Ctor": {
                     "type": "Serilog.Settings.Configuration.Tests.ObjectArgumentValueTests+WithOverloads, Serilog.Settings.Configuration.Tests",
                     "a": 1,
                     "b": "23:59:59",
-                    "c": "http://dot.com/"
+                    "c": "https://example.com/"
                     {{dJson}}
                 }
             }
-            """, "Ctor");
+            """;
+        var section = JsonStringConfigSource.LoadSection(json, "Ctor");
         var value = new ObjectArgumentValue(section, []);
 
         var result = value.ConvertTo(typeof(IAmAnInterface), new());
@@ -687,24 +781,25 @@ public class ObjectArgumentValueTests
         var actual = Assert.IsType<WithOverloads>(result);
         Assert.Equal(1, actual.A);
         Assert.Equal(new TimeSpan(23, 59, 59), actual.B);
-        Assert.Equal(new Uri("http://dot.com/"), actual.C);
+        Assert.Equal(new Uri("https://example.com/"), actual.C);
         Assert.Equal(d, actual.D);
     }
 
     [Fact]
-    public void ConvertToExplicitTypeMatchingArgumentsCaseInsensitively()
+    public void ConvertsToExplicitTypeMatchingArgumentsCaseInsensitively()
     {
         // language=json
-        var section = JsonStringConfigSource.LoadSection("""
+        const string json = """
             {
                 "Ctor": {
                     "type": "Serilog.Settings.Configuration.Tests.ObjectArgumentValueTests+WithOverloads, Serilog.Settings.Configuration.Tests",
                     "A": 1,
                     "B": "23:59:59",
-                    "C": "http://dot.com/"
+                    "C": "https://example.com/"
                 }
             }
-            """, "Ctor");
+            """;
+        var section = JsonStringConfigSource.LoadSection(json, "Ctor");
         var value = new ObjectArgumentValue(section, []);
 
         var result = value.ConvertTo(typeof(IAmAnInterface), new());
@@ -712,7 +807,7 @@ public class ObjectArgumentValueTests
         var actual = Assert.IsType<WithOverloads>(result);
         Assert.Equal(1, actual.A);
         Assert.Equal(new TimeSpan(23, 59, 59), actual.B);
-        Assert.Equal(new Uri("http://dot.com/"), actual.C);
+        Assert.Equal(new Uri("https://example.com/"), actual.C);
     }
 
     class WithSimilarOverloads : IAmAnInterface
@@ -731,7 +826,7 @@ public class ObjectArgumentValueTests
     public void ConvertToExplicitTypePickingConstructorOverloadWithMostStrings()
     {
         // language=json
-        var section = JsonStringConfigSource.LoadSection("""
+        const string json = """
             {
                 "Ctor": {
                     "type": "Serilog.Settings.Configuration.Tests.ObjectArgumentValueTests+WithSimilarOverloads, Serilog.Settings.Configuration.Tests",
@@ -740,7 +835,8 @@ public class ObjectArgumentValueTests
                     "c": 3
                 }
             }
-            """, "Ctor");
+            """;
+        var section = JsonStringConfigSource.LoadSection(json, "Ctor");
         var value = new ObjectArgumentValue(section, []);
 
         var result = value.ConvertTo(typeof(IAmAnInterface), new());
@@ -767,14 +863,15 @@ public class ObjectArgumentValueTests
     public void ConvertToExplicitTypePickingFirstMatchWhenOtherwiseAmbiguous()
     {
         // language=json
-        var section = JsonStringConfigSource.LoadSection("""
+        const string json = """
             {
                 "Ctor": {
                     "type": "Serilog.Settings.Configuration.Tests.ObjectArgumentValueTests+OnlyDifferentTypeOverloads, Serilog.Settings.Configuration.Tests",
                     "value": 123
                 }
             }
-            """, "Ctor");
+            """;
+        var section = JsonStringConfigSource.LoadSection(json, "Ctor");
         var value = new ObjectArgumentValue(section, []);
 
         var result = value.ConvertTo(typeof(IAmAnInterface), new());
@@ -803,18 +900,18 @@ public class ObjectArgumentValueTests
     [InlineData(",\"b\": 5", 5, 3)]
     [InlineData(",\"c\": 6", 2, 6)]
     [InlineData(",\"b\": 7, \"c\": 8", 7, 8)]
-    public void ConvertToExplicitTypeFillingInDefaultsInConstructor(string json, int b, int c)
+    public void ConvertsToExplicitTypeFillingInDefaultsInConstructor(string jsonPart, int b, int c)
     {
-        // language=json
-        var section = JsonStringConfigSource.LoadSection($$"""
+        var json = $$"""
             {
                 "Ctor": {
                     "type": "Serilog.Settings.Configuration.Tests.ObjectArgumentValueTests+WithDefaults, Serilog.Settings.Configuration.Tests",
                     "a": 1
-                    {{json}}
+                    {{jsonPart}}
                 }
             }
-            """, "Ctor");
+            """;
+        var section = JsonStringConfigSource.LoadSection(json, "Ctor");
         var value = new ObjectArgumentValue(section, []);
 
         var result = value.ConvertTo(typeof(IAmAnInterface), new());
@@ -833,10 +930,202 @@ public class ObjectArgumentValueTests
     }
 
     [Fact]
-    public void ConvertToExplicitTypeWithExplicitTypeConstructorArgument()
+    public void ConvertsToExplicitTypeWithParamsConstructorArgument()
     {
         // language=json
-        var section = JsonStringConfigSource.LoadSection("""
+        const string json = """
+            {
+                "Ctor": {
+                    "type": "Serilog.Settings.Configuration.Tests.ObjectArgumentValueTests+WithParamsArray, Serilog.Settings.Configuration.Tests",
+                    "values": [1, 2, 3]
+                }
+            }
+            """;
+        var section = JsonStringConfigSource.LoadSection(json, "Ctor");
+        var value = new ObjectArgumentValue(section, []);
+
+        var result = value.ConvertTo(typeof(IAmAnInterface), new());
+
+        var actual = Assert.IsType<WithParamsArray>(result);
+        Assert.Equal([1, 2, 3], actual.Values);
+    }
+
+    [Theory]
+    [InlineData(typeof(IEnumerable<int>))]
+    [InlineData(typeof(ICollection<int>))]
+    [InlineData(typeof(IReadOnlyCollection<int>))]
+    [InlineData(typeof(IList<int>))]
+    [InlineData(typeof(IReadOnlyList<int>))]
+    [InlineData(typeof(List<int>))]
+    public void ConvertsToExplicitTypeWithContainerConstructorArgument(Type containerType)
+    {
+        var expectedType = typeof(GenericClass<>).MakeGenericType(containerType);
+        var valueProp = expectedType.GetProperty(nameof(GenericClass<object>.Value));
+
+        // language=json
+        var json = $$"""
+            {
+                "Ctor": {
+                    "type": "Serilog.Settings.Configuration.Tests.Support.GenericClass`1[[{{containerType.AssemblyQualifiedName}}]], Serilog.Settings.Configuration.Tests",
+                    "value": [1, 2, 3]
+                }
+            }
+            """;
+        var section = JsonStringConfigSource.LoadSection(json, "Ctor");
+        var value = new ObjectArgumentValue(section, []);
+
+        var result = value.ConvertTo(typeof(IAmAnInterface), new());
+
+        Assert.IsType(expectedType, result);
+        var list = Assert.IsType<List<int>>(valueProp?.GetValue(result));
+        Assert.Equal([1, 2, 3], list);
+    }
+
+    [Theory]
+    [InlineData(typeof(ISet<int>))]
+#if NET5_0_OR_GREATER
+    [InlineData(typeof(IReadOnlySet<int>))]
+#endif
+    [InlineData(typeof(HashSet<int>))]
+    public void ConvertToExplicitTypeWithSetConstructorArgument(Type containerType)
+    {
+        var expectedType = typeof(GenericClass<>).MakeGenericType(containerType);
+        var valueProp = expectedType.GetProperty(nameof(GenericClass<object>.Value));
+
+        // language=json
+        var json = $$"""
+            {
+                "Ctor": {
+                    "type": "Serilog.Settings.Configuration.Tests.Support.GenericClass`1[[{{containerType.AssemblyQualifiedName}}]], Serilog.Settings.Configuration.Tests",
+                    "value": [ 1, 1, 2, 2 ]
+                }
+            }
+            """;
+        var section = JsonStringConfigSource.LoadSection(json, "Ctor");
+        var value = new ObjectArgumentValue(section, []);
+
+        var result = value.ConvertTo(typeof(IAmAnInterface), new());
+
+        Assert.IsType(expectedType, result);
+        var set = Assert.IsType<HashSet<int>>(valueProp?.GetValue(result));
+        Assert.Equal([1, 2], set);
+    }
+
+
+    [Theory]
+    [InlineData(typeof(IEnumerable<KeyValuePair<string, int>>))]
+    [InlineData(typeof(ICollection<KeyValuePair<string, int>>))]
+    [InlineData(typeof(IReadOnlyCollection<KeyValuePair<string, int>>))]
+    [InlineData(typeof(IDictionary<string, int>))]
+    [InlineData(typeof(IReadOnlyDictionary<string, int>))]
+    [InlineData(typeof(Dictionary<string, int>))]
+    public void ConvertsToExplicitTypeWithDictionaryConstructorArgument(Type containerType)
+    {
+        var expectedType = typeof(GenericClass<>).MakeGenericType(containerType);
+        var valueProp = expectedType.GetProperty(nameof(GenericClass<object>.Value));
+
+        // language=json
+        var json = $$"""
+            {
+                "Ctor": {
+                    "type": "Serilog.Settings.Configuration.Tests.Support.GenericClass`1[[{{containerType.AssemblyQualifiedName}}]], Serilog.Settings.Configuration.Tests",
+                    "value": {
+                        "a": 1,
+                        "b": 2
+                    }
+                }
+            }
+            """;
+        var section = JsonStringConfigSource.LoadSection(json, "Ctor");
+        var value = new ObjectArgumentValue(section, []);
+
+        var result = value.ConvertTo(typeof(IAmAnInterface), new());
+
+        Assert.IsType(expectedType, result);
+        var dictionary = Assert.IsType<Dictionary<string, int>>(valueProp?.GetValue(result));
+        Assert.Equal(new Dictionary<string, int> { { "a", 1 }, { "b", 2 } }, dictionary);
+    }
+
+    [Fact]
+    public void ConvertsToExplicitTypeWithStructConstructorArgument()
+    {
+        // language=json
+        const string json = """
+            {
+                "Ctor": {
+                    "type": "Serilog.Settings.Configuration.Tests.Support.GenericClass`1[[Serilog.Settings.Configuration.Tests.ObjectArgumentValueTests+PlainStruct, Serilog.Settings.Configuration.Tests]], Serilog.Settings.Configuration.Tests",
+                    "value": { "A" : "1" }
+                }
+            }
+            """;
+        var section = JsonStringConfigSource.LoadSection(json, "Ctor");
+        var value = new ObjectArgumentValue(section, []);
+
+        var result = value.ConvertTo(typeof(IAmAnInterface), new());
+
+        var actual = Assert.IsType<GenericClass<PlainStruct>>(result);
+        Assert.Equal("1", actual.Value.A);
+        Assert.Null(actual.Value.B);
+    }
+
+    [Fact]
+    public void ConvertsToExplicitTypeWithClassConstructorArgument()
+    {
+        // language=json
+        const string json = """
+            {
+                "Ctor": {
+                    "type": "Serilog.Settings.Configuration.Tests.Support.GenericClass`1[[TestDummies.DummyLoggerConfigurationExtensions+Binding, TestDummies]], Serilog.Settings.Configuration.Tests",
+                    "value": { "foo" : "bar" }
+                }
+            }
+            """;
+        var section = JsonStringConfigSource.LoadSection(json, "Ctor");
+        var value = new ObjectArgumentValue(section, []);
+
+        var result = value.ConvertTo(typeof(IAmAnInterface), new());
+
+        var actual = Assert.IsType<GenericClass<TestDummies.DummyLoggerConfigurationExtensions.Binding>>(result);
+        Assert.Equal("bar", actual.Value.Foo);
+        Assert.Null(actual.Value.Abc);
+    }
+
+    readonly struct Struct : IAmAnInterface
+    {
+        public string String { get; }
+        public Struct(string str) { String = str; }
+    }
+
+    [Fact]
+    public void ConvertsToExplicitTypeWithExplicitStructConstructorArgument()
+    {
+        // language=json
+        const string json = """
+            {
+                "Ctor": {
+                    "type": "Serilog.Settings.Configuration.Tests.Support.GenericClass`1[[Serilog.Settings.Configuration.Tests.Support.IAmAnInterface, Serilog.Settings.Configuration.Tests]], Serilog.Settings.Configuration.Tests",
+                    "value": {
+                        "type": "Serilog.Settings.Configuration.Tests.ObjectArgumentValueTests+Struct, Serilog.Settings.Configuration.Tests",
+                        "str" : "abc"
+                    }
+                }
+            }
+            """;
+        var section = JsonStringConfigSource.LoadSection(json, "Ctor");
+        var value = new ObjectArgumentValue(section, []);
+
+        var result = value.ConvertTo(typeof(IAmAnInterface), new());
+
+        var actual = Assert.IsType<GenericClass<IAmAnInterface>>(result);
+        var structValue = Assert.IsType<Struct>(actual.Value);
+        Assert.Equal("abc", structValue.String);
+    }
+
+    [Fact]
+    public void ConvertsToExplicitTypeWithExplicitTypeConstructorArgument()
+    {
+        // language=json
+        const string json = """
             {
                 "Ctor": {
                     "type": "Serilog.Settings.Configuration.Tests.Support.GenericClass`1[[Serilog.Settings.Configuration.Tests.Support.IAmAnInterface, Serilog.Settings.Configuration.Tests]], Serilog.Settings.Configuration.Tests",
@@ -845,7 +1134,8 @@ public class ObjectArgumentValueTests
                     }
                 }
             }
-            """, "Ctor");
+            """;
+        var section = JsonStringConfigSource.LoadSection(json, "Ctor");
         var value = new ObjectArgumentValue(section, []);
 
         var result = value.ConvertTo(typeof(IAmAnInterface), new());
@@ -869,14 +1159,15 @@ public class ObjectArgumentValueTests
     [InlineData(typeof(ulong), 8UL, "8")]
     [InlineData(typeof(float), -9.1F, "-9.1")]
     [InlineData(typeof(double), 10.2D, "10.2")]
-    public void ConvertToPrimitives(Type type, object expected, string sectionValue)
+    public void ConvertsToPrimitives(Type type, object expected, string sectionValue)
     {
         // language=json
-        var section = JsonStringConfigSource.LoadSection($$"""
+        var json = $$"""
             {
-                "Serilog": {{sectionValue}}
+                "value": {{sectionValue}}
             }
-            """, "Serilog");
+            """;
+        var section = JsonStringConfigSource.LoadSection(json, "value");
         var value = new ObjectArgumentValue(section, []);
 
         var actual = value.ConvertTo(type, new());
@@ -887,14 +1178,15 @@ public class ObjectArgumentValueTests
     // While ObjectArgumentValue supports converting to a nullable primitive, this is normally handled by StringArgumentValue
     // ObjectArgumentValue will not honor ConfigurationReaderOptions.FormatProvider, it will use InvariantCulture
     [Fact]
-    public void ConvertToNullablePrimitive()
+    public void ConvertsToNullablePrimitive()
     {
         // language=json
-        var section = JsonStringConfigSource.LoadSection("""
+        const string json = """
             {
-                "Serilog": 123
+                "value": 123
             }
-            """, "Serilog");
+            """;
+        var section = JsonStringConfigSource.LoadSection(json, "value");
         var value = new ObjectArgumentValue(section, []);
 
         var actual = value.ConvertTo(typeof(int?), new());
@@ -904,14 +1196,15 @@ public class ObjectArgumentValueTests
 
     // While ObjectArgumentValue supports converting to a nullable primitive, this is normally handled by StringArgumentValue
     [Fact]
-    public void ConvertToNullWhenEmptyNullable()
+    public void ConvertsToNullWhenEmptyNullable()
     {
         // language=json
-        var section = JsonStringConfigSource.LoadSection("""
+        const string json = """
             {
-                "Serilog": null
+                "value": null
             }
-            """, "Serilog");
+            """;
+        var section = JsonStringConfigSource.LoadSection(json, "value");
         var value = new ObjectArgumentValue(section, []);
 
         var actual = value.ConvertTo(typeof(int?), new());
@@ -920,14 +1213,15 @@ public class ObjectArgumentValueTests
     }
 
     [Fact]
-    public void ConvertToPlainClass()
+    public void ConvertsToPlainClass()
     {
         // language=json
-        var section = JsonStringConfigSource.LoadSection("""
+        const string json = """
             {
-                "Serilog": { "foo" : "bar" }
+                "value": { "foo" : "bar" }
             }
-            """, "Serilog");
+            """;
+        var section = JsonStringConfigSource.LoadSection(json, "value");
         var value = new ObjectArgumentValue(section, []);
 
         var actual = value.ConvertTo(typeof(TestDummies.DummyLoggerConfigurationExtensions.Binding), new());
@@ -944,14 +1238,15 @@ public class ObjectArgumentValueTests
     }
 
     [Fact]
-    public void ConvertToPlainStruct()
+    public void ConvertsToPlainStruct()
     {
         // language=json
-        var section = JsonStringConfigSource.LoadSection("""
+        const string json = """
             {
-                "Serilog": { "A" : "1" }
+                "value": { "A" : "1" }
             }
-            """, "Serilog");
+            """;
+        var section = JsonStringConfigSource.LoadSection(json, "value");
         var value = new ObjectArgumentValue(section, []);
 
         var actual = value.ConvertTo(typeof(PlainStruct), new());
@@ -965,18 +1260,54 @@ public class ObjectArgumentValueTests
     // This is because IConfigurationSection will resolve null to an empty string
     // This behavior is under review, see https://github.com/dotnet/runtime/issues/36510
     [Fact]
-    public void ConvertToNullWhenStructIsNull()
+    public void ConvertsToNullWhenStructIsNull()
     {
         // language=json
-        var section = JsonStringConfigSource.LoadSection("""
+        const string json = """
             {
-               "Serilog": null
+               "value": null
             }
-            """, "Serilog");
+            """;
+        var section = JsonStringConfigSource.LoadSection(json, "value");
         var value = new ObjectArgumentValue(section, []);
 
         var actual = value.ConvertTo(typeof(PlainStruct), new());
 
         Assert.Null(actual);
+    }
+
+    // This is intended to mirror Serilog.Sinks.Email's options type.
+    // https://github.com/serilog/serilog-settings-configuration/issues/417
+    public class NestedComplexType
+    {
+        public string? Host { get; set; }
+        public ITextFormatter? Subject { get; set; }
+    }
+
+    [Fact]
+    public void ConstructsNestedComplexObjects()
+    {
+        // language=json
+        const string json = """
+            {
+                "options": {
+                  "subject": {
+                    "type": "Serilog.Formatting.Display.MessageTemplateTextFormatter, Serilog",
+                    "outputTemplate": "Serilog test"
+                  },
+                  "host": "localhost"
+                }
+            }
+            """;
+
+        var section = JsonStringConfigSource.LoadSection(json, "options");
+        var value = new ObjectArgumentValue(section, []);
+
+        var actual = AssertConvertsToType<NestedComplexType>(value);
+        Assert.Equal("localhost", actual.Host);
+        var formatter = Assert.IsType<MessageTemplateTextFormatter>(actual.Subject);
+        var sw = new StringWriter();
+        formatter.Format(Some.LogEvent(), sw);
+        Assert.Equal("Serilog test", sw.ToString());
     }
 }

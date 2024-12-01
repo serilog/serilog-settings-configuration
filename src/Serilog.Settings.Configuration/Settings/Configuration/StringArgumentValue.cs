@@ -6,7 +6,7 @@ using Serilog.Core;
 
 namespace Serilog.Settings.Configuration;
 
-class StringArgumentValue : IConfigurationArgumentValue
+class StringArgumentValue : ConfigurationArgumentValue
 {
     readonly string _providedValue;
 
@@ -24,7 +24,7 @@ class StringArgumentValue : IConfigurationArgumentValue
             { typeof(Type), s => Type.GetType(s, throwOnError:true)! },
         };
 
-    public object? ConvertTo(Type toType, ResolutionContext resolutionContext)
+    public override object? ConvertTo(Type toType, ResolutionContext resolutionContext)
     {
         var argumentValue = Environment.ExpandEnvironmentVariables(_providedValue);
 
@@ -51,7 +51,7 @@ class StringArgumentValue : IConfigurationArgumentValue
         }
 
         if (toTypeInfo.IsEnum)
-            return Enum.Parse(toType, argumentValue);
+            return Enum.Parse(toType, argumentValue, ignoreCase: true);
 
         var convertor = ExtendedTypeConversions
             .Where(t => t.Key.GetTypeInfo().IsAssignableFrom(toTypeInfo))
