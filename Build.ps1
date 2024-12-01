@@ -7,7 +7,7 @@ Write-Output "build: Build started"
 
 Push-Location $PSScriptRoot
 try {
-    if(Test-Path .\artifacts) {
+    if (Test-Path .\artifacts) {
         Write-Output "build: Cleaning ./artifacts"
         Remove-Item ./artifacts -Force -Recurse
     }
@@ -28,8 +28,9 @@ try {
     Write-Output "build: Package version suffix is $suffix"
     Write-Output "build: Build version suffix is $buildSuffix"
 
+    & dotnet format --no-restore --verify-no-changes --severity error
     & dotnet build -c Release --version-suffix=$buildSuffix /p:ContinuousIntegrationBuild=true
-    if($LASTEXITCODE -ne 0) { throw "Build failed" }
+    if ($LASTEXITCODE -ne 0) { throw "Build failed" }
 
     foreach ($src in Get-ChildItem src/*) {
         Push-Location $src
@@ -41,7 +42,7 @@ try {
         } else {
             & dotnet pack -c Release --no-build --no-restore  -o ../../artifacts
         }
-        if($LASTEXITCODE -ne 0) { throw "Packaging failed" }
+        if ($LASTEXITCODE -ne 0) { throw "Packaging failed" }
 
         Pop-Location
     }
@@ -52,7 +53,7 @@ try {
         Write-Output "build: Testing project in $test"
 
         & dotnet test -c Release --no-build --no-restore
-        if($LASTEXITCODE -ne 0) { throw "Testing failed" }
+        if ($LASTEXITCODE -ne 0) { throw "Testing failed" }
 
         Pop-Location
     }
@@ -65,7 +66,7 @@ try {
 
         foreach ($nupkg in Get-ChildItem artifacts/*.nupkg) {
             & dotnet nuget push -k $env:NUGET_API_KEY -s https://api.nuget.org/v3/index.json "$nupkg"
-            if($LASTEXITCODE -ne 0) { throw "Publishing failed" }
+            if ($LASTEXITCODE -ne 0) { throw "Publishing failed" }
         }
 
         if (!($suffix)) {
