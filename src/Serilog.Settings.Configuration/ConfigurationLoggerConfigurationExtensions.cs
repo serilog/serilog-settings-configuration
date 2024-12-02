@@ -218,8 +218,8 @@ public static class ConfigurationLoggerConfigurationExtensions
     {
         var configurationReader = readerOptions switch
         {
-            { ConfigurationAssemblySource: {} } => GetConfigurationReader(configuration, readerOptions, readerOptions.ConfigurationAssemblySource.Value),
-            { Assemblies: {} } => GetConfigurationReader(configuration, readerOptions, readerOptions.Assemblies),
+            { ConfigurationAssemblySource: { } } => GetConfigurationReader(configuration, readerOptions, readerOptions.ConfigurationAssemblySource.Value),
+            { Assemblies: { } } => GetConfigurationReader(configuration, readerOptions, readerOptions.Assemblies),
             _ => GetConfigurationReader(configuration, readerOptions ?? new ConfigurationReaderOptions(), readerOptions?.DependencyContext),
         };
         return settingConfiguration.Settings(configurationReader);

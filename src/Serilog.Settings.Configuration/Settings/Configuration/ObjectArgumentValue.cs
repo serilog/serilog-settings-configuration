@@ -29,7 +29,7 @@ class ObjectArgumentValue : ConfigurationArgumentValue
         // process a nested configuration to populate an Action<> logger/sink config parameter?
         var typeInfo = toType.GetTypeInfo();
         if (typeInfo.IsGenericType &&
-            typeInfo.GetGenericTypeDefinition() is {} genericType && genericType == typeof(Action<>))
+            typeInfo.GetGenericTypeDefinition() is { } genericType && genericType == typeof(Action<>))
         {
             var configType = typeInfo.GenericTypeArguments[0];
             IConfigurationReader configReader = new ConfigurationReader(_section, _configurationAssemblies, resolutionContext);
@@ -185,14 +185,28 @@ class ObjectArgumentValue : ConfigurationArgumentValue
                         }
                         else
                         {
-                            return new { ci, args, isCallable = false, matches, stringMatches,
-                                usedArguments = suppliedNames };
+                            return new
+                            {
+                                ci,
+                                args,
+                                isCallable = false,
+                                matches,
+                                stringMatches,
+                                usedArguments = suppliedNames
+                            };
                         }
                     }
                 }
 
-                return new { ci, args, isCallable = true, matches, stringMatches,
-                    usedArguments = suppliedNames };
+                return new
+                {
+                    ci,
+                    args,
+                    isCallable = true,
+                    matches,
+                    stringMatches,
+                    usedArguments = suppliedNames
+                };
             })
             .Where(binding => binding.isCallable)
             .OrderByDescending(binding => binding.matches)

@@ -1,4 +1,4 @@
-﻿#if NET8_0
+﻿#if NET9_0
 
 using PublicApiGenerator;
 using Shouldly;
@@ -15,7 +15,7 @@ public class ApiApprovalTests
             new()
             {
                 IncludeAssemblyAttributes = false,
-                ExcludeAttributes = ["System.Diagnostics.DebuggerDisplayAttribute"],
+                ExcludeAttributes = [ "System.Diagnostics.DebuggerDisplayAttribute" ],
             });
 
         publicApi.ShouldMatchApproved(options => options.WithFilenameGenerator((_, _, fileType, fileExtension) => $"{assembly.GetName().Name!}.{fileType}.{fileExtension}"));
