@@ -70,7 +70,7 @@ sealed class ResolutionContext
         _declaredFilterSwitches[referenceName] = filterSwitch;
     }
 
-    string ToSwitchReference(string switchName)
+    static string ToSwitchReference(string switchName)
     {
         return switchName.StartsWith("$") ? switchName : $"${switchName}";
     }

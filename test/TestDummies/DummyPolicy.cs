@@ -34,7 +34,7 @@ public class DummyPolicy : IDestructuringPolicy
 
 public class CustomCollection<T> : IEnumerable<T>
 {
-    private readonly List<T> inner = new List<T>();
+    private readonly List<T> inner = [];
 
     public void Add(T item) => inner.Add(item);
 
