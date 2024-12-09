@@ -1,43 +1,31 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <Description>Microsoft.Extensions.Configuration (appsettings.json) support for Serilog.</Description>
-    <!-- This must match the major and minor components of the referenced Microsoft.Extensions.Logging package. -->
-    <VersionPrefix>8.0.4</VersionPrefix>
     <Authors>Serilog Contributors</Authors>
-    <!-- These must match the Dependencies tab in https://www.nuget.org/packages/microsoft.settings.configuration at
+    <!-- These must match the Dependencies tab in https://www.nuget.org/packages/microsoft.extensions.configuration at
         the target version. -->
-    <TargetFrameworks>net462;netstandard2.0;net6.0;net7.0;net8.0</TargetFrameworks>
-    <GenerateDocumentationFile>true</GenerateDocumentationFile>
-    <AssemblyName>Serilog.Settings.Configuration</AssemblyName>
-    <PackageTags>serilog;json</PackageTags>
+    <TargetFrameworks>net462;netstandard2.0;net8.0;net9.0</TargetFrameworks>
+    <PackageTags>serilog;json;appsettings</PackageTags>
     <PackageIcon>icon.png</PackageIcon>
     <PackageReadmeFile>README.md</PackageReadmeFile>
     <PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
     <PackageProjectUrl>https://github.com/serilog/serilog-settings-configuration</PackageProjectUrl>
     <PackageReleaseNotes>$(PackageProjectUrl)/releases</PackageReleaseNotes>
     <RootNamespace>Serilog</RootNamespace>
-    <PublishRepositoryUrl>true</PublishRepositoryUrl>
-    <EmbedUntrackedSources>true</EmbedUntrackedSources>
-    <IncludeSymbols>true</IncludeSymbols>
-    <SymbolPackageFormat>snupkg</SymbolPackageFormat>
   </PropertyGroup>
 
   <ItemGroup>
-    <Using Remove="System.Net.Http" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.1.1" PrivateAssets="All" />
     <PackageReference Include="PolySharp" Version="1.13.2" PrivateAssets="All" />
-    <PackageReference Include="Serilog" Version="3.1.1" />
+    <PackageReference Include="Serilog" Version="4.2.0-*" />
     <None Include="..\..\assets\icon.png" Pack="true" PackagePath="" Visible="false" />
-    <None Include="..\..\README.md" Pack="true" PackagePath="" />
+    <None Include="..\..\README.md" Pack="true" PackagePath="" Visible="false" />
+    <InternalsVisibleTo Include="Serilog.Settings.Configuration.Tests, PublicKey=0024000004800000940000000602000000240000525341310004000001000100fb8d13fd344a1c6fe0fe83ef33c1080bf30690765bc6eb0df26ebfdf8f21670c64265b30db09f73a0dea5b3db4c9d18dbf6d5a25af5ce9016f281014d79dc3b4201ac646c451830fc7e61a2dfd633d34c39f87b81894191652df5ac63cc40c77f3542f702bda692e6e8a9158353df189007a49da0f3cfd55eb250066b19485ec" />
   </ItemGroup>
 
   <ItemGroup>
     <!-- The versions of all references in this group must match the major and minor components of the package version prefix. -->
-    <PackageReference Include="Microsoft.Extensions.Configuration.Binder" Version="8.0.0" />
-    <PackageReference Include="Microsoft.Extensions.DependencyModel" Version="8.0.2" />
+    <PackageReference Include="Microsoft.Extensions.Configuration.Binder" Version="9.0.0" />
+    <PackageReference Include="Microsoft.Extensions.DependencyModel" Version="9.0.0" />
   </ItemGroup>
 </Project>

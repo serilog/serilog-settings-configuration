@@ -17,7 +17,7 @@ public class DummyConsoleSink : ILogEventSink
     [ThreadStatic]
     static List<LogEvent>? EmittedList;
 
-    public static List<LogEvent> Emitted => EmittedList ??= new List<LogEvent>();
+    public static List<LogEvent> Emitted => EmittedList ??= [];
 
     public void Emit(LogEvent logEvent)
     {

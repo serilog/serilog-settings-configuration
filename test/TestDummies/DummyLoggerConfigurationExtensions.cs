@@ -133,12 +133,9 @@ public static class DummyLoggerConfigurationExtensions
         this LoggerSinkConfiguration loggerSinkConfiguration,
         Action<LoggerSinkConfiguration> wrappedSinkAction)
     {
-        return LoggerSinkConfiguration.Wrap(
-            loggerSinkConfiguration,
+        return loggerSinkConfiguration.Sink(LoggerSinkConfiguration.Wrap(
             s => new DummyWrappingSink(s),
-            wrappedSinkAction,
-            LogEventLevel.Verbose,
-            levelSwitch: null);
+            wrappedSinkAction));
     }
 
     public static LoggerConfiguration WithDummyHardCodedString(
