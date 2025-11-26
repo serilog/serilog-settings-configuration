@@ -3,7 +3,6 @@ using System.Runtime.InteropServices;
 using System.Text;
 using CliWrap;
 using CliWrap.Exceptions;
-using FluentAssertions;
 using Polly;
 using Xunit.Abstractions;
 using Xunit.Sdk;
@@ -108,16 +107,18 @@ public class TestApp : IAsyncLifetime
 
         var executableFileName = RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? "TestApp.exe" : "TestApp";
         var executableFile = new FileInfo(Path.Combine(outputDirectory.FullName, executableFileName));
-        executableFile.Exists.Should().BeTrue();
+        Assert.True(executableFile.Exists);
         var dlls = executableFile.Directory!.EnumerateFiles("*.dll");
         if (publishMode == PublishMode.Standard)
         {
-            dlls.Should().NotBeEmpty(because: $"the test app was _not_ published as single-file ({publishMode})");
+            // the test app was _not_ published as single-file
+            Assert.NotEmpty(dlls);
         }
         else
         {
-            dlls.Should().BeEmpty(because: $"the test app was published as single-file ({publishMode})");
-            executableFile.Directory.EnumerateFiles().Should().ContainSingle().Which.FullName.Should().Be(executableFile.FullName);
+            // the test app was published as single-file
+            Assert.Empty(dlls);
+            Assert.Single(executableFile.Directory.EnumerateFiles(), f => f.FullName == executableFile.FullName);
         }
 
         _executables[publishMode] = executableFile;
