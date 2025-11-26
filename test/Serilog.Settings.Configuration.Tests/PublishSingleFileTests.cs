@@ -2,30 +2,21 @@
 using System.Text;
 using CliWrap;
 using CliWrap.Exceptions;
-using FluentAssertions;
-using FluentAssertions.Execution;
 using Serilog.Settings.Configuration.Tests.Support;
 using Xunit.Abstractions;
 
 namespace Serilog.Settings.Configuration.Tests;
 
 [Trait("Category", "Integration")]
-public sealed class PublishSingleFileTests : IDisposable, IClassFixture<TestApp>
+public sealed class PublishSingleFileTests : IClassFixture<TestApp>
 {
     readonly ITestOutputHelper _outputHelper;
     readonly TestApp _testApp;
-    readonly AssertionScope _scope;
 
     public PublishSingleFileTests(ITestOutputHelper outputHelper, TestApp testApp)
     {
         _outputHelper = outputHelper;
         _testApp = testApp;
-        _scope = new AssertionScope();
-    }
-
-    public void Dispose()
-    {
-        _scope.Dispose();
     }
 
     [Theory]
@@ -33,8 +24,8 @@ public sealed class PublishSingleFileTests : IDisposable, IClassFixture<TestApp>
     public async Task RunTestApp_NoUsingAndNoAssembly(PublishMode publishMode)
     {
         var (isSingleFile, stdOut, stdErr) = await RunTestAppAsync(publishMode);
-        stdOut.Should().Be(isSingleFile ? "Expected exception" : "(Main thread) [Information] Expected success");
-        stdErr.Should().BeEmpty();
+        Assert.Equal(stdOut, isSingleFile ? "Expected exception" : "(Main thread) [Information] Expected success");
+        Assert.Empty(stdErr);
     }
 
     [Theory]
@@ -42,11 +33,11 @@ public sealed class PublishSingleFileTests : IDisposable, IClassFixture<TestApp>
     public async Task RunTestApp_UsingConsole(PublishMode publishMode)
     {
         var (isSingleFile, stdOut, stdErr) = await RunTestAppAsync(publishMode, "--using-console");
-        stdOut.Should().Be(isSingleFile ? "() [Information] Expected success" : "(Main thread) [Information] Expected success");
+        Assert.Equal(stdOut, isSingleFile ? "() [Information] Expected success" : "(Main thread) [Information] Expected success");
         if (isSingleFile)
-            stdErr.Should().Contain("Unable to find a method called WithThreadName");
+            Assert.Contains("Unable to find a method called WithThreadName", stdErr);
         else
-            stdErr.Should().BeEmpty();
+            Assert.Empty(stdErr);
     }
 
     [Theory]
@@ -54,11 +45,11 @@ public sealed class PublishSingleFileTests : IDisposable, IClassFixture<TestApp>
     public async Task RunTestApp_UsingThread(PublishMode publishMode)
     {
         var (isSingleFile, stdOut, stdErr) = await RunTestAppAsync(publishMode, "--using-thread");
-        stdOut.Should().Be(isSingleFile ? "" : "(Main thread) [Information] Expected success");
+        Assert.Equal(stdOut, isSingleFile ? "" : "(Main thread) [Information] Expected success");
         if (isSingleFile)
-            stdErr.Should().Contain("Unable to find a method called Console");
+            Assert.Contains("Unable to find a method called Console", stdErr);
         else
-            stdErr.Should().BeEmpty();
+            Assert.Empty(stdErr);
     }
 
     [Theory]
@@ -66,8 +57,8 @@ public sealed class PublishSingleFileTests : IDisposable, IClassFixture<TestApp>
     public async Task RunTestApp_AssemblyThread(PublishMode publishMode)
     {
         var (_, stdOut, stdErr) = await RunTestAppAsync(publishMode, "--assembly-thread");
-        stdOut.Should().BeEmpty();
-        stdErr.Should().Contain("Unable to find a method called Console");
+        Assert.Empty(stdOut);
+        Assert.Contains("Unable to find a method called Console", stdErr);
     }
 
     [Theory]
@@ -75,8 +66,8 @@ public sealed class PublishSingleFileTests : IDisposable, IClassFixture<TestApp>
     public async Task RunTestApp_AssemblyConsole(PublishMode publishMode)
     {
         var (_, stdOut, stdErr) = await RunTestAppAsync(publishMode, "--assembly-console");
-        stdOut.Should().Be("() [Information] Expected success");
-        stdErr.Should().Contain("Unable to find a method called WithThreadName");
+        Assert.Equal("() [Information] Expected success", stdOut);
+        Assert.Contains("Unable to find a method called WithThreadName", stdErr);
     }
 
     [Theory]
@@ -84,8 +75,8 @@ public sealed class PublishSingleFileTests : IDisposable, IClassFixture<TestApp>
     public async Task RunTestApp_ConsoleAndThread(PublishMode publishMode, string strategy)
     {
         var (_, stdOut, stdErr) = await RunTestAppAsync(publishMode, $"--{strategy}-console", $"--{strategy}-thread");
-        stdOut.Should().Be("(Main thread) [Information] Expected success");
-        stdErr.Should().BeEmpty();
+        Assert.Equal("(Main thread) [Information] Expected success", stdOut);
+        Assert.Empty(stdErr);
     }
 
     [Theory]
@@ -93,8 +84,8 @@ public sealed class PublishSingleFileTests : IDisposable, IClassFixture<TestApp>
     public async Task RunTestApp_ConfigureMinimumLevelOnly(PublishMode publishMode)
     {
         var (_, stdOut, stdErr) = await RunTestAppAsync(publishMode, "--minimum-level-only");
-        stdOut.Should().Be("(Main thread) [Information] Expected success");
-        stdErr.Should().BeEmpty();
+        Assert.Equal("(Main thread) [Information] Expected success", stdOut);
+        Assert.Empty(stdErr);
     }
 
     async Task<(bool IsSingleFile, string StdOut, string StdErr)> RunTestAppAsync(PublishMode publishMode, params string[] args)

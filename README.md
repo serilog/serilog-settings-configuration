@@ -340,7 +340,7 @@ Destructuring means extracting pieces of information from an object and create p
 ],
 ```
 
-This is how the first destructuring policy would look like:
+This is how the first destructuring policy would look:
 
 ```csharp
 namespace MyFirstNamespace;
