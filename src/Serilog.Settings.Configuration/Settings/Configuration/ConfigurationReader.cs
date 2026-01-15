@@ -572,7 +572,20 @@ class ConfigurationReader : IConfigurationReader
     }
 
     static LogEventLevel ParseLogEventLevel(string value)
-        => Enum.TryParse(value, ignoreCase: true, out LogEventLevel parsedLevel)
-            ? parsedLevel
-            : throw new InvalidOperationException($"The value {value} is not a valid Serilog level.");
+    {
+        // Try parsing as LevelAlias first (handles "Off", "Minimum", "Maximum")
+        if (string.Equals(value, "Off", StringComparison.OrdinalIgnoreCase))
+            return LevelAlias.Off;
+        if (string.Equals(value, "Minimum", StringComparison.OrdinalIgnoreCase))
+            return LevelAlias.Minimum;
+        if (string.Equals(value, "Maximum", StringComparison.OrdinalIgnoreCase))
+            return LevelAlias.Maximum;
+
+        // Try parsing as LogEventLevel enum
+        if (Enum.TryParse(value, ignoreCase: true, out LogEventLevel parsedLevel))
+            return parsedLevel;
+
+        throw new InvalidOperationException($"The value {value} is not a valid Serilog level.");
+    }
+
 }
