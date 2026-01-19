@@ -571,7 +571,7 @@ class ConfigurationReader : IConfigurationReader
         return Regex.IsMatch(input, LevelSwitchNameRegex);
     }
 
-    static LogEventLevel ParseLogEventLevel(string value)
+    internal static LogEventLevel ParseLogEventLevel(string value)
     {
         // Try parsing as LevelAlias first (handles "Off", "Minimum", "Maximum")
         if (string.Equals(value, "Off", StringComparison.OrdinalIgnoreCase))
