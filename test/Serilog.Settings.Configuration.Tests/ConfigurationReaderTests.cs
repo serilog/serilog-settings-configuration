@@ -294,4 +294,39 @@ public class ConfigurationReaderTests
 
         AssertLogEventLevels(loggerConfig, LogEventLevel.Error);
     }
+
+    [Theory]
+    // Standard LogEventLevel enum values
+    [InlineData("Verbose", LogEventLevel.Verbose)]
+    [InlineData("Debug", LogEventLevel.Debug)]
+    [InlineData("Information", LogEventLevel.Information)]
+    [InlineData("Warning", LogEventLevel.Warning)]
+    [InlineData("Error", LogEventLevel.Error)]
+    [InlineData("Fatal", LogEventLevel.Fatal)]
+    // Case insensitivity
+    [InlineData("verbose", LogEventLevel.Verbose)]
+    [InlineData("INFORMATION", LogEventLevel.Information)]
+    [InlineData("warning", LogEventLevel.Warning)]
+    // LevelAlias values
+    [InlineData("Off", LevelAlias.Off)]
+    [InlineData("off", LevelAlias.Off)]
+    [InlineData("OFF", LevelAlias.Off)]
+    [InlineData("Minimum", LevelAlias.Minimum)]
+    [InlineData("minimum", LevelAlias.Minimum)]
+    [InlineData("Maximum", LevelAlias.Maximum)]
+    [InlineData("maximum", LevelAlias.Maximum)]
+    public void ParseLogEventLevelHandlesAllLevelValues(string value, LogEventLevel expected)
+    {
+        var result = ConfigurationReader.ParseLogEventLevel(value);
+        Assert.Equal(expected, result);
+    }
+
+    [Theory]
+    [InlineData("InvalidLevel")]
+    [InlineData("")]
+    [InlineData("None")]
+    public void ParseLogEventLevelThrowsForInvalidValues(string value)
+    {
+        Assert.Throws<InvalidOperationException>(() => ConfigurationReader.ParseLogEventLevel(value));
+    }
 }
