@@ -4,7 +4,7 @@ namespace Serilog.Settings.Configuration.Assemblies;
 
 sealed class DllScanningAssemblyFinder : AssemblyFinder
 {
-    public override IReadOnlyList<AssemblyName> FindAssembliesContainingName(string nameToFind)
+    public override IReadOnlyList<(AssemblyName, string?)> FindAssembliesContainingName(string nameToFind)
     {
         var probeDirs = new List<string>();
 
@@ -46,7 +46,7 @@ sealed class DllScanningAssemblyFinder : AssemblyFinder
                     where IsCaseInsensitiveMatch(assemblyFileName, nameToFind)
                     let assemblyName = TryGetAssemblyNameFrom(outputAssemblyPath)
                     where assemblyName != null
-                    select assemblyName;
+                    select (assemblyName, outputAssemblyPath);
 
         return query.ToList();
 

@@ -11,9 +11,9 @@ class CompositeAssemblyFinder : AssemblyFinder
         _assemblyFinders = assemblyFinders;
     }
 
-    public override IReadOnlyList<AssemblyName> FindAssembliesContainingName(string nameToFind)
+    public override IReadOnlyList<(AssemblyName, string?)> FindAssembliesContainingName(string nameToFind)
     {
-        var assemblyNames = new List<AssemblyName>();
+        var assemblyNames = new List<(AssemblyName, string?)>();
         foreach (var assemblyFinder in _assemblyFinders)
         {
             assemblyNames.AddRange(assemblyFinder.FindAssembliesContainingName(nameToFind));

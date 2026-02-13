@@ -355,9 +355,9 @@ class ConfigurationReader : IConfigurationReader
             }
         }
 
-        foreach (var assemblyName in assemblyFinder.FindAssembliesContainingName("serilog"))
+        foreach (var (assemblyName, path) in assemblyFinder.FindAssembliesContainingName("serilog"))
         {
-            var assumed = Assembly.Load(assemblyName);
+            var assumed = path == null ? Assembly.Load(assemblyName) : Assembly.LoadFrom(path);
             assemblies.Add(assumed);
         }
 
