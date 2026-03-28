@@ -390,7 +390,7 @@ public class StringArgumentValueTests
     [Fact]
     public void NonEmptyStringDoesNotConvertToArray()
     {
-        var value = new StringArgumentValue("cookie1");
+        var value = new StringArgumentValue("Information");
         Assert.Throws<InvalidCastException>(() =>
             value.ConvertTo(typeof(string[]), new ResolutionContext()));
     }
