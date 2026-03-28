@@ -386,4 +386,12 @@ public class StringArgumentValueTests
         var array = Assert.IsType<string[]>(actual);
         Assert.Empty(array);
     }
+
+    [Fact]
+    public void NonEmptyStringDoesNotConvertToArray()
+    {
+        var value = new StringArgumentValue("cookie1");
+        Assert.Throws<InvalidCastException>(() =>
+            value.ConvertTo(typeof(string[]), new ResolutionContext()));
+    }
 }
