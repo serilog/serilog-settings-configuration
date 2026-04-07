@@ -331,15 +331,15 @@ public class ConfigurationReaderTests
     }
 
     [Fact]
-    public void ParamsStringArrayParameter_WithNoArgsSupplied_IsMatchedOptional()
+    public void ParamsStringArrayParameter_WithNoArgsSupplied_IsMatchedAsOptional()
     {
-        var candidateMethods = typeof(ParamsArrayExtensions)
+        var candidateMethods = typeof(DummyLoggerConfigurationExtensions)
             .GetTypeInfo()
             .DeclaredMethods
             .ToList();
 
         var selected = ConfigurationReader.SelectConfigurationMethod(
-            candidateMethods, "WithParamsArray", Array.Empty<string>());
+            candidateMethods, "DummyParamsArray", Array.Empty<string>());
 
         Assert.NotNull(selected);
     }
@@ -352,8 +352,8 @@ public class ConfigurationReaderTests
             AssemblyFinder.ForSource(ConfigurationAssemblySource.UseLoadedAssemblies),
             new ConfigurationReaderOptions());
 
-        var method = typeof(ParamsArrayExtensions).GetMethod("WithParamsArray")!;
-        var param = method.GetParameters().Last();
+        var method = typeof(DummyLoggerConfigurationExtensions).GetMethod("DummyParamsArray")!;
+        var param = method.GetParameters().Last(); // params string[] values
 
         var result = reader.GetImplicitValueForNotSpecifiedKey(param, method);
 
