@@ -329,4 +329,35 @@ public class ConfigurationReaderTests
     {
         Assert.Throws<InvalidOperationException>(() => ConfigurationReader.ParseLogEventLevel(value));
     }
+
+    [Fact]
+    public void ParamsStringArrayParameter_WithNoArgsSupplied_IsMatchedOptional()
+    {
+        var candidateMethods = typeof(ParamsArrayExtentions)
+            .GetTypeInfo()
+            .DeclaredMethods
+            .ToList();
+
+        var selected = ConfigurationReader.SelectConfigurationMethod(
+            candidateMethods, "WithParamsArray", Array.Empty<string>());
+
+        Assert.NotNull(selected);
+    }
+
+    [Fact]
+    public void ParamsStringArrayParameter_ImplicitValueIsEmptyArray()
+    {
+        var reader = new ConfigurationReader(
+            JsonStringConfigSource.LoadSection("{}", "Serilog"),
+            AssemblyFinder.ForSource(ConfigurationAssemblySource.UseLoadedAssemblies),
+            new ConfigurationReaderOptions());
+
+        var method = typeof(ParamsArrayExtentions).GetMethod("WithParamsArray")!;
+        var param = method.GetParameters().Last();
+
+        var result = reader.GetImplicitValueForNotSpecifiedKey(param, method);
+
+        var array = Assert.IsType<string[]>(result);
+        Assert.Empty(array);
+    }
 }
