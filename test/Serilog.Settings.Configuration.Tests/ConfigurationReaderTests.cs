@@ -333,7 +333,7 @@ public class ConfigurationReaderTests
     [Fact]
     public void ParamsStringArrayParameter_WithNoArgsSupplied_IsMatchedOptional()
     {
-        var candidateMethods = typeof(ParamsArrayExtentions)
+        var candidateMethods = typeof(ParamsArrayExtensions)
             .GetTypeInfo()
             .DeclaredMethods
             .ToList();
@@ -352,7 +352,7 @@ public class ConfigurationReaderTests
             AssemblyFinder.ForSource(ConfigurationAssemblySource.UseLoadedAssemblies),
             new ConfigurationReaderOptions());
 
-        var method = typeof(ParamsArrayExtentions).GetMethod("WithParamsArray")!;
+        var method = typeof(ParamsArrayExtensions).GetMethod("WithParamsArray")!;
         var param = method.GetParameters().Last();
 
         var result = reader.GetImplicitValueForNotSpecifiedKey(param, method);
