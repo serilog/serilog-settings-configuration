@@ -154,6 +154,11 @@ class StringArgumentValue : ConfigurationArgumentValue
             }
         }
 
+        if (toType.IsArray && string.IsNullOrWhiteSpace(argumentValue))
+        {
+            return Array.CreateInstance(toType.GetElementType()!, 0);
+        }
+
         return Convert.ChangeType(argumentValue, toType, resolutionContext.ReaderOptions.FormatProvider);
     }
 
