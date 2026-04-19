@@ -1575,4 +1575,130 @@ public class ConfigurationSettingsTests
         var switch2 = Assert.Contains("$switch2", switches);
         Assert.Equal("Prop = 2", switch2.Expression);
     }
+
+    [Fact]
+    public void WriteToFallbackChainRoutesFailuresToFallbackSink()
+    {
+        // language=json
+        var json = """
+            {
+                "Serilog": {
+                    "Using": ["TestDummies"],
+                    "WriteTo": [{
+                        "Name": "FallbackChain",
+                        "Args": {
+                            "configureSink": [{
+                                "Name": "Sink",
+                                "Args": {
+                                    "sink": {
+                                        "type": "TestDummies.DummyFailingSink, TestDummies"
+                                    }
+                                }
+                            }],
+                            "configureFallback": [{
+                                "Name": "DummyRollingFile",
+                                "Args": { "pathFormat": "C:\\" }
+                            }]
+                        }
+                    }]
+                }
+            }
+            """;
+
+        var log = ConfigFromJson(json)
+            .CreateLogger();
+
+        DummyFailingSink.Reset();
+        DummyRollingFileSink.Reset();
+
+        log.Write(Some.InformationEvent());
+
+        Assert.Equal(1, DummyFailingSink.EmitAttempts);
+        Assert.Single(DummyRollingFileSink.Emitted);
+    }
+
+    [Fact]
+    public void WriteToFallbackChainSupportsSubsequentFallbacks()
+    {
+        // language=json
+        var json = """
+            {
+                "Serilog": {
+                    "Using": ["TestDummies"],
+                    "WriteTo": [{
+                        "Name": "FallbackChain",
+                        "Args": {
+                            "configureSink": [{
+                                "Name": "Sink",
+                                "Args": {
+                                    "sink": { "type": "TestDummies.DummyFailingSink, TestDummies" }
+                                }
+                            }],
+                            "configureFallback": [{
+                                "Name": "Sink",
+                                "Args": {
+                                    "sink": { "type": "TestDummies.DummyFailingSink, TestDummies" }
+                                }
+                            }],
+                            "configureSubsequentFallbacks": [
+                                [{
+                                    "Name": "DummyRollingFile",
+                                    "Args": { "pathFormat": "C:\\" }
+                                }]
+                            ]
+                        }
+                    }]
+                }
+            }
+            """;
+
+        var log = ConfigFromJson(json)
+            .CreateLogger();
+
+        DummyFailingSink.Reset();
+        DummyRollingFileSink.Reset();
+
+        log.Write(Some.InformationEvent());
+
+        Assert.Equal(2, DummyFailingSink.EmitAttempts);
+        Assert.Single(DummyRollingFileSink.Emitted);
+    }
+
+    [Fact]
+    public void WriteToFallibleReportsFailuresToListener()
+    {
+        // language=json
+        var json = """
+            {
+                "Serilog": {
+                    "Using": ["TestDummies"],
+                    "WriteTo": [{
+                        "Name": "Fallible",
+                        "Args": {
+                            "configureSink": [{
+                                "Name": "Sink",
+                                "Args": {
+                                    "sink": { "type": "TestDummies.DummyFailingSink, TestDummies" }
+                                }
+                            }],
+                            "failureListener": {
+                                "type": "TestDummies.DummyFailureListener, TestDummies"
+                            }
+                        }
+                    }]
+                }
+            }
+            """;
+
+        var log = ConfigFromJson(json)
+            .CreateLogger();
+
+        DummyFailingSink.Reset();
+        DummyFailureListener.Reset();
+
+        log.Write(Some.InformationEvent());
+
+        Assert.Equal(1, DummyFailingSink.EmitAttempts);
+        Assert.Equal(1, DummyFailureListener.FailureCount);
+    }
 }
