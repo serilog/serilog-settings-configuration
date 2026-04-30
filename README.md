@@ -313,6 +313,8 @@ Some Serilog packages require a reference to a logger configuration object. The 
 },
 ```
 
+The same nested pattern applies to wrapping sinks such as `Conditional` (from _[Serilog.Expressions](https://github.com/serilog/serilog-expressions)_), `FallbackChain`, and `Fallible` — see the [sample `appsettings.json`](sample/Sample/appsettings.json) for working examples.
+
 ### Destructuring
 
 Destructuring means extracting pieces of information from an object and create properties with values; Serilog offers the `@` [structure-capturing operator](https://github.com/serilog/serilog/wiki/Structured-Data#preserving-object-structure). In case there is a need to customize the way log events are serialized (e.g., hide property values or replace them with something else), one can define several destructuring policies, like this:

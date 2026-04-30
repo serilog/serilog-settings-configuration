@@ -55,6 +55,19 @@ static class SurrogateConfigurationMethods
         LoggingLevelSwitch? levelSwitch = null)
         => loggerSinkConfiguration.Logger(configureLogger, restrictedToMinimumLevel, levelSwitch);
 
+    static LoggerConfiguration FallbackChain(
+        LoggerSinkConfiguration loggerSinkConfiguration,
+        Action<LoggerSinkConfiguration> configureSink,
+        Action<LoggerSinkConfiguration> configureFallback,
+        Action<LoggerSinkConfiguration>[]? configureSubsequentFallbacks = null)
+        => loggerSinkConfiguration.FallbackChain(configureSink, configureFallback, configureSubsequentFallbacks ?? []);
+
+    static LoggerConfiguration Fallible(
+        LoggerSinkConfiguration loggerSinkConfiguration,
+        Action<LoggerSinkConfiguration> configureSink,
+        ILoggingFailureListener failureListener)
+        => loggerSinkConfiguration.Fallible(configureSink, failureListener);
+
     // .AuditTo...
     // ========
     static LoggerConfiguration Sink(
