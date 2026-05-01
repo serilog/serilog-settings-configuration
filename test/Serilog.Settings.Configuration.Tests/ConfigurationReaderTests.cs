@@ -360,4 +360,36 @@ public class ConfigurationReaderTests
         var array = Assert.IsType<string[]>(result);
         Assert.Empty(array);
     }
+
+    [Fact]
+    public void ParamsEnumerableParameter_GracefullyReturnsDefaultValue()
+    {
+        var reader = new ConfigurationReader(
+            JsonStringConfigSource.LoadSection("{}", "Serilog"),
+            AssemblyFinder.ForSource(ConfigurationAssemblySource.UseLoadedAssemblies),
+            new ConfigurationReaderOptions());
+
+        var method = typeof(DummyLoggerConfigurationExtensions).GetMethod("DummyParamsEnumerable")!;
+        var param = method.GetParameters().Last(); // params IEnumerable<string>
+
+        var result = reader.GetImplicitValueForNotSpecifiedKey(param, method);
+
+        Assert.Null(result);
+    }
+
+    [Fact]
+    public void ParamsSpanParameter_GracefullyReturnsDefaultValue()
+    {
+        var reader = new ConfigurationReader(
+            JsonStringConfigSource.LoadSection("{}", "Serilog"),
+            AssemblyFinder.ForSource(ConfigurationAssemblySource.UseLoadedAssemblies),
+            new ConfigurationReaderOptions());
+
+        var method = typeof(DummyLoggerConfigurationExtensions).GetMethod("DummyParamsSpan")!;
+        var param = method.GetParameters().Last(); // params ReadOnlySpan<string>
+
+        var result = reader.GetImplicitValueForNotSpecifiedKey(param, method);
+
+        Assert.Null(result);
+    }
 }
