@@ -329,4 +329,67 @@ public class ConfigurationReaderTests
     {
         Assert.Throws<InvalidOperationException>(() => ConfigurationReader.ParseLogEventLevel(value));
     }
+
+    [Fact]
+    public void ParamsStringArrayParameter_WithNoArgsSupplied_IsMatchedAsOptional()
+    {
+        var candidateMethods = typeof(DummyLoggerConfigurationExtensions)
+            .GetTypeInfo()
+            .DeclaredMethods
+            .ToList();
+
+        var selected = ConfigurationReader.SelectConfigurationMethod(
+            candidateMethods, "DummyParamsArray", Array.Empty<string>());
+
+        Assert.NotNull(selected);
+    }
+
+    [Fact]
+    public void ParamsStringArrayParameter_ImplicitValueIsEmptyArray()
+    {
+        var reader = new ConfigurationReader(
+            JsonStringConfigSource.LoadSection("{}", "Serilog"),
+            AssemblyFinder.ForSource(ConfigurationAssemblySource.UseLoadedAssemblies),
+            new ConfigurationReaderOptions());
+
+        var method = typeof(DummyLoggerConfigurationExtensions).GetMethod("DummyParamsArray")!;
+        var param = method.GetParameters().Last(); // params string[] values
+
+        var result = reader.GetImplicitValueForNotSpecifiedKey(param, method);
+
+        var array = Assert.IsType<string[]>(result);
+        Assert.Empty(array);
+    }
+
+    [Fact]
+    public void ParamsEnumerableParameter_GracefullyReturnsDefaultValue()
+    {
+        var reader = new ConfigurationReader(
+            JsonStringConfigSource.LoadSection("{}", "Serilog"),
+            AssemblyFinder.ForSource(ConfigurationAssemblySource.UseLoadedAssemblies),
+            new ConfigurationReaderOptions());
+
+        var method = typeof(DummyLoggerConfigurationExtensions).GetMethod("DummyParamsEnumerable")!;
+        var param = method.GetParameters().Last(); // params IEnumerable<string>
+
+        var result = reader.GetImplicitValueForNotSpecifiedKey(param, method);
+
+        Assert.Null(result);
+    }
+
+    [Fact]
+    public void ParamsSpanParameter_GracefullyReturnsDefaultValue()
+    {
+        var reader = new ConfigurationReader(
+            JsonStringConfigSource.LoadSection("{}", "Serilog"),
+            AssemblyFinder.ForSource(ConfigurationAssemblySource.UseLoadedAssemblies),
+            new ConfigurationReaderOptions());
+
+        var method = typeof(DummyLoggerConfigurationExtensions).GetMethod("DummyParamsSpan")!;
+        var param = method.GetParameters().Last(); // params ReadOnlySpan<string>
+
+        var result = reader.GetImplicitValueForNotSpecifiedKey(param, method);
+
+        Assert.Null(result);
+    }
 }

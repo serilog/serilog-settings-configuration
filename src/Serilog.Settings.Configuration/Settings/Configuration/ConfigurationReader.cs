@@ -403,10 +403,12 @@ class ConfigurationReader : IConfigurationReader
     {
         return paramInfo.HasDefaultValue
            // parameters of type IConfiguration are implicitly populated with provided Configuration
-           || paramInfo.ParameterType == typeof(IConfiguration);
+           || paramInfo.ParameterType == typeof(IConfiguration)
+           || paramInfo.IsDefined(typeof(ParamArrayAttribute), false)
+           || paramInfo.CustomAttributes.Any(a => a.AttributeType.FullName == "System.Runtime.CompilerServices.ParamCollectionAttribute");
     }
 
-    object? GetImplicitValueForNotSpecifiedKey(ParameterInfo parameter, MethodInfo methodToInvoke)
+    internal object? GetImplicitValueForNotSpecifiedKey(ParameterInfo parameter, MethodInfo methodToInvoke)
     {
         if (!HasImplicitValueWhenNotSpecified(parameter))
         {
@@ -429,7 +431,12 @@ class ConfigurationReader : IConfigurationReader
                                                           $"This is not supported when only a `IConfigSection` has been provided. (method '{methodToInvoke}')");
         }
 
-        return parameter.DefaultValue;
+        if (parameter.IsDefined(typeof(ParamArrayAttribute), false) && parameter.ParameterType.GetElementType() is { } elementType)
+        {
+            return Array.CreateInstance(elementType, 0);
+        }
+
+        return parameter.HasDefaultValue ? parameter.DefaultValue : null;
     }
 
     internal static MethodInfo? SelectConfigurationMethod(IReadOnlyCollection<MethodInfo> candidateMethods, string name, IReadOnlyCollection<string> suppliedArgumentNames)
