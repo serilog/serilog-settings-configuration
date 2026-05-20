@@ -40,6 +40,13 @@ static class DummyLoggerConfigurationExtensions
         return loggerSinkConfiguration.Sink(new DummyParamsSink(values.ToArray()));
     }
 
+    public static LoggerConfiguration DummyParamsList(
+        this LoggerSinkConfiguration loggerSinkConfiguration,
+        params System.Collections.Generic.List<string> list)
+    {
+        return loggerSinkConfiguration.Sink(new DummyParamsSink(list.ToArray()));
+    }
+
     public static LoggerConfiguration DummyParamsSpan(
         this LoggerSinkConfiguration loggerSinkConfiguration,
         params ReadOnlySpan<string> values)
