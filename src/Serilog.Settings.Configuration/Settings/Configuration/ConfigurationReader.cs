@@ -463,7 +463,13 @@ class ConfigurationReader : IConfigurationReader
                 {
                     return Activator.CreateInstance(paramType);
                 }
-                catch { }
+                catch(Exception ex)
+                {
+                    // Activator.CreateInstance is unlikely to succeed for collections lacking a parameterless constructor,
+                    // or those relying on the [CollectionBuilder] attribute for initialization. 
+                    SelfLog.WriteLine(
+                        $"Unable to create an implicit instance of the params collection type '{paramType}' for parameter '{parameter.Name}' on method '{methodToInvoke.Name}'. {ex}");
+                }
             }
         }
 
