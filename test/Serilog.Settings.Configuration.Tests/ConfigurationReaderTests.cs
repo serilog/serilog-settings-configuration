@@ -1,9 +1,10 @@
-using System.Reflection;
 using Microsoft.Extensions.Configuration;
 using Serilog.Events;
 using Serilog.Formatting;
 using Serilog.Settings.Configuration.Assemblies;
 using Serilog.Settings.Configuration.Tests.Support;
+using System.Reflection;
+using static Serilog.Settings.Configuration.Tests.DummyLoggerConfigurationExtensions;
 using static Serilog.Settings.Configuration.Tests.Support.ConfigurationReaderTestHelpers;
 
 namespace Serilog.Settings.Configuration.Tests;
@@ -409,5 +410,33 @@ public class ConfigurationReaderTests
         var result = reader.GetImplicitValueForNotSpecifiedKey(param, method);
 
         Assert.Null(result);
+    }
+
+    [Fact]
+    public void UnsupportedCollection_LogsToSelfLogAndReturnsNull()
+    {
+        var logs = new List<string>();
+        Serilog.Debugging.SelfLog.Enable(msg => logs.Add(msg));
+
+        try
+        {
+            var reader = new ConfigurationReader(
+                JsonStringConfigSource.LoadSection("{}", "Serilog"),
+                AssemblyFinder.ForSource(ConfigurationAssemblySource.UseLoadedAssemblies),
+                new ConfigurationReaderOptions());
+
+            var method = typeof(BrokenLoggerConfigurationExtensions).GetMethod("DummyBrokenCollection")!;
+            var param = method.GetParameters().Last();
+
+            var result = reader.GetImplicitValueForNotSpecifiedKey(param, method);
+
+            Assert.Null(result);
+            Assert.True(logs.Count > 0, "SelfLog count was 0. The catch block was never entered!");
+            Assert.Contains(logs, l => l.Contains("Unable to create an implicit instance"));
+        }
+        finally
+        {
+            Serilog.Debugging.SelfLog.Disable();
+        }
     }
 }

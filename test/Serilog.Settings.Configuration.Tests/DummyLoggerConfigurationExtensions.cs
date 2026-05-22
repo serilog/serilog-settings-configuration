@@ -54,3 +54,23 @@ static class DummyLoggerConfigurationExtensions
         return loggerSinkConfiguration.Sink(new DummyParamsSink(values.ToArray()));
     }
 }
+
+public static class BrokenLoggerConfigurationExtensions
+{
+    public static LoggerConfiguration DummyBrokenCollection(
+        this LoggerSinkConfiguration loggerSinkConfiguration,
+        params BrokenCollection<string> list)
+    {
+        return loggerSinkConfiguration.Sink(new DummyParamsSink());
+    }
+}
+
+public class BrokenCollection<T> : List<T>
+{
+    public BrokenCollection()
+    {
+        throw new InvalidOperationException("I am broken by design!");
+    }
+    public BrokenCollection(int capacity) : base(capacity) { }
+}
+
