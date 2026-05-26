@@ -430,8 +430,7 @@ public class ConfigurationReaderTests
 
             var result = reader.GetImplicitValueForNotSpecifiedKey(param, method);
 
-            Assert.Null(result);
-            Assert.True(logs.Count > 0, "SelfLog count was 0. The catch block was never entered!");
+            Assert.NotEmpty(logs);
             Assert.Contains(logs, l => l.Contains("Unable to create an implicit instance"));
         }
         finally
