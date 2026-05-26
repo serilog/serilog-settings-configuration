@@ -40,6 +40,13 @@ static class DummyLoggerConfigurationExtensions
         return loggerSinkConfiguration.Sink(new DummyParamsSink(values.ToArray()));
     }
 
+    public static LoggerConfiguration DummyParamsList(
+        this LoggerSinkConfiguration loggerSinkConfiguration,
+        params System.Collections.Generic.List<string> list)
+    {
+        return loggerSinkConfiguration.Sink(new DummyParamsSink(list.ToArray()));
+    }
+
     public static LoggerConfiguration DummyParamsSpan(
         this LoggerSinkConfiguration loggerSinkConfiguration,
         params ReadOnlySpan<string> values)
@@ -47,3 +54,23 @@ static class DummyLoggerConfigurationExtensions
         return loggerSinkConfiguration.Sink(new DummyParamsSink(values.ToArray()));
     }
 }
+
+public static class BrokenLoggerConfigurationExtensions
+{
+    public static LoggerConfiguration DummyBrokenCollection(
+        this LoggerSinkConfiguration loggerSinkConfiguration,
+        params BrokenCollection<string> list)
+    {
+        return loggerSinkConfiguration.Sink(new DummyParamsSink());
+    }
+}
+
+public class BrokenCollection<T> : List<T>
+{
+    public BrokenCollection()
+    {
+        throw new InvalidOperationException("I am broken by design!");
+    }
+    public BrokenCollection(int capacity) : base(capacity) { }
+}
+

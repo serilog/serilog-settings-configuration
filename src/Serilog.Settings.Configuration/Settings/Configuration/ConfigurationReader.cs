@@ -404,8 +404,13 @@ class ConfigurationReader : IConfigurationReader
         return paramInfo.HasDefaultValue
            // parameters of type IConfiguration are implicitly populated with provided Configuration
            || paramInfo.ParameterType == typeof(IConfiguration)
-           || paramInfo.IsDefined(typeof(ParamArrayAttribute), false)
-           || paramInfo.CustomAttributes.Any(a => a.AttributeType.FullName == "System.Runtime.CompilerServices.ParamCollectionAttribute");
+           || IsParamCollection(paramInfo);
+    }
+
+    static bool IsParamCollection(ParameterInfo paramInfo)
+    {
+        return paramInfo.IsDefined(typeof(ParamArrayAttribute), false)
+            || paramInfo.CustomAttributes.Any(a => a.AttributeType.FullName == "System.Runtime.CompilerServices.ParamCollectionAttribute");
     }
 
     internal object? GetImplicitValueForNotSpecifiedKey(ParameterInfo parameter, MethodInfo methodToInvoke)
@@ -431,9 +436,40 @@ class ConfigurationReader : IConfigurationReader
                                                           $"This is not supported when only a `IConfigSection` has been provided. (method '{methodToInvoke}')");
         }
 
-        if (parameter.IsDefined(typeof(ParamArrayAttribute), false) && parameter.ParameterType.GetElementType() is { } elementType)
+        if (IsParamCollection(parameter))
         {
-            return Array.CreateInstance(elementType, 0);
+            var paramType = parameter.ParameterType;
+
+            bool isByRefLike = paramType.CustomAttributes.Any(a => a.AttributeType.FullName == "System.Runtime.CompilerServices.IsByRefLikeAttribute");
+            if (isByRefLike)
+            {
+                return parameter.HasDefaultValue ? parameter.DefaultValue : null;
+            }
+
+            if (paramType.GetElementType() is { } elementType)
+            {
+                return Array.CreateInstance(elementType, 0);
+            }
+
+            if (paramType.IsGenericType && paramType.IsInterface)
+            {
+                var genericTypeArg = paramType.GetGenericArguments()[0];
+                return Array.CreateInstance(genericTypeArg, 0);
+            }
+
+            if (paramType.IsGenericType && !paramType.IsAbstract)
+            {
+                try
+                {
+                    return Activator.CreateInstance(paramType);
+                }
+                catch(Exception ex)
+                {
+                    // Activator.CreateInstance is unlikely to succeed for collections lacking a parameterless constructor,
+                    // or those relying on the [CollectionBuilder] attribute for initialization. 
+                    SelfLog.WriteLine($"Unable to create an implicit instance of the params collection type `{paramType}` for parameter `{parameter.Name}` on method `{methodToInvoke.Name}`: {ex}");
+                }
+            }
         }
 
         return parameter.HasDefaultValue ? parameter.DefaultValue : null;

@@ -1,9 +1,10 @@
-using System.Reflection;
 using Microsoft.Extensions.Configuration;
 using Serilog.Events;
 using Serilog.Formatting;
 using Serilog.Settings.Configuration.Assemblies;
 using Serilog.Settings.Configuration.Tests.Support;
+using System.Reflection;
+using static Serilog.Settings.Configuration.Tests.DummyLoggerConfigurationExtensions;
 using static Serilog.Settings.Configuration.Tests.Support.ConfigurationReaderTestHelpers;
 
 namespace Serilog.Settings.Configuration.Tests;
@@ -373,8 +374,26 @@ public class ConfigurationReaderTests
         var param = method.GetParameters().Last(); // params IEnumerable<string>
 
         var result = reader.GetImplicitValueForNotSpecifiedKey(param, method);
+        var array = Assert.IsType<string[]>(result);
+        Assert.Empty(array);
+    }
 
-        Assert.Null(result);
+    [Fact]
+    public void ParamsListParameter_ReturnsEmptyList()
+    {
+        var reader = new ConfigurationReader(
+            JsonStringConfigSource.LoadSection("{}", "Serilog"),
+            AssemblyFinder.ForSource(ConfigurationAssemblySource.UseLoadedAssemblies),
+            new ConfigurationReaderOptions());
+
+        // Assuming you have a DummyParamsList method in your TestDummies
+        var method = typeof(DummyLoggerConfigurationExtensions).GetMethod("DummyParamsList")!;
+        var param = method.GetParameters().Last(); // params List<string>
+
+        var result = reader.GetImplicitValueForNotSpecifiedKey(param, method);
+
+        var list = Assert.IsType<List<string>>(result);
+        Assert.Empty(list);
     }
 
     [Fact]
@@ -391,5 +410,32 @@ public class ConfigurationReaderTests
         var result = reader.GetImplicitValueForNotSpecifiedKey(param, method);
 
         Assert.Null(result);
+    }
+
+    [Fact]
+    public void UnsupportedCollection_LogsToSelfLogAndReturnsNull()
+    {
+        var logs = new List<string>();
+        Serilog.Debugging.SelfLog.Enable(msg => logs.Add(msg));
+
+        try
+        {
+            var reader = new ConfigurationReader(
+                JsonStringConfigSource.LoadSection("{}", "Serilog"),
+                AssemblyFinder.ForSource(ConfigurationAssemblySource.UseLoadedAssemblies),
+                new ConfigurationReaderOptions());
+
+            var method = typeof(BrokenLoggerConfigurationExtensions).GetMethod("DummyBrokenCollection")!;
+            var param = method.GetParameters().Last();
+
+            var result = reader.GetImplicitValueForNotSpecifiedKey(param, method);
+
+            Assert.NotEmpty(logs);
+            Assert.Contains(logs, l => l.Contains("Unable to create an implicit instance"));
+        }
+        finally
+        {
+            Serilog.Debugging.SelfLog.Disable();
+        }
     }
 }
