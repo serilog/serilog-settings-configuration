@@ -403,10 +403,17 @@ class ConfigurationReader : IConfigurationReader
     {
         return paramInfo.HasDefaultValue
            // parameters of type IConfiguration are implicitly populated with provided Configuration
-           || paramInfo.ParameterType == typeof(IConfiguration);
+           || paramInfo.ParameterType == typeof(IConfiguration)
+           || IsParamCollection(paramInfo);
     }
 
-    object? GetImplicitValueForNotSpecifiedKey(ParameterInfo parameter, MethodInfo methodToInvoke)
+    static bool IsParamCollection(ParameterInfo paramInfo)
+    {
+        return paramInfo.IsDefined(typeof(ParamArrayAttribute), false)
+            || paramInfo.CustomAttributes.Any(a => a.AttributeType.FullName == "System.Runtime.CompilerServices.ParamCollectionAttribute");
+    }
+
+    internal object? GetImplicitValueForNotSpecifiedKey(ParameterInfo parameter, MethodInfo methodToInvoke)
     {
         if (!HasImplicitValueWhenNotSpecified(parameter))
         {
@@ -429,7 +436,43 @@ class ConfigurationReader : IConfigurationReader
                                                           $"This is not supported when only a `IConfigSection` has been provided. (method '{methodToInvoke}')");
         }
 
-        return parameter.DefaultValue;
+        if (IsParamCollection(parameter))
+        {
+            var paramType = parameter.ParameterType;
+
+            bool isByRefLike = paramType.CustomAttributes.Any(a => a.AttributeType.FullName == "System.Runtime.CompilerServices.IsByRefLikeAttribute");
+            if (isByRefLike)
+            {
+                return parameter.HasDefaultValue ? parameter.DefaultValue : null;
+            }
+
+            if (paramType.GetElementType() is { } elementType)
+            {
+                return Array.CreateInstance(elementType, 0);
+            }
+
+            if (paramType.IsGenericType && paramType.IsInterface)
+            {
+                var genericTypeArg = paramType.GetGenericArguments()[0];
+                return Array.CreateInstance(genericTypeArg, 0);
+            }
+
+            if (paramType.IsGenericType && !paramType.IsAbstract)
+            {
+                try
+                {
+                    return Activator.CreateInstance(paramType);
+                }
+                catch(Exception ex)
+                {
+                    // Activator.CreateInstance is unlikely to succeed for collections lacking a parameterless constructor,
+                    // or those relying on the [CollectionBuilder] attribute for initialization. 
+                    SelfLog.WriteLine($"Unable to create an implicit instance of the params collection type `{paramType}` for parameter `{parameter.Name}` on method `{methodToInvoke.Name}`: {ex}");
+                }
+            }
+        }
+
+        return parameter.HasDefaultValue ? parameter.DefaultValue : null;
     }
 
     internal static MethodInfo? SelectConfigurationMethod(IReadOnlyCollection<MethodInfo> candidateMethods, string name, IReadOnlyCollection<string> suppliedArgumentNames)
@@ -571,8 +614,21 @@ class ConfigurationReader : IConfigurationReader
         return Regex.IsMatch(input, LevelSwitchNameRegex);
     }
 
-    static LogEventLevel ParseLogEventLevel(string value)
-        => Enum.TryParse(value, ignoreCase: true, out LogEventLevel parsedLevel)
-            ? parsedLevel
-            : throw new InvalidOperationException($"The value {value} is not a valid Serilog level.");
+    internal static LogEventLevel ParseLogEventLevel(string value)
+    {
+        // Try parsing as LevelAlias first (handles "Off", "Minimum", "Maximum")
+        if (string.Equals(value, "Off", StringComparison.OrdinalIgnoreCase))
+            return LevelAlias.Off;
+        if (string.Equals(value, "Minimum", StringComparison.OrdinalIgnoreCase))
+            return LevelAlias.Minimum;
+        if (string.Equals(value, "Maximum", StringComparison.OrdinalIgnoreCase))
+            return LevelAlias.Maximum;
+
+        // Try parsing as LogEventLevel enum
+        if (Enum.TryParse(value, ignoreCase: true, out LogEventLevel parsedLevel))
+            return parsedLevel;
+
+        throw new InvalidOperationException($"The value {value} is not a valid Serilog level.");
+    }
+
 }

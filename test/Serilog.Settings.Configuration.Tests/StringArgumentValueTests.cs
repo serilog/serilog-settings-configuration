@@ -374,4 +374,24 @@ public class StringArgumentValueTests
 
         Assert.Equal(expected, actual);
     }
+
+    [Theory]
+    [InlineData("")]
+    [InlineData("   ")]
+    public void EmptyOrWhitespaceStringConvertsToEmptyArrayForArrayType(string input)
+    {
+        var value = new StringArgumentValue(input);
+        var actual = value.ConvertTo(typeof(string[]), new ResolutionContext());
+
+        var array = Assert.IsType<string[]>(actual);
+        Assert.Empty(array);
+    }
+
+    [Fact]
+    public void NonEmptyStringDoesNotConvertToArray()
+    {
+        var value = new StringArgumentValue("Information");
+        Assert.Throws<InvalidCastException>(() =>
+            value.ConvertTo(typeof(string[]), new ResolutionContext()));
+    }
 }

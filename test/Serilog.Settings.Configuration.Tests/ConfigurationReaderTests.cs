@@ -1,9 +1,10 @@
-using System.Reflection;
 using Microsoft.Extensions.Configuration;
 using Serilog.Events;
 using Serilog.Formatting;
 using Serilog.Settings.Configuration.Assemblies;
 using Serilog.Settings.Configuration.Tests.Support;
+using System.Reflection;
+using static Serilog.Settings.Configuration.Tests.DummyLoggerConfigurationExtensions;
 using static Serilog.Settings.Configuration.Tests.Support.ConfigurationReaderTestHelpers;
 
 namespace Serilog.Settings.Configuration.Tests;
@@ -293,5 +294,148 @@ public class ConfigurationReaderTests
         reader.Configure(loggerConfig);
 
         AssertLogEventLevels(loggerConfig, LogEventLevel.Error);
+    }
+
+    [Theory]
+    // Standard LogEventLevel enum values
+    [InlineData("Verbose", LogEventLevel.Verbose)]
+    [InlineData("Debug", LogEventLevel.Debug)]
+    [InlineData("Information", LogEventLevel.Information)]
+    [InlineData("Warning", LogEventLevel.Warning)]
+    [InlineData("Error", LogEventLevel.Error)]
+    [InlineData("Fatal", LogEventLevel.Fatal)]
+    // Case insensitivity
+    [InlineData("verbose", LogEventLevel.Verbose)]
+    [InlineData("INFORMATION", LogEventLevel.Information)]
+    [InlineData("warning", LogEventLevel.Warning)]
+    // LevelAlias values
+    [InlineData("Off", LevelAlias.Off)]
+    [InlineData("off", LevelAlias.Off)]
+    [InlineData("OFF", LevelAlias.Off)]
+    [InlineData("Minimum", LevelAlias.Minimum)]
+    [InlineData("minimum", LevelAlias.Minimum)]
+    [InlineData("Maximum", LevelAlias.Maximum)]
+    [InlineData("maximum", LevelAlias.Maximum)]
+    public void ParseLogEventLevelHandlesAllLevelValues(string value, LogEventLevel expected)
+    {
+        var result = ConfigurationReader.ParseLogEventLevel(value);
+        Assert.Equal(expected, result);
+    }
+
+    [Theory]
+    [InlineData("InvalidLevel")]
+    [InlineData("")]
+    [InlineData("None")]
+    public void ParseLogEventLevelThrowsForInvalidValues(string value)
+    {
+        Assert.Throws<InvalidOperationException>(() => ConfigurationReader.ParseLogEventLevel(value));
+    }
+
+    [Fact]
+    public void ParamsStringArrayParameter_WithNoArgsSupplied_IsMatchedAsOptional()
+    {
+        var candidateMethods = typeof(DummyLoggerConfigurationExtensions)
+            .GetTypeInfo()
+            .DeclaredMethods
+            .ToList();
+
+        var selected = ConfigurationReader.SelectConfigurationMethod(
+            candidateMethods, "DummyParamsArray", Array.Empty<string>());
+
+        Assert.NotNull(selected);
+    }
+
+    [Fact]
+    public void ParamsStringArrayParameter_ImplicitValueIsEmptyArray()
+    {
+        var reader = new ConfigurationReader(
+            JsonStringConfigSource.LoadSection("{}", "Serilog"),
+            AssemblyFinder.ForSource(ConfigurationAssemblySource.UseLoadedAssemblies),
+            new ConfigurationReaderOptions());
+
+        var method = typeof(DummyLoggerConfigurationExtensions).GetMethod("DummyParamsArray")!;
+        var param = method.GetParameters().Last(); // params string[] values
+
+        var result = reader.GetImplicitValueForNotSpecifiedKey(param, method);
+
+        var array = Assert.IsType<string[]>(result);
+        Assert.Empty(array);
+    }
+
+    [Fact]
+    public void ParamsEnumerableParameter_GracefullyReturnsDefaultValue()
+    {
+        var reader = new ConfigurationReader(
+            JsonStringConfigSource.LoadSection("{}", "Serilog"),
+            AssemblyFinder.ForSource(ConfigurationAssemblySource.UseLoadedAssemblies),
+            new ConfigurationReaderOptions());
+
+        var method = typeof(DummyLoggerConfigurationExtensions).GetMethod("DummyParamsEnumerable")!;
+        var param = method.GetParameters().Last(); // params IEnumerable<string>
+
+        var result = reader.GetImplicitValueForNotSpecifiedKey(param, method);
+        var array = Assert.IsType<string[]>(result);
+        Assert.Empty(array);
+    }
+
+    [Fact]
+    public void ParamsListParameter_ReturnsEmptyList()
+    {
+        var reader = new ConfigurationReader(
+            JsonStringConfigSource.LoadSection("{}", "Serilog"),
+            AssemblyFinder.ForSource(ConfigurationAssemblySource.UseLoadedAssemblies),
+            new ConfigurationReaderOptions());
+
+        // Assuming you have a DummyParamsList method in your TestDummies
+        var method = typeof(DummyLoggerConfigurationExtensions).GetMethod("DummyParamsList")!;
+        var param = method.GetParameters().Last(); // params List<string>
+
+        var result = reader.GetImplicitValueForNotSpecifiedKey(param, method);
+
+        var list = Assert.IsType<List<string>>(result);
+        Assert.Empty(list);
+    }
+
+    [Fact]
+    public void ParamsSpanParameter_GracefullyReturnsDefaultValue()
+    {
+        var reader = new ConfigurationReader(
+            JsonStringConfigSource.LoadSection("{}", "Serilog"),
+            AssemblyFinder.ForSource(ConfigurationAssemblySource.UseLoadedAssemblies),
+            new ConfigurationReaderOptions());
+
+        var method = typeof(DummyLoggerConfigurationExtensions).GetMethod("DummyParamsSpan")!;
+        var param = method.GetParameters().Last(); // params ReadOnlySpan<string>
+
+        var result = reader.GetImplicitValueForNotSpecifiedKey(param, method);
+
+        Assert.Null(result);
+    }
+
+    [Fact]
+    public void UnsupportedCollection_LogsToSelfLogAndReturnsNull()
+    {
+        var logs = new List<string>();
+        Serilog.Debugging.SelfLog.Enable(msg => logs.Add(msg));
+
+        try
+        {
+            var reader = new ConfigurationReader(
+                JsonStringConfigSource.LoadSection("{}", "Serilog"),
+                AssemblyFinder.ForSource(ConfigurationAssemblySource.UseLoadedAssemblies),
+                new ConfigurationReaderOptions());
+
+            var method = typeof(BrokenLoggerConfigurationExtensions).GetMethod("DummyBrokenCollection")!;
+            var param = method.GetParameters().Last();
+
+            var result = reader.GetImplicitValueForNotSpecifiedKey(param, method);
+
+            Assert.NotEmpty(logs);
+            Assert.Contains(logs, l => l.Contains("Unable to create an implicit instance"));
+        }
+        finally
+        {
+            Serilog.Debugging.SelfLog.Disable();
+        }
     }
 }
