@@ -1,6 +1,6 @@
 <Project>
   <PropertyGroup>
     <!-- This must match the major and minor components of the referenced Microsoft.Extensions.Configuration package. -->
-    <VersionPrefix>10.0.1</VersionPrefix>
+    <VersionPrefix>10.0.2</VersionPrefix>
   </PropertyGroup>
 </Project>
