@@ -5,7 +5,7 @@ namespace Serilog.Settings.Configuration.Assemblies;
 
 abstract class AssemblyFinder
 {
-    public abstract IReadOnlyList<AssemblyName> FindAssembliesContainingName(string nameToFind);
+    public abstract IReadOnlyList<(AssemblyName, string?)> FindAssembliesContainingName(string nameToFind);
 
     protected static bool IsCaseInsensitiveMatch(string? text, string textToFind)
     {

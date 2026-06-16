@@ -12,16 +12,16 @@ sealed class DependencyContextAssemblyFinder : AssemblyFinder
         _dependencyContext = dependencyContext;
     }
 
-    public override IReadOnlyList<AssemblyName> FindAssembliesContainingName(string nameToFind)
+    public override IReadOnlyList<(AssemblyName, string?)> FindAssembliesContainingName(string nameToFind)
     {
         if (_dependencyContext == null)
-            return Array.Empty<AssemblyName>();
+            return Array.Empty<(AssemblyName, string?)>();
 
         var query = from library in _dependencyContext.RuntimeLibraries
                     where IsReferencingSerilog(library)
                     from assemblyName in library.GetDefaultAssemblyNames(_dependencyContext)
                     where IsCaseInsensitiveMatch(assemblyName.Name, nameToFind)
-                    select assemblyName;
+                    select (assemblyName, (string?)null);
 
         return query.ToList();
 
