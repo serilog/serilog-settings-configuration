@@ -134,6 +134,9 @@ public class TestApp : IAsyncLifetime
             .WithValidation(CommandResultValidation.None)
             .WithWorkingDirectory(workingDirectory.FullName)
             .WithArguments(arguments)
+            // Without this, MSBuild leaves worker nodes running for reuse, and these inherit the output pipes of the `dotnet` process. CliWrap
+            // waits for those pipes to close, so each command that starts new nodes stalls until they reach their 15 minute idle timeout.
+            .WithEnvironmentVariables(env => env.Set("MSBUILDDISABLENODEREUSE", "1"))
             .WithStandardOutputPipe(PipeTarget.ToDelegate(line =>
             {
                 outBuilder.AppendLine(line);

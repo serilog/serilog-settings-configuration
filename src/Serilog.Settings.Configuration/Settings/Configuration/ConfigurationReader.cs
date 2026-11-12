@@ -401,10 +401,10 @@ class ConfigurationReader : IConfigurationReader
 
     static bool HasImplicitValueWhenNotSpecified(ParameterInfo paramInfo)
     {
+        // Parameters of type IConfiguration are implicitly populated with provided Configuration.
         return paramInfo.HasDefaultValue
-           // parameters of type IConfiguration are implicitly populated with provided Configuration
-           || paramInfo.ParameterType == typeof(IConfiguration)
-           || IsParamCollection(paramInfo);
+            || paramInfo.ParameterType == typeof(IConfiguration)
+            || IsParamCollection(paramInfo);
     }
 
     static bool IsParamCollection(ParameterInfo paramInfo)
@@ -463,7 +463,7 @@ class ConfigurationReader : IConfigurationReader
                 {
                     return Activator.CreateInstance(paramType);
                 }
-                catch(Exception ex)
+                catch (Exception ex)
                 {
                     // Activator.CreateInstance is unlikely to succeed for collections lacking a parameterless constructor,
                     // or those relying on the [CollectionBuilder] attribute for initialization. 
