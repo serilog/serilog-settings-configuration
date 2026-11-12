@@ -48,7 +48,14 @@ jobs:
       - name: Push to NuGet
         shell: pwsh
         run: |
-          dotnet nuget push "./artifacts/*.nupkg" --api-key "${{ steps.login.outputs.NUGET_API_KEY }}" --source https://api.nuget.org/v3/index.json
+          # Packages are enumerated here, rather than passing a wildcard to `dotnet nuget push`, because NuGet's
+          # own wildcard matching does not reliably handle `./`-prefixed, forward-slashed paths on Windows.
+          $packages = @(Get-ChildItem ./artifacts/*.nupkg)
+          if ($packages.Count -eq 0) { throw "No packages found in ./artifacts" }
+          foreach ($nupkg in $packages) {
+            dotnet nuget push "$nupkg" --api-key "${{ steps.login.outputs.NUGET_API_KEY }}" --source https://api.nuget.org/v3/index.json
+            if ($LASTEXITCODE -ne 0) { throw "Publishing failed" }
+          }
       - name: Create GitHub release
         # Builds from `main` are versioned without a pre-release suffix; see `Build.ps1`.
         if: github.ref_name == 'main'
