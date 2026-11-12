@@ -1,4 +1,4 @@
-# Serilog.Settings.Configuration [![Build status](https://github.com/serilog/serilog-settings-configuration/actions/workflows/ci.yml/badge.svg?branch=dev)](https://github.com/serilog/serilog-settings-configuration/actions)&nbsp;[![NuGet Version](http://img.shields.io/nuget/v/Serilog.Settings.Configuration.svg?style=flat)](https://www.nuget.org/packages/Serilog.Settings.Configuration/)
+# Serilog.Settings.Configuration [![Build status](https://github.com/serilog/serilog-settings-configuration/actions/workflows/publish.yml/badge.svg?branch=dev)](https://github.com/serilog/serilog-settings-configuration/actions/workflows/publish.yml)&nbsp;[![NuGet Version](http://img.shields.io/nuget/v/Serilog.Settings.Configuration.svg?style=flat)](https://www.nuget.org/packages/Serilog.Settings.Configuration/)
 
 A Serilog settings provider that reads from [Microsoft.Extensions.Configuration](https://docs.microsoft.com/en-us/aspnet/core/fundamentals/configuration/?view=aspnetcore-3.1) sources, including .NET Core's `appsettings.json` file.
 
