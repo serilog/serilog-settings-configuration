@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <TargetFrameworks Condition=" '$(OS)' == 'Windows_NT'">net48</TargetFrameworks>
-    <TargetFrameworks>$(TargetFrameworks);net8.0;net9.0;net10.0</TargetFrameworks>
+    <TargetFrameworks>$(TargetFrameworks);net10.0;net11.0</TargetFrameworks>
     <DeterministicSourcePaths>false</DeterministicSourcePaths>
     <GenerateDocumentationFile>false</GenerateDocumentationFile>
   </PropertyGroup>
@@ -20,7 +20,7 @@
 
   <ItemGroup>
     <PackageReference Include="CliWrap" Version="3.10.0" />
-    <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="10.0.0" />
+    <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="11.0.0" />
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="18.0.1" />
     <PackageReference Include="NuGet.Frameworks" Version="7.0.0" />
     <PackageReference Include="Polly" Version="8.6.4" />
